@@ -1,6 +1,6 @@
 # Optional systemd service drop-in for the measured local 300 Mbps profile.
 # Tune again on the actual servers. This limits Go worker concurrency per TG,
 # not kernel WireGuard workers, iperf processes, or total host CPU allocation.
-# The test VM had 12 logical CPUs; this is not a claim about a 2-vCPU host.
+# The test VM had 12 logical CPUs; this is not a claim about a 4-vCPU host.
 [Service]
-Environment=GOMAXPROCS=2
+Environment=GOMAXPROCS=4

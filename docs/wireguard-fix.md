@@ -69,8 +69,29 @@ its short passes are not presented as long-run acceptance.
 
 A separate scheduler control on the preceding candidate kept all other settings
 and set `GOMAXPROCS=2` per TG: 350.01 Mbps average / 349.73 Mbps minimum over 120s.
-The final local deployment profile records that setting. The VM still had 12
-logical CPUs; Go worker concurrency is not a 2-vCPU-host capacity claim.
+That was a short scheduler control, not the final accepted profile. The VM still
+had 12 logical CPUs; Go worker concurrency is not a 2-vCPU-host capacity claim.
+
+Sticky candidate `098d82a` retained QUIC with zero carrier changes and zero kernel
+UDP receive-buffer drops, but an attempted long run was interrupted around 474s
+after an interval-only reconstruction reached 260.18 Mbps in a ten-second window
+(live read-counter telemetry had observed about 248 Mbps). The native QUIC receive
+queue still shares frame-processing scheduling. An independent drainer now moves
+native datagrams into a bounded 2,048-slot queue before frame decoding, retaining
+at most 2.74 MiB of payload per QUIC connection without another copy.
+
+Controlled profiled QUIC checks at 350 Mbps: a 512-slot drainer with Go concurrency
+2 recorded 181 native receive drops; 2,048 slots with the same concurrency recorded
+55; the same 2,048-slot binary with concurrency 4 recorded 4. All three short checks
+received about 350 Mbps with minimum windows above 349 Mbps. Drop counters cover
+only the first 25 seconds including setup; these are not 30-minute acceptance.
+The final candidate profile uses `GOMAXPROCS=4` per TG on the same 12-logical-CPU VM.
+
+Tests cover a paused frame consumer with a 2,048-datagram burst, per-call deadlines
+followed by successful receives, explicit close with full prefetch, and native
+connection closure while downstream is paused. The native-close test first exposed
+a blocked-reader leak; observing native connection context and cancelling/draining
+wire-owned storage fixes it. Accept callback return also closes the wire.
 
 ## Controls, including failed intermediate versions
 

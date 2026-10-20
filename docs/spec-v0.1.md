@@ -39,6 +39,10 @@ REALITY/XHTTP and raw/spoof integrations are later adapters, not simulated featu
   reconsidered once per second as native QUIC PMTU discovery progresses.
   The TG frame body stays version 1. No custom cryptography. Both peers must
   upgrade together: the earlier `tg-dgram-v1` carrier is incompatible.
+- QUIC receive draining is independent of frame processing: at most 2,048 native
+  datagrams, each checked at <=1,400 bytes before queue retention. Payload ownership
+  transfers without another copy. Cancellation and native closure interrupt a
+  full queue; a receive-call deadline does not poison later receives.
 
 ## Health and resource bounds
 Per-carrier control queue is separate from bounded data queue. Pending/unprobed

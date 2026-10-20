@@ -21,13 +21,63 @@ import (
 const alpn = "tg-dgram-v2"
 
 type quicWire struct {
-	conn       datagramConnection
-	sendMu     sync.Mutex
-	sendBuffer [1400]byte
-	limit      int
-	retryMTU   time.Time
-	received   []byte
-	offset     int
+	conn         datagramConnection
+	sendMu       sync.Mutex
+	sendBuffer   [1400]byte
+	limit        int
+	retryMTU     time.Time
+	received     []byte
+	offset       int
+	readerOnce   sync.Once
+	closeOnce    sync.Once
+	cancelRead   context.CancelFunc
+	receiveQueue chan quicReceived
+	readerDone   chan struct{}
+	closeErr     error
+}
+
+type quicReceived struct {
+	packet []byte
+	err    error
+}
+
+// The native DATAGRAM receive queue has only 128 slots. Drain it independently
+// of frame decoding, reassembly and local UDP delivery. Storage is bounded to
+// 2048*1400 bytes per connection; ownership transfers without an additional copy.
+func (w *quicWire) startReader() {
+	w.readerOnce.Do(func() {
+		ctx, cancel := context.WithCancel(context.Background())
+		w.cancelRead = cancel
+		var nativeClosed <-chan struct{}
+		if c, ok := w.conn.(interface{ Context() context.Context }); ok {
+			nativeClosed = c.Context().Done()
+		}
+		w.receiveQueue = make(chan quicReceived, 2048)
+		w.readerDone = make(chan struct{})
+		go func() {
+			defer close(w.readerDone)
+			defer close(w.receiveQueue)
+			for {
+				b, err := w.conn.ReceiveDatagram(ctx)
+				if err != nil {
+					b = nil
+				} else if len(b) == 0 || len(b) > len(w.sendBuffer) {
+					b = nil
+					err = errors.New("invalid QUIC bundle size")
+				}
+				select {
+				case <-ctx.Done():
+					return
+				case <-nativeClosed:
+					return
+				case w.receiveQueue <- quicReceived{packet: b, err: err}:
+				}
+				if err != nil {
+					return
+				}
+			}
+		}()
+	})
 }
 
 type datagramConnection interface {
@@ -82,14 +132,25 @@ func (w *quicWire) SendBatch(frames [][]byte) error {
 	return nil
 }
 func (w *quicWire) Receive(ctx context.Context) ([]byte, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if w.offset == len(w.received) {
-		b, err := w.conn.ReceiveDatagram(ctx)
-		if err != nil {
-			return nil, err
+		w.startReader()
+		var item quicReceived
+		select {
+		case <-ctx.Done():
+			return nil, ctx.Err()
+		case received, ok := <-w.receiveQueue:
+			if !ok {
+				return nil, net.ErrClosed
+			}
+			item = received
 		}
-		if len(b) == 0 || len(b) > len(w.sendBuffer) {
-			return nil, errors.New("invalid QUIC bundle size")
+		if item.err != nil {
+			return nil, item.err
 		}
+		b := item.packet
 		count := 0
 		for at := 0; at < len(b); {
 			if len(b)-at < 2 {
@@ -112,7 +173,18 @@ func (w *quicWire) Receive(ctx context.Context) ([]byte, error) {
 	w.offset += size
 	return frame, nil
 }
-func (w *quicWire) Close() error { return w.conn.CloseWithError(0, "closed") }
+func (w *quicWire) Close() error {
+	w.startReader()
+	w.closeOnce.Do(func() {
+		w.cancelRead()
+		w.closeErr = w.conn.CloseWithError(0, "closed")
+		<-w.readerDone
+		// Release prefetched ownership on shutdown; Receive may also be draining.
+		for range w.receiveQueue {
+		}
+	})
+	return w.closeErr
+}
 func quicConfig() *quic.Config {
 	return &quic.Config{EnableDatagrams: true, HandshakeIdleTimeout: 3 * time.Second, MaxIdleTimeout: 15 * time.Second, MaxIncomingStreams: 1, MaxIncomingUniStreams: -1}
 }
@@ -168,7 +240,9 @@ func listenQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 				}
 				_ = stream.Close()
 				stream.CancelRead(0)
-				_ = accept(local, &quicWire{conn: conn}, peerEpoch)
+				w := &quicWire{conn: conn}
+				defer w.Close()
+				_ = accept(local, w, peerEpoch)
 			}()
 		}
 	}()

@@ -103,12 +103,18 @@ uses batched writes; other platforms use individual writes. Buffers are released
 only after consumption. This avoids stalling carrier receive on every UDP write;
 it cannot eliminate overload drops or replace receiver-based acceptance tests.
 
-The local 300 Mbps deployment profile uses `GOMAXPROCS=2` per TG process; an
+The local 300 Mbps deployment profile uses `GOMAXPROCS=4` per TG process; an
 optional service drop-in example is in `deploy/300mbps-lab.conf.example`. This was
 measured on a VM with 12 logical CPUs. It does not restrict kernel WireGuard or
-prove the capacity of a 2-vCPU host. Tune again on real servers; larger worker
-counts were measurably worse on this local workload. The executable keeps Go's
+prove the capacity of a 4-vCPU host. Tune again on real servers; scheduler choices
+were measured separately on this local workload. The executable keeps Go's
 normal runtime default unless the operator sets the environment variable.
+
+QUIC has an independent bounded receive drainer: at most 2,048 datagrams, each
+validated to at most 1,400 bytes before retention (about 2.74 MiB of payload per
+connection plus queue metadata). It does not copy the native datagram again.
+Per-call receive deadlines do not cancel the connection's reader. Wire close and
+native connection closure both stop it even when the downstream queue is full.
 
 TG never restarts remote daemons or changes kernel networking. Recovery backoff does
 not stop surviving probes. All-path failure drops new packets instead of accumulating
