@@ -1,0 +1,107 @@
+"""Disposable Linux container setup and external daemon monitoring. Never emit keys."""
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+import urllib.request
+
+
+def command(*args, **kwargs):
+    return subprocess.run(args, check=True, capture_output=True, text=True, **kwargs).stdout.strip()
+
+
+def initialize(exit_name, queue, carrier):
+    os.umask(0o077)
+    command('/tg', 'init', '--dir', '/private/pki', '--server-name', 'localhost')
+    for role in ('edge', 'exit'):
+        p = Path('/private/pki') / (role+'.json')
+        config = json.loads(p.read_text())
+        config['metrics'] = '127.0.0.1:19090'
+        config['queue_frames'] = int(queue)
+        if carrier != 'both':
+            config['carriers'] = [c for c in config['carriers'] if c['kind'] == carrier]
+        for path in config['carriers']:
+            port = 8443 if path['kind'] == 'https' else 8444
+            path['address'] = f'{exit_name if role == "edge" else "0.0.0.0"}:{port}'
+        p.write_text(json.dumps(config))
+        key = command('wg', 'genkey')
+        Path('/private/'+role+'.key').write_text(key+'\n')
+        Path('/private/'+role+'.pub').write_text(command('wg', 'pubkey', input=key)+'\n')
+    print('temporary credentials generated; no keys exported', flush=True)
+
+
+def run(role, mtu):
+    other = 'exit' if role == 'edge' else 'edge'
+    address, peer = ('10.77.0.1', '10.77.0.2') if role == 'edge' else ('10.77.0.2', '10.77.0.1')
+    command('ip', 'link', 'add', 'dev', 'wg-tg', 'type', 'wireguard')
+    command('ip', 'address', 'add', address+'/30', 'dev', 'wg-tg')
+    args = ['wg', 'set', 'wg-tg', 'listen-port', '51820', 'private-key', '/private/'+role+'.key',
+            'peer', Path('/private/'+other+'.pub').read_text().strip(), 'allowed-ips', peer+'/32']
+    if role == 'edge':
+        args += ['endpoint', '127.0.0.1:31820', 'persistent-keepalive', '5']
+    command(*args)
+    command('ip', 'link', 'set', 'dev', 'wg-tg', 'mtu', mtu, 'up')
+    log = open('/out/'+role+'-tg.log', 'w', buffering=1)
+    process = subprocess.Popen(['/tg', 'run', '--config', '/private/pki/'+role+'.json'], stdout=log, stderr=log)
+    stopped = False
+
+    def stop(*_):
+        nonlocal stopped
+        stopped = True
+    signal.signal(signal.SIGTERM, stop)
+    signal.signal(signal.SIGINT, stop)
+    output = open('/out/'+role+'-monitor.jsonl', 'w', buffering=1)
+    sample_number = 0
+    try:
+        while not stopped:
+            if process.poll() is not None:
+                raise RuntimeError('TG exited: '+str(process.returncode))
+            status = {}
+            for line in Path(f'/proc/{process.pid}/smaps_rollup').read_text().splitlines():
+                if ':' in line:
+                    key, value = line.split(':', 1)
+                    if key in ('Rss', 'Pss'):
+                        status[key.lower()+'_kib'] = int(value.split()[0])
+            fields = Path(f'/proc/{process.pid}/stat').read_text().rsplit(')', 1)[1].split()
+            row = dict(time=time.time(), pid=process.pid, start_ticks=int(fields[19]),
+                       cpu_ticks=int(fields[11])+int(fields[12]), threads=int(fields[17]), **status)
+            try:
+                with urllib.request.urlopen('http://127.0.0.1:19090/status', timeout=2) as response:
+                    row['tg'] = json.load(response)
+            except Exception as exc:
+                row['status_error'] = type(exc).__name__
+            row['wg_rx_bytes'] = int(Path('/sys/class/net/wg-tg/statistics/rx_bytes').read_text())
+            row['wg_tx_bytes'] = int(Path('/sys/class/net/wg-tg/statistics/tx_bytes').read_text())
+            if sample_number % 12 == 0:
+                row['wg_latest_handshake'] = int(command('wg', 'show', 'wg-tg', 'latest-handshakes').split()[-1])
+                transfer = command('wg', 'show', 'wg-tg', 'transfer').split()
+                row['wg_peer_received_bytes'], row['wg_peer_sent_bytes'] = map(int, transfer[-2:])
+            sample_number += 1
+            current = Path('/sys/fs/cgroup/memory.current')
+            if current.exists():
+                row['container_memory_bytes'] = int(current.read_text())
+                row['container_memory_stat'] = {k: int(v) for k, v in
+                    (line.split() for line in Path('/sys/fs/cgroup/memory.stat').read_text().splitlines())
+                    if k in ('anon', 'file', 'kernel', 'sock', 'slab')}
+            output.write(json.dumps(row)+'\n')
+            for _ in range(50):
+                if stopped:
+                    break
+                time.sleep(.1)
+    finally:
+        process.terminate()
+        process.wait(timeout=10)
+        output.close()
+        log.close()
+
+
+if __name__ == '__main__':
+    if sys.argv[1] == 'init':
+        initialize(sys.argv[2], sys.argv[3], sys.argv[4])
+    elif sys.argv[1] == 'direct':
+        command('wg', 'set', 'wg-tg', 'peer', Path('/private/exit.pub').read_text().strip(), 'endpoint', sys.argv[2]+':51820')
+    else:
+        run(sys.argv[1], sys.argv[2])

@@ -68,6 +68,10 @@ Score: RTT + twice RTT variation + configured cost + bounded queue penalty. HTTP
 costs 20ms by default. These are test starting points, not validated Iran tuning.
 Queue pressure can try another healthy carrier immediately. Failure detection can
 drop UDP; lossless handover and TG-level application retransmission are not provided.
+Upgrade hysteresis governs the preferred path. Per-packet overflow fallback can
+still send adjacent packets over different carriers. The loaded WireGuard test
+recorded frequent carrier changes and failed its TCP receiver target; measure
+reordering and retransmission before treating the current policy as production-ready.
 
 New configurations use `queue_frames: 1024` per carrier. Existing explicit values
 are preserved. With two frames per 1400-byte application packet at 350 Mbps, this

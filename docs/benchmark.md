@@ -1,5 +1,9 @@
 # Receiver acceptance protocol
 
+The completed local kernel-WireGuard test is recorded in
+[wireguard-validation.md](wireguard-validation.md). Its 30-minute receiver-speed
+gate failed. The procedure below remains the future real-host acceptance protocol.
+
 This is a future real-host procedure, not a measured TG result. Use owner-provided
 Iran and overseas hosts; record CPU/NIC/link limits, kernel, TG commit, MTU, UTC time,
 ISP and both directions. Measure the direct baseline first, then inner WireGuard

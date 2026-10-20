@@ -9,9 +9,14 @@ aggregate receiver goodput**. Future 10 Gbps aggregate requires separate profili
 and capacity validation. Local load results and their limited scope are recorded
 in [the performance report](docs/performance.md); real-host acceptance is pending.
 
+**Full-stack acceptance currently fails:** a 30-minute, eight-stream TCP test
+through kernel WireGuard and TG received 199.76 Mbps, with a minimum rolling
+10-second rate of 74.19 Mbps. TG process memory remained bounded during that run.
+See the [WireGuard results and reproduction](docs/wireguard-validation.md).
+
 TG forwards one application's opaque UDP packets. WireGuard is the intended inner
 IP tunnel, configured separately. TG keeps the exit UDP socket across carrier
-changes, probes both carriers, avoids flapping with hysteresis, and falls back under
+changes, probes both carriers, debounces preferred-path upgrades, and falls back under
 failure or queue pressure. It does not configure WireGuard, routes, firewall or NAT.
 See [فارسی](README-fa.md).
 

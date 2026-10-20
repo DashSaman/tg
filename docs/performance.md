@@ -1,5 +1,9 @@
 # Local load validation
 
+The later [kernel-WireGuard TCP follow-up](wireguard-validation.md) completed a
+30-minute run and failed the 300 Mbps receiver gate. The measurements below cover
+the earlier opaque-UDP application load.
+
 This test measures real encrypted UDP application delivery over TG on one Linux
 Docker host. It is not a codec benchmark. It includes both TG endpoints, generator,
 receiver and optional fault proxies in one Go process. It excludes WireGuard, WAN,

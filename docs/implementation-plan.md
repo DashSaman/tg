@@ -65,3 +65,14 @@ HTTP carrier and docs/performance.md.
 
 Local goodput is a separate milestone from the two-host Iran acceptance described
 above. Allocation churn, live heap and final receiver bytes must be reported separately.
+
+### 6. Full-stack WireGuard follow-up
+- [x] Run real kernel WireGuard in two isolated namespaces with unmodified TG.
+- [x] Complete 1800 seconds of eight-stream TCP and 180 seconds of repeated outages.
+- [x] Record independent receiver receipts and per-daemon RSS/PSS outside TG.
+- [x] Validate memory/recovery gates, retain failed controls and cleanup evidence.
+- [ ] Resolve the failed full-stack 300 Mbps gate, then repeat acceptance.
+
+Observed full-stack result: 199.76 Mbps average, minimum rolling 10s 74.19 Mbps.
+TG resident-memory medians were stable during the observed lower-throughput load.
+No data-path change was made in this follow-up; see wireguard-validation.md.

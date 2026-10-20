@@ -1,0 +1,294 @@
+{
+  "steady": {
+    "passed": false,
+    "protocol": "TCP",
+    "scope": "receiver_application_goodput",
+    "seconds": 1800.003709,
+    "received_mbps": 199.76004415222013,
+    "minimum_window_mbps": 74.18712894908619,
+    "window_seconds": 10,
+    "maximum_udp_interval_loss_percent": null,
+    "maximum_udp_interval_jitter_ms": null,
+    "failures": [
+      "aggregate receiver bitrate below target",
+      "rolling receiver window below target or absent"
+    ],
+    "start": 1792516156.518062,
+    "end": 1792517972.6439466,
+    "case": "steady",
+    "reverse": false
+  },
+  "faults": {
+    "passed": false,
+    "protocol": "TCP",
+    "scope": "receiver_application_goodput",
+    "seconds": 180.006889,
+    "received_mbps": 162.8693771158947,
+    "minimum_window_mbps": 19.659894342047313,
+    "window_seconds": 10,
+    "maximum_udp_interval_loss_percent": null,
+    "maximum_udp_interval_jitter_ms": null,
+    "failures": [
+      "aggregate receiver bitrate below target",
+      "rolling receiver window below target or absent"
+    ],
+    "recovered_last_5_intervals": false,
+    "final_healthy": {
+      "edge": 2,
+      "exit": 2
+    },
+    "recovery_passed": false,
+    "start": 1792517973.7619028,
+    "end": 1792518156.965791,
+    "case": "faults",
+    "reverse": false,
+    "recovery_duration_covered": true,
+    "longest_zero_receiver_intervals_seconds": 6.000796914100647
+  },
+  "memory": {
+    "edge": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 356,
+      "rss_early_median_mib": 16.09765625,
+      "rss_late_median_mib": 16.203125,
+      "pss_early_median_mib": 12.208984375,
+      "pss_late_median_mib": 12.3046875,
+      "rss_peak_mib": 17.00390625,
+      "pss_peak_mib": 13.11328125,
+      "rss_growth_mib": 0.10546875,
+      "pss_growth_mib": 0.095703125,
+      "pss_slope_mib_per_minute": 0.004700622163132824,
+      "rss_slope_mib_per_minute": 0.0054135237306408845,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration",
+      "carrier_switches_delta": 24855,
+      "thread_count_range": [
+        15,
+        18
+      ],
+      "observed_handshake_timestamps": 15,
+      "container_peak_mib": 66.953125,
+      "container_kernel_early_median_mib": 1.5546875,
+      "container_sock_early_median_mib": 8.5078125,
+      "container_slab_early_median_mib": 0.8669700622558594,
+      "container_anon_early_median_mib": 26.728515625,
+      "container_kernel_late_median_mib": 1.60546875,
+      "container_sock_late_median_mib": 11.50390625,
+      "container_slab_late_median_mib": 0.8711318969726562,
+      "container_anon_late_median_mib": 46.904296875
+    },
+    "exit": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 356,
+      "rss_early_median_mib": 18.01171875,
+      "rss_late_median_mib": 18.041015625,
+      "pss_early_median_mib": 14.1279296875,
+      "pss_late_median_mib": 14.142578125,
+      "rss_peak_mib": 22.2109375,
+      "pss_peak_mib": 18.3125,
+      "rss_growth_mib": 0.029296875,
+      "pss_growth_mib": 0.0146484375,
+      "pss_slope_mib_per_minute": 0.0099768064959186,
+      "rss_slope_mib_per_minute": 0.010689792108126147,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration",
+      "carrier_switches_delta": 0,
+      "thread_count_range": [
+        16,
+        18
+      ],
+      "observed_handshake_timestamps": 15,
+      "container_peak_mib": 56.96484375,
+      "container_kernel_early_median_mib": 1.578125,
+      "container_sock_early_median_mib": 0.015625,
+      "container_slab_early_median_mib": 0.8881072998046875,
+      "container_anon_early_median_mib": 26.55078125,
+      "container_kernel_late_median_mib": 1.6171875,
+      "container_sock_late_median_mib": 0.01171875,
+      "container_slab_late_median_mib": 0.8930015563964844,
+      "container_anon_late_median_mib": 40.38671875
+    }
+  },
+  "scope": "two isolated network namespaces on one Linux Docker VM; kernel WireGuard and TG; no WAN or DPI",
+  "passed": false,
+  "measurement_time_memory_analysis": {
+    "edge": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 356,
+      "rss_early_median_mib": 16.09765625,
+      "rss_late_median_mib": 16.203125,
+      "pss_early_median_mib": 12.208984375,
+      "pss_late_median_mib": 12.3046875,
+      "rss_peak_mib": 17.00390625,
+      "pss_peak_mib": 13.11328125,
+      "rss_growth_mib": 0.10546875,
+      "pss_growth_mib": 0.095703125,
+      "pss_slope_mib_per_minute": 0.004700622163132824,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    },
+    "exit": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 356,
+      "rss_early_median_mib": 18.01171875,
+      "rss_late_median_mib": 18.041015625,
+      "pss_early_median_mib": 14.1279296875,
+      "pss_late_median_mib": 14.142578125,
+      "rss_peak_mib": 22.2109375,
+      "pss_peak_mib": 18.3125,
+      "rss_growth_mib": 0.029296875,
+      "pss_growth_mib": 0.0146484375,
+      "pss_slope_mib_per_minute": 0.0099768064959186,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    }
+  },
+  "measurement_time_fault_recovery": {
+    "recovery_passed": false,
+    "recovered_last_5_intervals": false,
+    "final_healthy": {
+      "edge": 2,
+      "exit": 2
+    }
+  },
+  "exit_application_socket_unchanged": true,
+  "daemon_process_stable_including_faults": {
+    "edge": true,
+    "exit": true
+  },
+  "analysis_note": "Raw measurements unchanged. Final postprocessing additionally gates RSS slope and rejects truncated recovery receipts; original gate results retained.",
+  "sender_retransmits": 529894,
+  "controls": {
+    "direct": {
+      "passed": true,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 30.000124,
+      "received_mbps": 350.083126856409,
+      "minimum_window_mbps": 349.80302492234165,
+      "window_seconds": 10,
+      "maximum_udp_interval_loss_percent": null,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [],
+      "start": 1792516099.2918983,
+      "end": 1792516129.5509765,
+      "case": "direct-probe",
+      "reverse": false
+    },
+    "https_default": {
+      "passed": false,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 30.061089,
+      "received_mbps": 202.64369690665563,
+      "minimum_window_mbps": 186.58151261536247,
+      "window_seconds": 10,
+      "maximum_udp_interval_loss_percent": null,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [
+        "aggregate receiver bitrate below target",
+        "rolling receiver window below target or absent"
+      ],
+      "start": 1792515699.0805912,
+      "end": 1792515729.5615869,
+      "case": "https-probe",
+      "reverse": false
+    },
+    "https_16k_writes": {
+      "passed": false,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 30.051272,
+      "received_mbps": 233.42980596628323,
+      "minimum_window_mbps": 221.20877323411386,
+      "window_seconds": 10,
+      "maximum_udp_interval_loss_percent": null,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [
+        "aggregate receiver bitrate below target",
+        "rolling receiver window below target or absent"
+      ],
+      "start": 1792515834.835355,
+      "end": 1792515865.298268,
+      "case": "https-probe",
+      "reverse": false
+    },
+    "https_queue4096": {
+      "passed": false,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 30.111585,
+      "received_mbps": 216.47098444004192,
+      "minimum_window_mbps": 187.45973272500427,
+      "window_seconds": 10,
+      "maximum_udp_interval_loss_percent": null,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [
+        "aggregate receiver bitrate below target",
+        "rolling receiver window below target or absent"
+      ],
+      "start": 1792515890.76065,
+      "end": 1792515921.6584451,
+      "case": "https-probe",
+      "reverse": false
+    },
+    "both_default": {
+      "passed": false,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 30.01745,
+      "received_mbps": 143.51154278594615,
+      "minimum_window_mbps": 107.41402847608467,
+      "window_seconds": 10,
+      "maximum_udp_interval_loss_percent": null,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [
+        "aggregate receiver bitrate below target",
+        "rolling receiver window below target or absent"
+      ],
+      "start": 1792515947.3741765,
+      "end": 1792515977.2344785,
+      "case": "quic-probe",
+      "reverse": false
+    },
+    "unpaced_both": {
+      "passed": false,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 30.009549,
+      "received_mbps": 206.95691494730562,
+      "minimum_window_mbps": 190.7384005742921,
+      "window_seconds": 10,
+      "maximum_udp_interval_loss_percent": null,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [
+        "aggregate receiver bitrate below target",
+        "rolling receiver window below target or absent"
+      ],
+      "start": 1792518187.8977027,
+      "end": 1792518218.3753226,
+      "case": "both-probe",
+      "reverse": false
+    },
+    "quic_only": {
+      "passed": false,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 30.008061,
+      "received_mbps": 207.5580531511183,
+      "minimum_window_mbps": 173.34204715179976,
+      "window_seconds": 10,
+      "maximum_udp_interval_loss_percent": null,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [
+        "aggregate receiver bitrate below target",
+        "rolling receiver window below target or absent"
+      ],
+      "start": 1792518231.1741753,
+      "end": 1792518261.6611543,
+      "case": "quic-probe",
+      "reverse": false
+    }
+  },
+  "runtime_commit": "ea08a315fde8d501161403db93558b3a432e2c27"
+}

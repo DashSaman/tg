@@ -1,9 +1,12 @@
 # Local validation ledger — 2026-10-20
 
 Scope: Linux Docker on the developer's Windows machine, Go 1.26, quic-go v0.64.1.
+The later [full-stack WireGuard validation](wireguard-validation.md) measured a
+complete 30-minute TCP run, resident memory and repeated loaded path outages. It
+failed the 300 Mbps receiver gate; the earlier opaque-UDP results remain narrower.
 The official `golang:1.26-bookworm` image digest used was
 `sha256:ee3901c61e423732605a51f1b8157c849ec01194ea0a274213b5202b2c11e7bf`.
-No Iranian server, overseas deployment, public-source spoof test, routing change
+No Iranian server, overseas deployment, public-source spoof test, host routing change
 or production installation was performed.
 
 Verified behavior in tests:
