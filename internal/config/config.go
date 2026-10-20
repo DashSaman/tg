@@ -40,6 +40,7 @@ type Config struct {
 	ProbeIntervalMS int       `json:"probe_interval_ms"`
 	ProbeTimeoutMS  int       `json:"probe_timeout_ms"`
 	HoldDownMS      int       `json:"hold_down_ms"`
+	AutoUpgrade     bool      `json:"auto_upgrade"`
 	QueueFrames     int       `json:"queue_frames"`
 	MaxPacketBytes  int       `json:"max_packet_bytes"`
 }

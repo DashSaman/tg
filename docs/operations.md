@@ -63,7 +63,12 @@ means handed to a local UDP socket, not Internet goodput. Measure final applicat
 receivers. Full Internet-exit health needs a separate application probe, not shipped.
 
 Defaults: probes every 1s, expiry after 4s, independent reconnect backoff up to about
-3s. Healthy upgrades need two fresh observations, 10ms score advantage and 5s hold.
+3s. Default `auto_upgrade: false` keeps the current carrier while it is healthy;
+the surviving path remains selected when another path recovers. This avoids moving
+a live aggregate onto an idle path whose bulk capacity has not been measured.
+Optional `auto_upgrade: true` enables healthy upgrades requiring two fresh
+observations, 10ms measured score advantage and `hold_down_ms` (default 5s).
+That adaptive mode failed loaded local controls and is not the validated profile.
 Score: RTT + twice RTT variation + configured cost + bounded queue penalty. HTTPS
 costs 20ms by default. These are test starting points, not validated Iran tuning.
 Static cost guides initial/failure selection. Replacing a healthy carrier also
@@ -75,7 +80,8 @@ One carrier carries application data at a time. A full transmit queue waits abou
 2 ms for whole-packet space; persistent overflow drops that packet rather than
 spraying it onto another healthy path. The previous overflow policy generated
 thousands of switches under load. Failure and confirmed measured improvement
-can still replace the carrier. A deliberate switch can reorder in-flight UDP;
+can still replace the carrier when adaptive mode is explicitly enabled. Carrier
+failure always permits replacement. A deliberate switch can reorder in-flight UDP;
 handover does not guarantee zero TCP retransmissions.
 
 Upgrade both endpoints together. QUIC now uses `tg-dgram-v2` with length-prefixed

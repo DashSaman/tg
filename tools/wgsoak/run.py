@@ -178,6 +178,7 @@ def main():
         else:
             raise RuntimeError('WireGuard handshake/connectivity failed; inspect node logs')
         manifest['versions'] = execute('edge', 'sh', '-c', 'uname -r; wg --version; iperf3 --version; ip -details link show wg-tg; ip route get 10.77.0.2')
+        manifest['lab_configuration'] = json.loads((out/'lab-config-summary.json').read_text())
         (out/'manifest.json').write_text(json.dumps(manifest, indent=2))
         for role in names:
             (out/(role+'-udp-socket-memory.txt')).write_text(execute(role,'ss','-u','-a','-n','-m'))

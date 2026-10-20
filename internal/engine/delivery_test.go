@@ -190,3 +190,36 @@ func TestApplicationBatchReportsPartialKernelWrite(t *testing.T) {
 		}
 	}
 }
+
+func TestConfiguredHealthyUpgradeRequiresExplicitOptIn(t *testing.T) {
+	for _, enabled := range []bool{false, true} {
+		c := config.Defaults()
+		c.Role = "edge"
+		c.SessionID = "11111111111111111111111111111111"
+		c.AutoUpgrade = enabled
+		e, err := New(c)
+		if err != nil {
+			t.Fatal(err)
+		}
+		now := time.Unix(100, 0)
+		paths := []session.Path{{ID: "first", Ready: true, LastPong: now, RTT: 20 * time.Millisecond}, {ID: "second", Ready: true, LastPong: now, RTT: 80 * time.Millisecond}}
+		if e.selector.Choose(now, paths) != "first" {
+			t.Fatal("initial selection")
+		}
+		paths[1].RTT = time.Millisecond
+		for i := 6; i <= 8; i++ {
+			at := now.Add(time.Duration(i) * time.Second)
+			for j := range paths {
+				paths[j].LastPong = at
+			}
+			e.selector.Choose(at, paths)
+		}
+		want := "first"
+		if enabled {
+			want = "second"
+		}
+		if got := e.selector.Choose(now.Add(8*time.Second), paths); got != want {
+			t.Fatalf("auto_upgrade=%v selected %s instead of %s", enabled, got, want)
+		}
+	}
+}

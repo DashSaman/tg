@@ -10,6 +10,7 @@ type Path struct {
 	Queued, Capacity  int
 }
 type Selector struct {
+	AutoUpgrade               bool
 	Timeout, HoldDown, Margin time.Duration
 	Confirmations             int
 	active, candidate         string
@@ -49,6 +50,12 @@ func (s *Selector) Choose(now time.Time, paths []Path) string {
 	}
 	if active == nil {
 		return switchTo(best.ID)
+	}
+	// An idle carrier's empty queue and cold congestion window cannot establish
+	// its bulk capacity. Default active/backup retains a healthy aggregate path;
+	// operators must explicitly opt into adaptive healthy-path replacement.
+	if !s.AutoUpgrade {
+		return s.active
 	}
 	// Static cost expresses initial/failure preference, not evidence that a
 	// healthy fallback has become worse. Otherwise the cost alone repeatedly

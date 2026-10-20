@@ -59,6 +59,19 @@ no packet resequencing. The repair therefore uses a single active data carrier,
 switching on carrier failure or confirmed measured improvement, with bounded
 whole-packet admission and explicit overload drops instead of packet spraying.
 
+Candidate `12049ea` removed per-packet spraying but its adaptive queue score still
+moved the aggregate between a loaded and an idle carrier. Its long attempt was
+interrupted around 415 seconds after a 104.85 Mbps minimum window, with zero ingress
+UDP receive-buffer drops. The default now sets `auto_upgrade: false`: retain a
+healthy active path, and switch when it fails. Recovering a different path does
+not force failback. The earlier adaptive mode is available only by explicit opt-in;
+its short passes are not presented as long-run acceptance.
+
+A separate scheduler control on the preceding candidate kept all other settings
+and set `GOMAXPROCS=2` per TG: 350.01 Mbps average / 349.73 Mbps minimum over 120s.
+The final local deployment profile records that setting. The VM still had 12
+logical CPUs; Go worker concurrency is not a 2-vCPU-host capacity claim.
+
 ## Controls, including failed intermediate versions
 
 All are local eight-stream TCP controls through kernel WireGuard. Rates are Mbps.

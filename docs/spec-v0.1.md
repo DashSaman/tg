@@ -44,12 +44,14 @@ REALITY/XHTTP and raw/spoof integrations are later adapters, not simulated featu
 Per-carrier control queue is separate from bounded data queue. Pending/unprobed
 links cannot carry application data. Probes measure authenticated round-trip on
 the carrier, not full Internet exit reachability; metrics name that scope explicitly.
-Failure after probe timeout permits immediate failover; healthy-path replacement
-requires repeated advantage and hold-down. One carrier carries application data
+Failure after probe timeout permits failover. Default `auto_upgrade: false`
+retains a healthy active carrier even when another idle path has a better score;
+restoring a failed path does not force failback. Optional `auto_upgrade: true`
+enables repeated-advantage/hold-down healthy replacement, which remains experimental
+after its failed loaded controls. One carrier carries application data
 at a time. Full queues wait about 2 ms for whole-packet space, without holding the
 engine lock; persistent overflow drops a whole packet. Overflow does not spray
-adjacent encrypted packets across different healthy carriers. Failure and confirmed
-measured improvement can still replace the selected carrier.
+adjacent encrypted packets across different healthy carriers.
 Completed UDP packets enter one 256-packet output queue and one writer drains up
 to 32 immediately available packets. Linux uses `sendmmsg`; other systems retain
 individual UDP writes. No batching delay is added. Completed buffers retain their

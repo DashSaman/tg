@@ -16,6 +16,7 @@ def command(*args, **kwargs):
 def initialize(exit_name, queue, carrier):
     os.umask(0o077)
     command('/tg', 'init', '--dir', '/private/pki', '--server-name', 'localhost')
+    public = {}
     for role in ('edge', 'exit'):
         p = Path('/private/pki') / (role+'.json')
         config = json.loads(p.read_text())
@@ -27,9 +28,11 @@ def initialize(exit_name, queue, carrier):
             port = 8443 if path['kind'] == 'https' else 8444
             path['address'] = f'{exit_name if role == "edge" else "0.0.0.0"}:{port}'
         p.write_text(json.dumps(config))
+        public[role] = {k:config.get(k) for k in ('auto_upgrade','queue_frames','max_packet_bytes','probe_interval_ms','probe_timeout_ms','hold_down_ms')}
         key = command('wg', 'genkey')
         Path('/private/'+role+'.key').write_text(key+'\n')
         Path('/private/'+role+'.pub').write_text(command('wg', 'pubkey', input=key)+'\n')
+    Path('/out/lab-config-summary.json').write_text(json.dumps(public,indent=2))
     print('temporary credentials generated; no keys exported', flush=True)
 
 

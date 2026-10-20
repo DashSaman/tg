@@ -7,7 +7,7 @@ import (
 
 func TestSelectionDebouncesAndImmediatelyEscapesDeadPath(t *testing.T) {
 	now := time.Unix(100, 0)
-	s := Selector{Timeout: time.Second, HoldDown: 2 * time.Second, Margin: 5 * time.Millisecond, Confirmations: 2}
+	s := Selector{AutoUpgrade: true, Timeout: time.Second, HoldDown: 2 * time.Second, Margin: 5 * time.Millisecond, Confirmations: 2}
 	paths := []Path{{ID: "quic", Ready: true, LastPong: now, RTT: 10 * time.Millisecond}, {ID: "https", Ready: true, LastPong: now, RTT: 40 * time.Millisecond}}
 	if got := s.Choose(now, paths); got != "quic" {
 		t.Fatal(got)
@@ -43,6 +43,41 @@ func TestUnprobedPathCannotCarryTraffic(t *testing.T) {
 	}
 }
 
+func TestDefaultSelectionRetainsHealthyCarrierUntilFailure(t *testing.T) {
+	now := time.Unix(100, 0)
+	s := Selector{Timeout: 10 * time.Second, HoldDown: time.Second, Margin: 5 * time.Millisecond}
+	paths := []Path{{ID: "quic", Ready: true, LastPong: now, RTT: 10 * time.Millisecond}, {ID: "https", Ready: true, LastPong: now, RTT: 40 * time.Millisecond}}
+	if s.Choose(now, paths) != "quic" {
+		t.Fatal("initial ranking wrong")
+	}
+	paths[1].RTT = time.Millisecond
+	for i := 2; i < 8; i++ {
+		at := now.Add(time.Duration(i) * time.Second)
+		for j := range paths {
+			paths[j].LastPong = at
+		}
+		if s.Choose(at, paths) != "quic" {
+			t.Fatal("default migrated a healthy aggregate onto an idle carrier")
+		}
+	}
+	paths[0].Ready = false
+	if s.Choose(now.Add(8*time.Second), paths) != "https" {
+		t.Fatal("sticky mode retained failed path")
+	}
+	paths[0].Ready = true
+	paths[0].RTT = time.Millisecond
+	paths[1].RTT = 80 * time.Millisecond
+	for i := 9; i < 15; i++ {
+		at := now.Add(time.Duration(i) * time.Second)
+		for j := range paths {
+			paths[j].LastPong = at
+		}
+		if s.Choose(at, paths) != "https" {
+			t.Fatal("restoration undid healthy fallback")
+		}
+	}
+}
+
 func TestJitterPenalizesUnstableCarrier(t *testing.T) {
 	now := time.Now()
 	s := Selector{Timeout: time.Second}
@@ -54,7 +89,7 @@ func TestJitterPenalizesUnstableCarrier(t *testing.T) {
 
 func TestFallbackIsNotUndoneByStaticCostPreference(t *testing.T) {
 	now := time.Unix(100, 0)
-	s := Selector{Timeout: 10 * time.Second, HoldDown: time.Second, Margin: 10 * time.Millisecond, Confirmations: 2}
+	s := Selector{AutoUpgrade: true, Timeout: 10 * time.Second, HoldDown: time.Second, Margin: 10 * time.Millisecond, Confirmations: 2}
 	paths := []Path{{ID: "quic", Ready: true, LastPong: now, RTT: time.Millisecond}, {ID: "https", Ready: true, LastPong: now, RTT: 2 * time.Millisecond, Cost: 20 * time.Millisecond}}
 	if s.Choose(now, paths) != "quic" {
 		t.Fatal("initial cost preference lost")

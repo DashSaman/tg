@@ -45,7 +45,7 @@ func New(c config.Config) (*Engine, error) {
 			return nil, err
 		}
 	}
-	return &Engine{cfg: c, epoch: binary.BigEndian.Uint64(b[:]), links: make(map[string]*link), addresses: make(map[string]string), receive: session.NewReassembler(128, 2*time.Second), selector: session.Selector{Timeout: c.Timeout(), HoldDown: time.Duration(c.HoldDownMS) * time.Millisecond, Margin: 10 * time.Millisecond, Confirmations: 2}}, nil
+	return &Engine{cfg: c, epoch: binary.BigEndian.Uint64(b[:]), links: make(map[string]*link), addresses: make(map[string]string), receive: session.NewReassembler(128, 2*time.Second), selector: session.Selector{AutoUpgrade: c.AutoUpgrade, Timeout: c.Timeout(), HoldDown: time.Duration(c.HoldDownMS) * time.Millisecond, Margin: 10 * time.Millisecond, Confirmations: 2}}, nil
 }
 
 // Run owns all sockets until cancellation and is intentionally single-use.
