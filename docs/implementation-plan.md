@@ -41,12 +41,13 @@ Files: cmd/tg, examples, deploy, tools/acceptance.py, tools/test_acceptance.py, 
 - [x] Test generated config validation and receiver-window acceptance failures.
 - [x] Implement init/check/run, generated configs, systemd, bilingual setup and honest status.
 - [x] Run tests/vet/builds and inspect full relevant diff.
-- [ ] Publish the feature branch and draft PR.
+- [x] Publish the feature branch and [draft PR #1](https://github.com/DashSaman/tg/pull/1).
 
 ## Progress
 Core implementation and fresh local verification are complete: six Go packages,
 21 Go test/subtest cases including fuzz seeds, four Python test cases, race and vet.
 Linux amd64/arm64 and Windows amd64 builds passed; two native architecture smoke
-runs passed. Publication follows. See validation.md for evidence and limitations.
+runs passed. Published on `codex/tg-v0.1` for review. See validation.md for evidence
+and limitations.
 The owner explicitly deferred real-host acceptance. It remains mandatory before
 claiming production Iran stability or the 300 Mbps aggregate target.
