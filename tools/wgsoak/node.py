@@ -68,6 +68,16 @@ def run(role, mtu):
             fields = Path(f'/proc/{process.pid}/stat').read_text().rsplit(')', 1)[1].split()
             row = dict(time=time.time(), pid=process.pid, start_ticks=int(fields[19]),
                        cpu_ticks=int(fields[11])+int(fields[12]), threads=int(fields[17]), **status)
+            snmp = Path('/proc/net/snmp').read_text().splitlines()
+            row['udp'] = next((dict(zip(a.split()[1:], map(int, b.split()[1:])))
+                               for a, b in zip(snmp[::2], snmp[1::2]) if a.startswith('Udp:')), {})
+            row['tcp'] = next((dict(zip(a.split()[1:], map(int, b.split()[1:])))
+                               for a, b in zip(snmp[::2], snmp[1::2]) if a.startswith('Tcp:')), {})
+            # Namespace-local socket receive queues and drops. Never collect keys.
+            row['udp_sockets'] = [dict(family=family, local=p[1], remote=p[2], queue=p[4], inode=p[9], drops=int(p[-1]))
+                                  for family in ('udp', 'udp6')
+                                  for line in Path('/proc/net/'+family).read_text().splitlines()[1:]
+                                  if len(p := line.split()) >= 13]
             try:
                 with urllib.request.urlopen('http://127.0.0.1:19090/status', timeout=2) as response:
                     row['tg'] = json.load(response)

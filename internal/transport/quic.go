@@ -8,6 +8,7 @@ import (
 	"errors"
 	"github.com/DashSaman/tg/internal/config"
 	"github.com/DashSaman/tg/internal/pki"
+	"github.com/DashSaman/tg/internal/session"
 	"github.com/quic-go/quic-go"
 	"io"
 	"net"
@@ -15,13 +16,103 @@ import (
 	"time"
 )
 
-const alpn = "tg-dgram-v1"
+// v2 carries bounded length-prefixed TG frames in each QUIC DATAGRAM.
+// Both peers must upgrade together; v1 peers fail ALPN negotiation.
+const alpn = "tg-dgram-v2"
 
-type quicWire struct{ conn *quic.Conn }
+type quicWire struct {
+	conn       datagramConnection
+	sendMu     sync.Mutex
+	sendBuffer [1400]byte
+	limit      int
+	retryMTU   time.Time
+	received   []byte
+	offset     int
+}
 
-func (w *quicWire) Send(b []byte) error                         { return w.conn.SendDatagram(b) }
-func (w *quicWire) Receive(ctx context.Context) ([]byte, error) { return w.conn.ReceiveDatagram(ctx) }
-func (w *quicWire) Close() error                                { return w.conn.CloseWithError(0, "closed") }
+type datagramConnection interface {
+	SendDatagram([]byte) error
+	ReceiveDatagram(context.Context) ([]byte, error)
+	CloseWithError(quic.ApplicationErrorCode, string) error
+}
+
+func (w *quicWire) Send(b []byte) error { return w.SendBatch([][]byte{b}) }
+func (w *quicWire) SendBatch(frames [][]byte) error {
+	w.sendMu.Lock()
+	defer w.sendMu.Unlock()
+	if len(frames) == 0 || len(frames) > MaxBatchFrames {
+		return errors.New("QUIC batch limit exceeded")
+	}
+	for _, f := range frames {
+		if len(f) == 0 || len(f) > session.MaxFrame {
+			return errors.New("invalid QUIC frame size")
+		}
+	}
+	now := time.Now()
+	if w.limit == 0 || !now.Before(w.retryMTU) {
+		w.limit = len(w.sendBuffer)
+		w.retryMTU = now.Add(time.Second)
+	}
+	for first := 0; first < len(frames); {
+		n, last := 0, first
+		for last < len(frames) && n+2+len(frames[last]) <= w.limit {
+			b := frames[last]
+			binary.BigEndian.PutUint16(w.sendBuffer[n:n+2], uint16(len(b)))
+			n += 2
+			copy(w.sendBuffer[n:], b)
+			n += len(b)
+			last++
+		}
+		if last == first {
+			return &quic.DatagramTooLargeError{MaxDatagramPayloadSize: int64(w.limit - 2)}
+		}
+		err := w.conn.SendDatagram(w.sendBuffer[:n])
+		if err != nil {
+			var size *quic.DatagramTooLargeError
+			if errors.As(err, &size) && size.MaxDatagramPayloadSize < int64(w.limit) && size.MaxDatagramPayloadSize > 2 {
+				// SendDatagram rejected this datagram before queueing; retry only these
+				// unsent frames at the current path limit. Earlier bundles stay consumed.
+				w.limit = int(size.MaxDatagramPayloadSize)
+				continue
+			}
+			return err
+		}
+		first = last
+	}
+	return nil
+}
+func (w *quicWire) Receive(ctx context.Context) ([]byte, error) {
+	if w.offset == len(w.received) {
+		b, err := w.conn.ReceiveDatagram(ctx)
+		if err != nil {
+			return nil, err
+		}
+		if len(b) == 0 || len(b) > len(w.sendBuffer) {
+			return nil, errors.New("invalid QUIC bundle size")
+		}
+		count := 0
+		for at := 0; at < len(b); {
+			if len(b)-at < 2 {
+				return nil, errors.New("truncated QUIC frame length")
+			}
+			size := int(binary.BigEndian.Uint16(b[at : at+2]))
+			at += 2
+			count++
+			if size == 0 || size > session.MaxFrame || size > len(b)-at || count > MaxBatchFrames {
+				return nil, errors.New("invalid QUIC bundled frame")
+			}
+			at += size
+		}
+		w.received = b
+		w.offset = 0
+	}
+	size := int(binary.BigEndian.Uint16(w.received[w.offset : w.offset+2]))
+	w.offset += 2
+	frame := w.received[w.offset : w.offset+size]
+	w.offset += size
+	return frame, nil
+}
+func (w *quicWire) Close() error { return w.conn.CloseWithError(0, "closed") }
 func quicConfig() *quic.Config {
 	return &quic.Config{EnableDatagrams: true, HandshakeIdleTimeout: 3 * time.Second, MaxIdleTimeout: 15 * time.Second, MaxIncomingStreams: 1, MaxIncomingUniStreams: -1}
 }
@@ -124,5 +215,5 @@ func dialQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	if other == 0 || !state.SupportsDatagrams.Remote || !state.SupportsDatagrams.Local {
 		return fail(errors.New("peer cannot use datagram session"))
 	}
-	return &quicWire{conn}, other, nil
+	return &quicWire{conn: conn}, other, nil
 }

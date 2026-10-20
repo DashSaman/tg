@@ -3,18 +3,23 @@ package engine
 import (
 	"errors"
 	"github.com/DashSaman/tg/internal/config"
+	"golang.org/x/net/ipv4"
 	"net"
 	"net/netip"
+	"runtime"
 	"sync"
 	"time"
 )
 
 type application struct {
-	conn       *net.UDPConn
-	exit       bool
-	mu         sync.Mutex
-	peer       netip.AddrPort
-	readBuffer []byte
+	conn          *net.UDPConn
+	exit          bool
+	mu            sync.Mutex
+	peer          netip.AddrPort
+	readBuffer    []byte
+	batch         *ipv4.PacketConn
+	writeMessages [32]ipv4.Message
+	writeBuffers  [32][1][]byte
 }
 
 func openApplication(c config.Config) (*application, error) {
@@ -34,7 +39,70 @@ func openApplication(c config.Config) (*application, error) {
 	// A per-socket hint, never a global sysctl change. The OS may clamp it.
 	// Absorb short scheduler bursts independently of the bounded frame queue.
 	_ = a.conn.SetReadBuffer(1 << 20)
+	a.batch = ipv4.NewPacketConn(a.conn)
+	for i := range a.writeMessages {
+		a.writeMessages[i].Buffers = a.writeBuffers[i][:]
+	}
 	return a, nil
+}
+
+// Linux uses sendmmsg; other platforms may consume one message per call.
+// The caller retains every buffer until this synchronous method returns.
+func (a *application) writeBatch(packets [][]byte, timeout time.Duration) (int, error) {
+	if len(packets) == 1 {
+		err := a.write(packets[0], timeout)
+		if err != nil {
+			return 0, err
+		}
+		return 1, nil
+	}
+	if len(packets) == 0 || len(packets) > len(a.writeMessages) {
+		return 0, errors.New("invalid application batch")
+	}
+	if runtime.GOOS != "linux" {
+		for i, p := range packets {
+			if err := a.write(p, timeout); err != nil {
+				return i, err
+			}
+		}
+		return len(packets), nil
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	var peer net.Addr
+	if !a.exit {
+		if !a.peer.IsValid() {
+			return 0, errors.New("no application peer yet")
+		}
+		peer = net.UDPAddrFromAddrPort(a.peer)
+	}
+	_ = a.conn.SetWriteDeadline(time.Now().Add(timeout))
+	for i, p := range packets {
+		a.writeBuffers[i][0] = p
+		a.writeMessages[i].Addr = peer
+	}
+	defer func() {
+		for i := range packets {
+			a.writeBuffers[i][0] = nil
+			a.writeMessages[i].Addr = nil
+		}
+	}()
+	sent := 0
+	for sent < len(packets) {
+		n, err := a.batch.WriteBatch(a.writeMessages[sent:len(packets)], 0)
+		// x/net forwards the raw Linux syscall's -1 on an error. It must
+		// not subtract a previously consumed prefix from our result.
+		if n > 0 {
+			sent += n
+		}
+		if err != nil {
+			return sent, err
+		}
+		if n == 0 {
+			return sent, errors.New("empty application batch write")
+		}
+	}
+	return sent, nil
 }
 func (a *application) read(limit int) ([]byte, error) {
 	b := a.readBuffer[:limit+1]

@@ -51,3 +51,34 @@ func TestJitterPenalizesUnstableCarrier(t *testing.T) {
 		t.Fatal("ignored latency variation", got)
 	}
 }
+
+func TestFallbackIsNotUndoneByStaticCostPreference(t *testing.T) {
+	now := time.Unix(100, 0)
+	s := Selector{Timeout: 10 * time.Second, HoldDown: time.Second, Margin: 10 * time.Millisecond, Confirmations: 2}
+	paths := []Path{{ID: "quic", Ready: true, LastPong: now, RTT: time.Millisecond}, {ID: "https", Ready: true, LastPong: now, RTT: 2 * time.Millisecond, Cost: 20 * time.Millisecond}}
+	if s.Choose(now, paths) != "quic" {
+		t.Fatal("initial cost preference lost")
+	}
+	s.Fallback(now, "https")
+	for i := 1; i <= 3; i++ {
+		at := now.Add(time.Duration(i) * time.Second)
+		for j := range paths {
+			paths[j].LastPong = at
+		}
+		if s.Choose(at, paths) != "https" {
+			t.Fatal("static cost alone undid congestion fallback without measured gain")
+		}
+	}
+	// A material measured latency gain still permits a confirmed upgrade.
+	paths[1].RTT = 40 * time.Millisecond
+	for i := 4; i <= 5; i++ {
+		at := now.Add(time.Duration(i) * time.Second)
+		for j := range paths {
+			paths[j].LastPong = at
+		}
+		got := s.Choose(at, paths)
+		if i == 5 && got != "quic" {
+			t.Fatal("measured improvement ignored")
+		}
+	}
+}

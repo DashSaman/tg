@@ -66,12 +66,21 @@ Defaults: probes every 1s, expiry after 4s, independent reconnect backoff up to 
 3s. Healthy upgrades need two fresh observations, 10ms score advantage and 5s hold.
 Score: RTT + twice RTT variation + configured cost + bounded queue penalty. HTTPS
 costs 20ms by default. These are test starting points, not validated Iran tuning.
+Static cost guides initial/failure selection. Replacing a healthy carrier also
+requires a 10ms advantage in measured delay, variation and queue pressure; cost
+alone is insufficient to send traffic back after congestion fallback.
 Queue pressure can try another healthy carrier immediately. Failure detection can
 drop UDP; lossless handover and TG-level application retransmission are not provided.
-Upgrade hysteresis governs the preferred path. Per-packet overflow fallback can
-still send adjacent packets over different carriers. The loaded WireGuard test
-recorded frequent carrier changes and failed its TCP receiver target; measure
-reordering and retransmission before treating the current policy as production-ready.
+Successful overflow fallback commits the alternate as the preferred path and starts
+the same hold-down. The previous implementation returned to the old path on the
+next packet and generated thousands of switches under load. A switch can still
+reorder in-flight UDP; handover does not guarantee zero TCP retransmissions.
+
+Upgrade both endpoints together. QUIC now uses `tg-dgram-v2` with length-prefixed
+frame bundles and native path-MTU limits; it cannot negotiate the old v1 carrier.
+HTTPS framing and TG session frame version 1 are unchanged. A small outer MTU
+still works by splitting unsent bundles; larger bundles are an optimization, not
+a requirement. TG never changes the configured WireGuard MTU.
 
 New configurations use `queue_frames: 1024` per carrier. Existing explicit values
 are preserved. With two frames per 1400-byte application packet at 350 Mbps, this
@@ -79,6 +88,11 @@ is roughly 16ms of burst headroom, not a latency guarantee. The application UDP
 socket requests a 1MiB receive buffer; OS limits can clamp it. Increase queues only
 with receiver loss and latency measurements: longer queues retain more memory and
 may increase latency on slow paths. See [local performance evidence](performance.md).
+Completed packets also have a bounded 256-packet output queue. One writer drains
+up to 32 already available packets into the same application UDP socket. Linux
+uses batched writes; other platforms use individual writes. Buffers are released
+only after consumption. This avoids stalling carrier receive on every UDP write;
+it cannot eliminate overload drops or replace receiver-based acceptance tests.
 
 TG never restarts remote daemons or changes kernel networking. Recovery backoff does
 not stop surviving probes. All-path failure drops new packets instead of accumulating

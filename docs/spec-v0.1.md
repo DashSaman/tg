@@ -33,7 +33,12 @@ REALITY/XHTTP and raw/spoof integrations are later adapters, not simulated featu
 - Reassembly: max 128 unfinished packets, 2 second expiry; exact shape validation,
   no allocate-before-check, and a 4096-packet duplicate window across carriers.
 - HTTPS stream framing uses a 2-byte length prefix, strictly bounded to 1040 bytes.
-  QUIC uses the same authenticated frame body in DATAGRAMs; no custom cryptography.
+  QUIC ALPN `tg-dgram-v2` bundles these length-prefixed frames (at most 16) into
+  DATAGRAMs of at most 1400 bytes. `SendDatagram`'s current path limit can split
+  an unsent bundle without replaying an already accepted bundle. The limit is
+  reconsidered once per second as native QUIC PMTU discovery progresses.
+  The TG frame body stays version 1. No custom cryptography. Both peers must
+  upgrade together: the earlier `tg-dgram-v1` carrier is incompatible.
 
 ## Health and resource bounds
 Per-carrier control queue is separate from bounded data queue. Pending/unprobed
@@ -41,13 +46,24 @@ links cannot carry application data. Probes measure authenticated round-trip on
 the carrier, not full Internet exit reachability; metrics name that scope explicitly.
 Failure after probe timeout permits immediate failover; healthy-path replacement
 requires repeated advantage and hold-down. Full queues try another healthy link
-without partial packet enqueue. No retransmission of application UDP inside TG.
+without partial packet enqueue; successful fallback commits the selected path and
+restarts hold-down, rather than switching back for the very next packet.
+Completed UDP packets enter one 256-packet output queue and one writer drains up
+to 32 immediately available packets. Linux uses `sendmmsg`; other systems retain
+individual UDP writes. No batching delay is added. Completed buffers retain their
+original reassembler owner until synchronous write consumption or cancellation.
+The output queue retains at most 2 MiB of payload storage, plus at most 256 KiB
+in the current write batch, independently of the partial-assembly and free-cache
+bounds. No retransmission of application UDP inside TG.
 No automatic remote service restart. Bounded reconnect backoff never disables probes
 on surviving links. Queueing encrypted WireGuard packets does not expose user flow
 classes; application-aware traffic scheduling and FEC are future work.
 
-Selection score includes smoothed carrier RTT, twice its EWMA absolute variation,
-configured path cost and bounded queue penalty. Probe timeout must be 3–15 probe
+Initial/failure selection score includes smoothed carrier RTT, twice its EWMA
+absolute variation, configured path cost and bounded queue penalty. Replacing a
+healthy carrier also requires the margin in measured RTT/variation/queue score;
+static cost preference alone cannot repeatedly undo congestion fallback.
+Probe timeout must be 3–15 probe
 intervals (also capped at 300 seconds), keeping pending challenges bounded to 16.
 This RTT-variation estimator is not application-packet jitter measurement.
 

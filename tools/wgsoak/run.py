@@ -36,6 +36,8 @@ def main():
     parser.add_argument('--block-size', default='128K')
     parser.add_argument('--queue-frames', type=int, default=1024)
     parser.add_argument('--skip-https-probe', action='store_true')
+    parser.add_argument('--profile', action='store_true', help='set lab-only profiling wrapper environment')
+    parser.add_argument('--gomaxprocs', type=int, default=0, help='diagnostic scheduler control; 0 keeps runtime default')
     parser.add_argument('--carrier', choices=['both', 'quic', 'https'], default='both')
     parser.add_argument('--mtu', type=int, default=1280)
     parser.add_argument('--mbps', type=float, default=350, help='aggregate TCP pacing target; 0 uses unpaced bulk TCP')
@@ -163,6 +165,8 @@ def main():
         docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier)
         for role in ('exit', 'edge'):
             docker('run', '-d', '--name', names[role], '--network', network, '--cap-add', 'NET_ADMIN',
+                   *(['-e', 'TG_DIAGNOSTIC_PROFILE=/out/'+role] if args.profile else []),
+                   *(['-e', 'GOMAXPROCS='+str(args.gomaxprocs)] if args.gomaxprocs else []),
                    '--label', 'tg.wgsoak='+prefix, *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', role, args.mtu)
             created.append(names[role])
         for attempt in range(30):

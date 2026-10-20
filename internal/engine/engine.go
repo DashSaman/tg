@@ -32,6 +32,7 @@ type Engine struct {
 	workers          sync.WaitGroup
 	sequence         atomic.Uint64
 	counters         counters
+	output           chan delivery
 }
 
 func New(c config.Config) (*Engine, error) {
@@ -82,6 +83,10 @@ func (e *Engine) Run(ctx context.Context) error {
 		}
 		e.workers.Done()
 		e.workers.Wait()
+		for len(e.output) > 0 {
+			d := <-e.output
+			d.owner.Release(d.packet)
+		}
 	}()
 	a, err := openApplication(e.cfg)
 	if err != nil {
@@ -89,7 +94,10 @@ func (e *Engine) Run(ctx context.Context) error {
 	}
 	e.mu.Lock()
 	e.app = a
+	e.output = make(chan delivery, 256)
 	e.mu.Unlock()
+	e.workers.Add(1)
+	go func() { defer e.workers.Done(); e.writeApplication(local) }()
 	if e.cfg.Metrics != "" {
 		stop, err := e.serveMetrics(local)
 		if err != nil {
@@ -227,6 +235,7 @@ func (e *Engine) readApplication(ctx context.Context) {
 				}
 				if l := e.links[p.ID]; l != nil && l.enqueue(frames) {
 					chosen = p.ID
+					e.selector.Fallback(now, chosen)
 					sent = true
 					break
 				}
@@ -275,12 +284,11 @@ func (e *Engine) onData(l *link, f session.Frame) {
 	if !complete {
 		return
 	}
-	defer reassembler.Release(packet)
-	if err := e.app.write(packet, e.cfg.Timeout()); err != nil {
-		e.counters.appErrors.Add(1)
-		return
+	select {
+	case e.output <- delivery{packet: packet, owner: reassembler}:
+	case <-e.ctx.Done():
+		reassembler.Release(packet)
 	}
-	e.counters.outputBytes.Add(uint64(len(packet)))
 }
 
 // Resolve explicitly to keep UDP application sockets on loopback.
