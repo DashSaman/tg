@@ -58,6 +58,7 @@ def main():
     manifest = dict(binary_sha256=hashlib.sha256(binary.read_bytes()).hexdigest(),
                     source_commit=docker('run', '--rm', '--mount', f'type=bind,source={binary},target=/tg,readonly', 'tg-wgsoak:local', 'go', 'version', '-m', '/tg').stdout,
                     seconds=args.seconds, fault_seconds=args.fault_seconds, streams=8,
+                    gomaxprocs=args.gomaxprocs or None, live_receiver_telemetry=True,
                     offered_aggregate_mbps=args.mbps if args.mbps else None, tcp_pacing=bool(args.mbps), mtu=args.mtu, carrier=args.carrier, started_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                     queue_frames=args.queue_frames, block_size=args.block_size,
                     scope='two isolated network namespaces on one Linux Docker VM; kernel WireGuard and TG; no WAN or DPI')
@@ -178,6 +179,9 @@ def main():
             raise RuntimeError('WireGuard handshake/connectivity failed; inspect node logs')
         manifest['versions'] = execute('edge', 'sh', '-c', 'uname -r; wg --version; iperf3 --version; ip -details link show wg-tg; ip route get 10.77.0.2')
         (out/'manifest.json').write_text(json.dumps(manifest, indent=2))
+        for role in names:
+            (out/(role+'-udp-socket-memory.txt')).write_text(execute(role,'ss','-u','-a','-n','-m'))
+        docker('exec','-d',names['exit'],'python3','/tools/live.py')
         if args.probe_only:
             if args.probe_only == 'https':
                 rule('udp', True)

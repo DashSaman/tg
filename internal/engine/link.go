@@ -17,6 +17,7 @@ type link struct {
 	ctx            context.Context
 	cancel         context.CancelFunc
 	data, control  chan session.Frame
+	space          chan struct{}
 	enqueueMu      sync.Mutex
 	once           sync.Once
 	closed         atomic.Bool
@@ -29,7 +30,7 @@ type link struct {
 
 func newLink(e *Engine, ctx context.Context, p config.Carrier, w transport.Wire) *link {
 	local, cancel := context.WithCancel(ctx)
-	return &link{engine: e, carrier: p, wire: w, ctx: local, cancel: cancel, data: make(chan session.Frame, e.cfg.QueueFrames), control: make(chan session.Frame, 8), born: time.Now(), pending: make(map[uint64]time.Time)}
+	return &link{engine: e, carrier: p, wire: w, ctx: local, cancel: cancel, data: make(chan session.Frame, e.cfg.QueueFrames), control: make(chan session.Frame, 8), space: make(chan struct{}, 1), born: time.Now(), pending: make(map[uint64]time.Time)}
 }
 func (l *link) stop() { l.once.Do(func() { l.closed.Store(true); l.cancel(); _ = l.wire.Close() }) }
 func (l *link) run() {
@@ -50,6 +51,37 @@ func (l *link) enqueue(frames []session.Frame) bool {
 		l.data <- f
 	}
 	return true
+}
+
+func (l *link) notifySpace() {
+	select {
+	case l.space <- struct{}{}:
+	default:
+	}
+}
+
+// Backpressure brief application bursts before changing carriers. Wait only on
+// this link's queue; engine and application locks must not be held by the caller.
+func (l *link) enqueueWait(ctx context.Context, frames []session.Frame, wait time.Duration) bool {
+	timer := time.NewTimer(wait)
+	defer timer.Stop()
+	for {
+		if ctx.Err() != nil || l.ctx.Err() != nil {
+			return false
+		}
+		if l.enqueue(frames) {
+			return true
+		}
+		select {
+		case <-ctx.Done():
+			return false
+		case <-l.ctx.Done():
+			return false
+		case <-timer.C:
+			return false
+		case <-l.space:
+		}
+	}
 }
 func (l *link) sendControl(f session.Frame) bool {
 	select {
@@ -113,6 +145,7 @@ func (l *link) transmit() {
 				size += len(b)
 			}
 		}
+		l.notifySpace()
 		if canBatch {
 			err = batchWire.SendBatch(batch[:count])
 		} else {

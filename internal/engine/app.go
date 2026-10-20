@@ -38,7 +38,7 @@ func openApplication(c config.Config) (*application, error) {
 	}
 	// A per-socket hint, never a global sysctl change. The OS may clamp it.
 	// Absorb short scheduler bursts independently of the bounded frame queue.
-	_ = a.conn.SetReadBuffer(1 << 20)
+	_ = a.conn.SetReadBuffer(4 << 20)
 	a.batch = ipv4.NewPacketConn(a.conn)
 	for i := range a.writeMessages {
 		a.writeMessages[i].Buffers = a.writeBuffers[i][:]

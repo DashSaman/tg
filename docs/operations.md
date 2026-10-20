@@ -69,12 +69,14 @@ costs 20ms by default. These are test starting points, not validated Iran tuning
 Static cost guides initial/failure selection. Replacing a healthy carrier also
 requires a 10ms advantage in measured delay, variation and queue pressure; cost
 alone is insufficient to send traffic back after congestion fallback.
-Queue pressure can try another healthy carrier immediately. Failure detection can
+Failure detection can
 drop UDP; lossless handover and TG-level application retransmission are not provided.
-Successful overflow fallback commits the alternate as the preferred path and starts
-the same hold-down. The previous implementation returned to the old path on the
-next packet and generated thousands of switches under load. A switch can still
-reorder in-flight UDP; handover does not guarantee zero TCP retransmissions.
+One carrier carries application data at a time. A full transmit queue waits about
+2 ms for whole-packet space; persistent overflow drops that packet rather than
+spraying it onto another healthy path. The previous overflow policy generated
+thousands of switches under load. Failure and confirmed measured improvement
+can still replace the carrier. A deliberate switch can reorder in-flight UDP;
+handover does not guarantee zero TCP retransmissions.
 
 Upgrade both endpoints together. QUIC now uses `tg-dgram-v2` with length-prefixed
 frame bundles and native path-MTU limits; it cannot negotiate the old v1 carrier.
@@ -85,7 +87,8 @@ a requirement. TG never changes the configured WireGuard MTU.
 New configurations use `queue_frames: 1024` per carrier. Existing explicit values
 are preserved. With two frames per 1400-byte application packet at 350 Mbps, this
 is roughly 16ms of burst headroom, not a latency guarantee. The application UDP
-socket requests a 1MiB receive buffer; OS limits can clamp it. Increase queues only
+socket requests a 4MiB receive buffer; OS limits can clamp it and kernel accounting
+can double the requested size. Increase queues only
 with receiver loss and latency measurements: longer queues retain more memory and
 may increase latency on slow paths. See [local performance evidence](performance.md).
 Completed packets also have a bounded 256-packet output queue. One writer drains
@@ -93,6 +96,13 @@ up to 32 already available packets into the same application UDP socket. Linux
 uses batched writes; other platforms use individual writes. Buffers are released
 only after consumption. This avoids stalling carrier receive on every UDP write;
 it cannot eliminate overload drops or replace receiver-based acceptance tests.
+
+The local 300 Mbps deployment profile uses `GOMAXPROCS=2` per TG process; an
+optional service drop-in example is in `deploy/300mbps-lab.conf.example`. This was
+measured on a VM with 12 logical CPUs. It does not restrict kernel WireGuard or
+prove the capacity of a 2-vCPU host. Tune again on real servers; larger worker
+counts were measurably worse on this local workload. The executable keeps Go's
+normal runtime default unless the operator sets the environment variable.
 
 TG never restarts remote daemons or changes kernel networking. Recovery backoff does
 not stop surviving probes. All-path failure drops new packets instead of accumulating

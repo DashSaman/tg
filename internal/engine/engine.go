@@ -227,20 +227,16 @@ func (e *Engine) readApplication(ctx context.Context) {
 		sent := false
 		if l := e.links[chosen]; l != nil {
 			sent = l.enqueue(frames)
-		}
-		if !sent {
-			for _, p := range paths {
-				if p.ID == chosen || !p.Healthy(now, e.cfg.Timeout()) {
-					continue
-				}
-				if l := e.links[p.ID]; l != nil && l.enqueue(frames) {
-					chosen = p.ID
-					e.selector.Fallback(now, chosen)
-					sent = true
-					break
-				}
+			if !sent {
+				e.mu.Unlock()
+				sent = l.enqueueWait(ctx, frames, 2*time.Millisecond)
+				e.mu.Lock()
 			}
 		}
+		// A single opaque WireGuard aggregate cannot safely be striped by
+		// individual overflow packets. Keep one active carrier; the selector
+		// handles failed paths and confirmed healthy replacements on the next
+		// packet. At persistent capacity pressure, drop a whole packet.
 		if sent {
 			if e.active != "" && e.active != chosen {
 				e.counters.switches.Add(1)

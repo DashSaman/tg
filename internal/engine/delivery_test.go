@@ -103,7 +103,7 @@ func TestCancellationUnblocksFullDeliveryQueue(t *testing.T) {
 	d.owner.Release(d.packet)
 }
 
-func TestOverflowFallbackRemainsSelectedAfterQueueDrains(t *testing.T) {
+func TestQueuePressureDoesNotSprayPacketsAcrossHealthyCarriers(t *testing.T) {
 	c := config.Defaults()
 	c.Role = "edge"
 	c.AppAddress = "127.0.0.1:0"
@@ -117,7 +117,7 @@ func TestOverflowFallbackRemainsSelectedAfterQueueDrains(t *testing.T) {
 	e := &Engine{cfg: c, app: app, ctx: ctx, links: make(map[string]*link), selector: session.Selector{Timeout: time.Second, HoldDown: time.Second, Margin: 10 * time.Millisecond}}
 	now := time.Now()
 	for _, p := range c.Carriers {
-		e.links[p.Name] = &link{carrier: p, data: make(chan session.Frame, 4), lastPong: now, rtt: time.Millisecond}
+		e.links[p.Name] = &link{ctx: ctx, carrier: p, data: make(chan session.Frame, 4), lastPong: now, rtt: time.Millisecond}
 	}
 	e.selector.Choose(now, e.paths(now)) // Select the cheap UDP path before it fills.
 	for i := 0; i < 4; i++ {
@@ -132,20 +132,19 @@ func TestOverflowFallbackRemainsSelectedAfterQueueDrains(t *testing.T) {
 	go func() { e.readApplication(ctx); close(done) }()
 	defer func() { cancel(); app.close(); <-done }()
 	sender.Write([]byte("first"))
-	until(t, func() bool { return e.counters.queuedBytes.Load() == 5 })
-	if e.Snapshot().ActiveCarrier != "web" {
-		t.Fatal("overflow did not use alternate path")
+	until(t, func() bool { return e.counters.dropped.Load() == 1 || e.counters.queuedBytes.Load() > 0 })
+	if len(e.links["web"].data) != 0 || e.counters.queuedBytes.Load() != 0 {
+		t.Fatal("queue pressure sprayed a packet onto a different healthy carrier")
 	}
-	// The original queue becomes writable; it must not steal the next packet
-	// from an otherwise healthy fallback path, undoing hysteresis for every packet.
+	// A bounded burst can drop at capacity; it must not alternate adjacent
+	// encrypted packets between paths with different delay and ordering.
 	for len(e.links["udp"].data) > 0 {
 		<-e.links["udp"].data
 	}
-	<-e.links["web"].data
 	sender.Write([]byte("second"))
-	until(t, func() bool { return e.counters.queuedBytes.Load() == 11 })
-	if e.Snapshot().ActiveCarrier != "web" {
-		t.Fatal("fallback bypassed hold-down as soon as original queue drained")
+	until(t, func() bool { return e.counters.queuedBytes.Load() == 6 })
+	if e.Snapshot().ActiveCarrier != "udp" {
+		t.Fatal("original healthy path was not retained after burst")
 	}
 }
 

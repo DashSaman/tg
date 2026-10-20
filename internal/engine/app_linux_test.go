@@ -22,8 +22,8 @@ func TestApplicationBurstFitsRequestedReceiveBuffer(t *testing.T) {
 		t.Skip("kernel receive limit unavailable")
 	}
 	limit, _ := strconv.Atoi(strings.TrimSpace(string(raw)))
-	if limit < 1<<20 {
-		t.Skip("host caps receive buffers below the requested 1MiB")
+	if limit < 4<<20 {
+		t.Skip("host caps receive buffers below the requested 4MiB")
 	}
 	c := config.Defaults()
 	c.Role = "edge"
@@ -39,21 +39,21 @@ func TestApplicationBurstFitsRequestedReceiveBuffer(t *testing.T) {
 	}
 	defer sender.Close()
 	packet := make([]byte, 1400)
-	for i := 0; i < 512; i++ {
+	for i := 0; i < 2048; i++ {
 		binary.BigEndian.PutUint32(packet, uint32(i))
 		if _, err := sender.Write(packet); err != nil {
 			t.Fatal(err)
 		}
 	}
 	_ = app.conn.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
-	var seen [512]bool
-	for i := 0; i < 512; i++ {
+	var seen [2048]bool
+	for i := 0; i < 2048; i++ {
 		b, err := app.read(c.MaxPacketBytes)
 		if err != nil {
 			t.Fatalf("bounded ingress burst lost after %d packets: %v", i, err)
 		}
 		id := binary.BigEndian.Uint32(b)
-		if len(b) != 1400 || id >= 512 || seen[id] {
+		if len(b) != 1400 || id >= 2048 || seen[id] {
 			t.Fatal("burst integrity failed")
 		}
 		seen[id] = true

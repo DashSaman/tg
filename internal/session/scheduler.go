@@ -18,20 +18,6 @@ type Selector struct {
 	switched                  time.Time
 }
 
-// Fallback commits successful whole-packet admission on a healthy alternate.
-// Subsequent packets obey the same hold-down as a measured path switch rather
-// than oscillating back as soon as the old queue has one free slot.
-func (s *Selector) Fallback(now time.Time, id string) {
-	if s.active == id {
-		return
-	}
-	s.active = id
-	s.candidate = ""
-	s.wins = 0
-	s.candidatePong = time.Time{}
-	s.switched = now
-}
-
 func (p Path) Healthy(now time.Time, timeout time.Duration) bool {
 	return p.Ready && !p.LastPong.IsZero() && now.Sub(p.LastPong) <= timeout && p.RTT >= 0
 }

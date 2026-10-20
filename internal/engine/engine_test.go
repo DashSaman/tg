@@ -215,6 +215,42 @@ func TestQueueAdmissionNeverEnqueuesPartialPacket(t *testing.T) {
 	}
 }
 
+func TestQueueWaitAbsorbsBurstWithoutPartialAdmission(t *testing.T) {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	l := &link{ctx: ctx, data: make(chan session.Frame, 4), space: make(chan struct{}, 1)}
+	for i := 0; i < 4; i++ {
+		l.data <- session.Frame{ID: 99}
+	}
+	frames, _ := session.Fragment(make([]byte, 2048), 1)
+	done := make(chan bool, 1)
+	go func() { done <- l.enqueueWait(ctx, frames, time.Second) }()
+	<-l.data
+	l.notifySpace()
+	select {
+	case <-done:
+		t.Fatal("partial capacity admitted a fragmented packet")
+	case <-time.After(5 * time.Millisecond):
+	}
+	<-l.data
+	l.notifySpace()
+	select {
+	case ok := <-done:
+		if !ok {
+			t.Fatal("bounded burst was treated as persistent congestion")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("space notification lost")
+	}
+	if len(l.data) != 4 {
+		t.Fatal("whole packet did not occupy exactly two slots")
+	}
+	cancel()
+	if l.enqueueWait(ctx, frames, time.Second) {
+		t.Fatal("cancelled wait admitted a packet")
+	}
+}
+
 func TestPeerRestartResetsDedupWithoutReplacingExitSocket(t *testing.T) {
 	dir := filepath.Join(t.TempDir(), "keys")
 	if err := pki.Generate(dir, "localhost"); err != nil {

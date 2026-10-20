@@ -45,9 +45,11 @@ Per-carrier control queue is separate from bounded data queue. Pending/unprobed
 links cannot carry application data. Probes measure authenticated round-trip on
 the carrier, not full Internet exit reachability; metrics name that scope explicitly.
 Failure after probe timeout permits immediate failover; healthy-path replacement
-requires repeated advantage and hold-down. Full queues try another healthy link
-without partial packet enqueue; successful fallback commits the selected path and
-restarts hold-down, rather than switching back for the very next packet.
+requires repeated advantage and hold-down. One carrier carries application data
+at a time. Full queues wait about 2 ms for whole-packet space, without holding the
+engine lock; persistent overflow drops a whole packet. Overflow does not spray
+adjacent encrypted packets across different healthy carriers. Failure and confirmed
+measured improvement can still replace the selected carrier.
 Completed UDP packets enter one 256-packet output queue and one writer drains up
 to 32 immediately available packets. Linux uses `sendmmsg`; other systems retain
 individual UDP writes. No batching delay is added. Completed buffers retain their

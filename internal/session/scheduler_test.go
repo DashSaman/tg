@@ -59,7 +59,11 @@ func TestFallbackIsNotUndoneByStaticCostPreference(t *testing.T) {
 	if s.Choose(now, paths) != "quic" {
 		t.Fatal("initial cost preference lost")
 	}
-	s.Fallback(now, "https")
+	paths[0].Ready = false
+	if s.Choose(now, paths) != "https" {
+		t.Fatal("failed path retained")
+	}
+	paths[0].Ready = true
 	for i := 1; i <= 3; i++ {
 		at := now.Add(time.Duration(i) * time.Second)
 		for j := range paths {
