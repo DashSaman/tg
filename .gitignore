@@ -1,0 +1,8 @@
+/bin/
+/dist/
+/pki/
+/receipts/
+*.key
+*.exe
+__pycache__/
+.superpowers/

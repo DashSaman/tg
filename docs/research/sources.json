@@ -1,0 +1,922 @@
+{
+  "date": "2026-10-20",
+  "scope": "Selected primary documentation, protocol specifications and targeted static source inspection; not exhaustive source audit or runtime validation.",
+  "requirements": {
+    "initial_aggregate_mbps": 300,
+    "future_aggregate_gbps": 10,
+    "route": "Iran to overseas",
+    "priority": "resilience to variable network conditions and censorship"
+  },
+  "runtime_tests": {
+    "performed": false,
+    "reason": "Owner will provide test servers later"
+  },
+  "source_snapshots": {
+    "DashSaman/TunnelPannel": "e73aa88352a1c783aebfcf8f3d615ad33293d409",
+    "ParsaKSH/spoof-tunnel": "ba29f0c8e22da5a905a74a8137e01a22f0443e60"
+  },
+  "comparisons": [
+    {
+      "id": 1,
+      "name": "WireGuard",
+      "family": "VPN و IP",
+      "documented_mechanism": "تانل IP رمز‌شده روی UDP؛ پیاده‌سازی کرنل لینوکس.",
+      "engineering_assessment": "برای ظرفیت پایه مناسب است؛ امضای پروتکل، مسدودشدن UDP و IP مقصد همچنان مطرح‌اند.",
+      "proposed_role": "خط مبنا و لایه امن داخلی",
+      "source": "https://www.wireguard.com/",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 2,
+      "name": "AmneziaWG",
+      "family": "VPN و IP",
+      "documented_mechanism": "مشتق WireGuard با تغییر هدر، padding و پارامترهای ترافیک؛ مستندات فعلی قابلیت‌های AWG 3+ را توضیح می‌دهند.",
+      "engineering_assessment": "نامزد جدی مسیر UDP؛ پارامترهای خصوصی به‌تنهایی گواه غیرقابل‌شناسایی‌بودن نیستند.",
+      "proposed_role": "نامزد ظرفیت و پنهان‌سازی",
+      "source": "https://github.com/amnezia-vpn/amneziawg-go",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 3,
+      "name": "OpenVPN",
+      "family": "VPN و IP",
+      "documented_mechanism": "VPN مبتنی بر TLS با حامل TCP یا UDP و TUN/TAP.",
+      "engineering_assessment": "گزینه مرجع سازگاری؛ سربار و رفتار زیر بار باید با پیکربندی و امکان offload همان میزبان مقایسه شود.",
+      "proposed_role": "خط مبنا",
+      "source": "https://openvpn.net/community-docs/community-articles/openvpn-2-6-manual.html",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 4,
+      "name": "strongSwan / IKEv2-IPsec",
+      "family": "VPN و IP",
+      "documented_mechanism": "IPsec و قابلیت MOBIKE برای تغییر آدرس یا مسیر اتصال.",
+      "engineering_assessment": "بلوغ خوب؛ MOBIKE از قبل مسئله جابه‌جایی شبکه را پوشش می‌دهد، اما مشکل شناسایی یا بسته‌شدن UDP/4500 را حل نمی‌کند.",
+      "proposed_role": "خط مبنا و مرجع مهاجرت",
+      "source": "https://docs.strongswan.org/docs/latest/features/mobike.html",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 5,
+      "name": "GRE / IPIP / SIT / VXLAN",
+      "family": "VPN و IP",
+      "documented_mechanism": "خانواده‌های کپسوله‌سازی IP و شبکه مجازی؛ در TunnelPannel نیز آزموده شده‌اند.",
+      "engineering_assessment": "سرعت خام، رمزنگاری و مقاومت فیلترینگ سه معیار جدا هستند؛ این کپسوله‌سازی‌ها به‌خودی‌خود لایه محرمانگی نیستند.",
+      "proposed_role": "خط مبنای سربار شبکه",
+      "source": "https://github.com/DashSaman/TunnelPannel/blob/main/docs/releases/v0.9.0-rc3/REAL_BENCHMARK.md",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 6,
+      "name": "Xray / VLESS + REALITY",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "احراز هویت و رفتار TLS خاص REALITY با پشتیبانی uTLS و مقصد handshake.",
+      "engineering_assessment": "نامزد مسیر TCP؛ REALITY را نباید با جعل IP یا تضمین عبور از هر محدودیت اشتباه گرفت.",
+      "proposed_role": "نامزد مسیر مقاوم‌تر به شناسایی",
+      "source": "https://github.com/XTLS/REALITY/blob/main/README.en.md",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 7,
+      "name": "XHTTP",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "حالت‌های packet-up، stream-up و stream-one؛ امکان جداسازی رفت و برگشت و استفاده از reverse proxy/CDN سازگار.",
+      "engineering_assessment": "جداسازی دو جهت از قبل موجود است. محدودیت buffering، timeout، سازگاری و ظرفیت CDN باید آزمایش شود.",
+      "proposed_role": "نامزد حامل وب و مسیر نامتقارن",
+      "source": "https://github.com/XTLS/Xray-core/discussions/4113",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 8,
+      "name": "NaïveProxy",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "استفاده از پشته شبکه Chromium، HTTP/2 یا HTTP/3 CONNECT، padding و frontend واقعی.",
+      "engineering_assessment": "مرجع مهم شباهت رفتاری مرورگر؛ به‌روزرسانی Chromium و محدودیت‌های stream/connection اهمیت دارد.",
+      "proposed_role": "نامزد حامل HTTPS و مرجع fingerprint",
+      "source": "https://github.com/klzgrad/naiveproxy",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 9,
+      "name": "Hysteria 2",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "پروکسی TCP/UDP روی QUIC، HTTP/3 masquerading و حالت اختیاری Salamander.",
+      "engineering_assessment": "نامزد مسیر دارای loss در صورت دسترسی UDP؛ نرخ اجباری بیش از ظرفیت می‌تواند کیفیت را بدتر کند. Salamander ظاهر HTTP/3 عادی را تغییر می‌دهد.",
+      "proposed_role": "نامزد مسیر UDP/QUIC",
+      "source": "https://github.com/HyNetworks/hysteria/blob/master/PROTOCOL.md",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 10,
+      "name": "TUIC v5",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "stream برای TCP و datagram یا stream برای UDP؛ شناسه نشست UDP و heartbeat.",
+      "engineering_assessment": "مرجع تفکیک stream و datagram؛ وابستگی عملی رایج آن به QUIC/UDP باید در طراحی مسیر پشتیبان لحاظ شود.",
+      "proposed_role": "نامزد مقایسه QUIC",
+      "source": "https://github.com/tuic-protocol/tuic/blob/master/SPEC.md",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 11,
+      "name": "Shadowsocks 2022",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "AEAD، حفاظت replay و نشست UDP مستقل از آدرس مبدأ با به‌روزرسانی آدرس پس از احراز اصالت.",
+      "engineering_assessment": "مرجع مفید امنیت و مهاجرت UDP؛ رمز‌شدن داده با نامرئی‌شدن الگوی ترافیک برابر نیست.",
+      "proposed_role": "مرجع نشست امن و خط مبنا",
+      "source": "https://shadowsocks.org/doc/sip022.html",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 12,
+      "name": "Trojan",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "پروکسی در TLS همراه با رفتار fallback برای ترافیک نامعتبر.",
+      "engineering_assessment": "نامزد HTTPS ساده برای مقایسه؛ دامنه، گواهی و الگوی جریان باید با واقعیت مسیر سنجیده شوند.",
+      "proposed_role": "خط مبنای TLS",
+      "source": "https://github.com/trojan-gfw/trojan",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 13,
+      "name": "ShadowTLS v3",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "رله handshake واقعی TLS و احراز هویت پنهان؛ خود پروژه درخواست پراکسی و رمزنگاری محتوای داخلی را بر عهده نمی‌گیرد.",
+      "engineering_assessment": "به لایه داخلی امن نیاز دارد. انتخاب v3/strict و رفتار در برابر probing و hijacking مهم‌اند.",
+      "proposed_role": "نامزد پوشش حامل",
+      "source": "https://github.com/ihciah/shadow-tls/blob/master/docs/protocol-v3-en.md",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 14,
+      "name": "Cloak",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "pluggable transport با چند اتصال TCP، استتار وب و اتصال به پراکسی داخلی.",
+      "engineering_assessment": "استفاده از چند TCP برای کاهش HOL سابقه دارد؛ تنظیم plain فقط همراه احراز هویت و رمزنگاری داخلی قابل اتکاست.",
+      "proposed_role": "مرجع استتار و توزیع اتصال",
+      "source": "https://github.com/cbeuw/Cloak",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 15,
+      "name": "Mieru",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "پروکسی TCP/UDP بدون TLS، XChaCha20-Poly1305، padding، replay detection و traffic-pattern قابل تنظیم.",
+      "engineering_assessment": "نامزد مقایسه برای استتار غیر TLS؛ fragmentation و low-entropy هزینه تأخیر یا حجم دارند.",
+      "proposed_role": "نامزد پژوهشی",
+      "source": "https://github.com/enfein/mieru/blob/main/docs/traffic-pattern.md",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 16,
+      "name": "AnyTLS",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "نشست‌های چندجریانی و padding قابل به‌روزرسانی روی TLS؛ UDP از مسیر UDP-over-TCP.",
+      "engineering_assessment": "مرجع ساخت padding و pool؛ نمونه reference به‌تنهایی تنظیم امن تولیدی ندارد و تضمین کیفیت UDP نیست.",
+      "proposed_role": "مرجع طراحی؛ اجرای سازگار امن",
+      "source": "https://github.com/anytls/anytls-go",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 17,
+      "name": "TrustTunnel",
+      "family": "حامل‌های استتارشده",
+      "documented_mechanism": "حامل‌های HTTP/1.1، HTTP/2 و QUIC و انتقال TCP/UDP/ICMP.",
+      "engineering_assessment": "نامزد مقایسه چندحاملی؛ ادعاهای بازاریابی درباره غیرقابل‌تشخیص‌بودن را شاهد مستقل فرض نکرده‌ایم.",
+      "proposed_role": "نامزد چندحاملی",
+      "source": "https://github.com/TrustTunnel/TrustTunnel",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 18,
+      "name": "Backhaul",
+      "family": "تانل معکوس و ترکیب‌پذیر",
+      "documented_mechanism": "reverse tunnel با TCP، WS، WSS، smux و انتقال UDP روی TCP.",
+      "engineering_assessment": "برای NAT و انتقال پورت کاربردی؛ UDP روی TCP در loss می‌تواند تأخیر تجمعی ایجاد کند.",
+      "proposed_role": "خط مبنای معکوس",
+      "source": "https://github.com/Musixal/Backhaul",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 19,
+      "name": "WaterWall",
+      "family": "تانل معکوس و ترکیب‌پذیر",
+      "documented_mechanism": "زنجیره nodeهای stream/packet، TUN، پروتکل‌ها، worker و buffer pool.",
+      "engineering_assessment": "مرجع جدی ترکیب حامل‌ها؛ چیدن چند node به‌تنهایی نوآوری یا پایداری اثبات‌شده نیست.",
+      "proposed_role": "مرجع معماری و خط مبنا",
+      "source": "https://radkesvat.github.io/WaterWall-Docs/docs/noderefs/all-nodes",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 20,
+      "name": "frp",
+      "family": "تانل معکوس و ترکیب‌پذیر",
+      "documented_mechanism": "reverse proxy با TCP/UDP، KCP/QUIC، pooling، multiplex و health check.",
+      "engineering_assessment": "pool و reconnect از قبل موجودند؛ انتخاب multiplex باید بر اساس اثر loss روی کاربران انجام شود.",
+      "proposed_role": "خط مبنای کارکرد",
+      "source": "https://github.com/fatedier/frp",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 21,
+      "name": "rathole",
+      "family": "تانل معکوس و ترکیب‌پذیر",
+      "documented_mechanism": "پروکسی معکوس Rust با TLS یا Noise اختیاری و token سرویس.",
+      "engineering_assessment": "مقایسه CPU/حافظه مفید است؛ بنچمارک loopback آن مدرک افزایش سرعت WAN نیست.",
+      "proposed_role": "خط مبنای کارایی",
+      "source": "https://github.com/rathole-org/rathole",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 22,
+      "name": "GOST",
+      "family": "تانل معکوس و ترکیب‌پذیر",
+      "documented_mechanism": "زنجیره forward، selector، TUN/TAP و API/metrics.",
+      "engineering_assessment": "برای نمونه‌سازی ترکیب مسیرها مناسب؛ تعدد قابلیت‌ها جای آزمون مسیر مشخص را نمی‌گیرد.",
+      "proposed_role": "مرجع کنترل و ترکیب",
+      "source": "https://github.com/go-gost/gost",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 23,
+      "name": "Chisel",
+      "family": "تانل معکوس و ترکیب‌پذیر",
+      "documented_mechanism": "TCP/UDP روی HTTP با SSH داخلی، backoff و reverse forwarding.",
+      "engineering_assessment": "نامزد سازگاری با مسیر وب؛ افت یک TCP مشترک ممکن است چند جریان را معطل کند.",
+      "proposed_role": "پشتیبان و خط مبنا",
+      "source": "https://github.com/jpillora/chisel",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 24,
+      "name": "wstunnel",
+      "family": "تانل معکوس و ترکیب‌پذیر",
+      "documented_mechanism": "WS، HTTP/2 و WebTransport با forwarding و mTLS اختیاری.",
+      "engineering_assessment": "راهنما صریحاً buffering بعضی reverse proxyها و نیاز UDP برای WebTransport را توضیح می‌دهد.",
+      "proposed_role": "نامزد fallback وب",
+      "source": "https://github.com/erebe/wstunnel",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 25,
+      "name": "Paqet",
+      "family": "Raw و کنترل loss",
+      "documented_mechanism": "raw TCP با pcap، KCP و smux؛ دورزدن پشته TCP سیستم‌عامل.",
+      "engineering_assessment": "Fake/raw TCP است و الزاماً جعل IP مبدأ نیست. conntrack/RST و منابع پردازش باید دقیق آزموده شوند.",
+      "proposed_role": "نامزد raw پس از آزمون",
+      "source": "https://github.com/hanselime/paqet",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 26,
+      "name": "udp2raw",
+      "family": "Raw و کنترل loss",
+      "documented_mechanism": "انتقال UDP با هدر FakeTCP/UDP/ICMP؛ heartbeat و بازیابی نگاشت‌ها.",
+      "engineering_assessment": "FakeTCP فاقد retransmission معمول TCP است؛ با پروکسی L7 فرق دارد. لایه امن مدرن داخلی را حفظ می‌کنیم.",
+      "proposed_role": "نامزد سازگاری L3/L4",
+      "source": "https://github.com/wangyu-/udp2raw",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 27,
+      "name": "Phantun",
+      "family": "Raw و کنترل loss",
+      "documented_mechanism": "تبدیل UDP به TCP ظاهری با حفظ تحویل نامرتب و بدون retransmission/flow control TCP.",
+      "engineering_assessment": "نمی‌تواند از پراکسی L7 عبور کند؛ خود ابزار encryption/anti-replay ندارد و به لایه داخلی امن نیاز دارد.",
+      "proposed_role": "نامزد raw کم‌سربار",
+      "source": "https://github.com/dndx/phantun",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 28,
+      "name": "KCP / kcptun",
+      "family": "Raw و کنترل loss",
+      "documented_mechanism": "KCP الگوریتم reliable transport با timer و retransmission قابل تنظیم است؛ kcptun کاربرد تاریخی تانل‌سازی آن است.",
+      "engineering_assessment": "هزینه پهنای باند و ازدحام باید سنجیده شود. آدرس upstream قدیمی xtaci/kcptun در این مرور 404 داد؛ توصیه نسخه نگهداری‌شده ارائه نشده است.",
+      "proposed_role": "مرجع الگوریتم؛ وضعیت kcptun نامشخص",
+      "source": "https://github.com/skywind3000/kcp/blob/master/README.en.md",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 29,
+      "name": "UDPspeeder",
+      "family": "Raw و کنترل loss",
+      "documented_mechanism": "FEC مبتنی بر Reed–Solomon برای جبران loss، با مصرف پهنای باند اضافه.",
+      "engineering_assessment": "برای loss تصادفی می‌تواند مفید باشد؛ هنگام ازدحام، افزونگی بیشتر ممکن است مشکل را تشدید کند.",
+      "proposed_role": "مرجع FEC انتخابی",
+      "source": "https://github.com/wangyu-/UDPspeeder",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 30,
+      "name": "Spoof Tunnel",
+      "family": "جعل آدرس و مسیر نامتقارن",
+      "documented_mechanism": "جعل IP مبدأ در هر دو جهت با مقصد واقعی ازپیش‌معلوم؛ حامل رفت و برگشت مستقل؛ نسخه فعلی UDP pipe.",
+      "engineering_assessment": "گزینه مشروط واقعی، نیازمند امکان spoof در هر دو طرف. رمزنگاری فعلی باید از لایه داخلی مانند WireGuard تأمین شود.",
+      "proposed_role": "نامزد آزمایشی مشروط",
+      "source": "https://github.com/ParsaKSH/spoof-tunnel",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 31,
+      "name": "CensorSpoofer",
+      "family": "جعل آدرس و مسیر نامتقارن",
+      "documented_mechanism": "پژوهش ۲۰۱۲ با upstream کم‌ظرفیت غیرمستقیم و downstream جعل‌شده برای مرور وب.",
+      "engineering_assessment": "سابقه علمی معتبر برای ایده نامتقارن؛ نمونه پژوهشی آن محصول آماده ۳۰۰ مگابیتی نیست.",
+      "proposed_role": "مرجع پژوهشی",
+      "source": "https://arxiv.org/abs/1203.1673",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 32,
+      "name": "dnstt",
+      "family": "دسترسی اضطراری",
+      "documented_mechanism": "DNS tunnel با recursive resolver و پشتیبانی DoH/DoT؛ لایه‌های KCP، smux و Noise.",
+      "engineering_assessment": "سازگاری resolver و سقف پاسخ DNS مهم است؛ برای دسترسی اضطراری ارزیابی می‌شود، نه پذیرش پیش‌فرض ۳۰۰ مگابیت.",
+      "proposed_role": "پشتیبان دسترسی کم‌ظرفیت",
+      "source": "https://www.bamsoftware.com/software/dnstt/",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 33,
+      "name": "Slipstream / slipstream-rust",
+      "family": "دسترسی اضطراری",
+      "documented_mechanism": "حمل QUIC داخل query/responseهای DNS با multipath resolver؛ بازنویسی Rust نیز موجود است.",
+      "engineering_assessment": "بهبود نسبت به DNS tunnel قدیمی مدرک ظرفیت WAN ایران نیست؛ زیر بار و محدودیت resolver باید سنجیده شود.",
+      "proposed_role": "پشتیبان اضطراری و مرجع",
+      "source": "https://github.com/Mygod/slipstream-rust",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 34,
+      "name": "Tor: obfs4 / meek / WebTunnel",
+      "family": "دسترسی اضطراری",
+      "documented_mechanism": "سه خانواده پوشش تصادفی، واسط وب و HTTPS برای دسترسی به bridge.",
+      "engineering_assessment": "طراحی توزیع bridge و مقاومت probing مفید است؛ مسیر عمومی Tor را مبنای ظرفیت اختصاصی کاربران قرار نمی‌دهیم.",
+      "proposed_role": "مرجع مقاومت و bootstrap",
+      "source": "https://support.torproject.org/tor-browser/circumvention/unblocking-tor/",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 35,
+      "name": "Snowflake",
+      "family": "دسترسی اضطراری",
+      "documented_mechanism": "واسط‌های داوطلب WebRTC برای اتصال به Tor.",
+      "engineering_assessment": "مقصدهای متغیر مزیت دارند؛ کنترل ظرفیت و پایداری واسط‌های عمومی در اختیار ما نیست.",
+      "proposed_role": "مرجع دسترسی و تنوع مقصد",
+      "source": "https://snowflake.torproject.org/",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 36,
+      "name": "Psiphon",
+      "family": "کنترل چندمسیره",
+      "documented_mechanism": "چند روش استتار، رقابت تلاش‌های اتصال، یادگیری روش موفق و توزیع پارامترهای tactics.",
+      "engineering_assessment": "انتخاب خودکار روش موفق ایده جدیدی نیست؛ هزینه و کیفیت آن باید خط مبنای کنترل‌گر ما باشد.",
+      "proposed_role": "مرجع مهم سیاست تطبیقی",
+      "source": "https://github.com/Psiphon-Labs/psiphon-tunnel-core",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 37,
+      "name": "Outline",
+      "family": "کنترل چندمسیره",
+      "documented_mechanism": "اکوسیستم نصب، مدیریت و کلاینت پروکسی با سازگاری Shadowsocks.",
+      "engineering_assessment": "تجربه نصب و توزیع دسترسی مفید است؛ شخصی‌سازی UI به‌تنهایی تانل جدید نمی‌سازد.",
+      "proposed_role": "مرجع تجربه کاربری",
+      "source": "https://github.com/Jigsaw-Code/outline-apps",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 38,
+      "name": "sing-box URLTest",
+      "family": "کنترل چندمسیره",
+      "documented_mechanism": "انتخاب outbound با تست URL، interval/tolerance و گزینه قطع اتصال‌های موجود هنگام تغییر.",
+      "engineering_assessment": "پینگ یا URLTest تنها کافی نیست؛ حفظ نشست و کیفیت زیر بار باید جدا اندازه‌گیری شود.",
+      "proposed_role": "خط مبنای انتخاب مسیر",
+      "source": "https://sing-box.sagernet.org/configuration/outbound/urltest/",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 39,
+      "name": "Glorytun",
+      "family": "کنترل چندمسیره",
+      "documented_mechanism": "تانل UDP چندمسیره با failover، shaping و تشخیص MTU.",
+      "engineering_assessment": "bonding، failover و MTU پویا سابقه دارند. مقاومت در برابر فیلترینگ پروتکل باید جدا بررسی شود.",
+      "proposed_role": "خط مبنای چندمسیره",
+      "source": "https://github.com/angt/glorytun",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 40,
+      "name": "MPTCP / OpenMPTCProuter",
+      "family": "کنترل چندمسیره",
+      "documented_mechanism": "تجمیع لینک‌ها با زیرجریان‌های TCP و fallback؛ OpenMPTCProuter روش‌های VPN دیگری هم یکپارچه می‌کند.",
+      "engineering_assessment": "چندمسیره‌بودن به مسیرهای واقعاً متفاوت وابسته است؛ MPTCP به‌تنهایی رمزنگاری یا پوشش DPI نیست.",
+      "proposed_role": "خط مبنای bonding",
+      "source": "https://www.mptcp.dev/",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 41,
+      "name": "Conjure / Refraction Networking",
+      "family": "زیرساخت و پژوهش",
+      "documented_mechanism": "قرارگیری station در شبکه ISP و واسط‌های refraction؛ مدل متفاوت از VPS معمولی.",
+      "engineering_assessment": "الهام برای پنهان‌سازی مقصد؛ ساخت یک station روی دو VPS به‌تنهایی زیرساخت لازم را فراهم نمی‌کند.",
+      "proposed_role": "مرجع؛ خارج از نسخه اول",
+      "source": "https://github.com/refraction-networking/conjure",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 42,
+      "name": "Zapret / Zapret2",
+      "family": "زیرساخت و پژوهش",
+      "documented_mechanism": "دست‌کاری و desynchronization برای مقابله با DPI؛ مخزن نسخه نخست EOL و جانشین را معرفی می‌کند.",
+      "engineering_assessment": "VPN یا رمزنگاری نیست. نتیجه به نوع DPI بستگی دارد و نباید با تغییر IP خروجی اشتباه شود.",
+      "proposed_role": "پژوهش اختیاری روی مسیر مشخص",
+      "source": "https://github.com/bol-van/zapret",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 43,
+      "name": "Geneva",
+      "family": "زیرساخت و پژوهش",
+      "documented_mechanism": "پژوهش تولید و ارزیابی راهبردهای تغییر بسته برای عبور از سانسور.",
+      "engineering_assessment": "تطبیق راهبرد ایده دارای سابقه است؛ تغییر خودکار و بی‌قید بسته‌ها مبنای نسخه تولیدی ما نخواهد بود.",
+      "proposed_role": "مرجع پژوهش تطبیقی",
+      "source": "https://geneva.cs.umd.edu/",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 44,
+      "name": "MASQUE / CONNECT-UDP",
+      "family": "زیرساخت و پژوهش",
+      "documented_mechanism": "استاندارد انتقال UDP از HTTP با HTTP Datagram و Capsule.",
+      "engineering_assessment": "مرجع استاندارد برای حامل datagram روی وب؛ استفاده از استاندارد به‌تنهایی عبور از فیلتر یا ظرفیت را تضمین نمی‌کند.",
+      "proposed_role": "گزینه مقایسه معماری",
+      "source": "https://datatracker.ietf.org/doc/html/rfc9298",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 45,
+      "name": "TunnelPannel / TunnelGuard",
+      "family": "کنترل چندمسیره",
+      "documented_mechanism": "ثبت و آزمایش موتورهای موجود؛ FSMهای failover با hysteresis، cooldown و کنترل flap.",
+      "engineering_assessment": "پایه مقایسه و ایده آزمون؛ افزودن همین قابلیت‌ها با اسم جدید ارزش تازه محسوب نمی‌شود.",
+      "proposed_role": "مرجع اولیه و آزمون",
+      "source": "https://github.com/DashSaman/TunnelPannel",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 46,
+      "name": "Hedioum در TunnelPannel",
+      "family": "تانل معکوس و ترکیب‌پذیر",
+      "documented_mechanism": "استخر TLS و حالت‌های SOCKS/TUN؛ حالت SOCKS تنها، مسیر VIP کرنل محسوب نمی‌شود.",
+      "engineering_assessment": "نمونه نزدیک به طرح TLS اولیه ماست؛ تفاوت proxy health با سلامت مسیر IP و رفتار اتصال‌های کوتاه باید روشن بماند.",
+      "proposed_role": "مرجع pool و مقایسه",
+      "source": "https://github.com/DashSaman/TunnelPannel/blob/e73aa88352a1c783aebfcf8f3d615ad33293d409/tunnelguard/tfd/engines/hedioum.py",
+      "validation": "documentation_review_only_no_path_benchmark"
+    },
+    {
+      "id": 47,
+      "name": "HajSaman در TunnelPannel",
+      "family": "VPN و IP",
+      "documented_mechanism": "پروفایل‌های SIT، WireGuard روی SIT و زنجیره کامل؛ probe داخلی WG و تشخیص جداگانه underlay.",
+      "engineering_assessment": "زنده‌بودن زیرلایه در کد با موفقیت خود تانل یکی نشده است؛ برای طراحی تشخیص چندلایه مرجع مفیدی است.",
+      "proposed_role": "مرجع تشخیص و ترکیب IP",
+      "source": "https://github.com/DashSaman/TunnelPannel/blob/e73aa88352a1c783aebfcf8f3d615ad33293d409/tunnelguard/tfd/engines/hajsaman.py",
+      "validation": "documentation_review_only_no_path_benchmark"
+    }
+  ],
+  "downloaded_sources": [
+    {
+      "id": "wireguard",
+      "url": "https://www.wireguard.com/",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://www.wireguard.com/",
+      "bytes": 22066,
+      "sha256": "3ba735a9ab49db806ea52c576d2effb7b03a7f443a69073dae73d35d6460cfa2"
+    },
+    {
+      "id": "amneziawg",
+      "url": "https://raw.githubusercontent.com/amnezia-vpn/amneziawg-go/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/amnezia-vpn/amneziawg-go/master/README.md",
+      "bytes": 7236,
+      "sha256": "bf97ddfb6299f9c6f727bbce48f316a997a149570c1d7655dbec4a64c479eda8"
+    },
+    {
+      "id": "openvpn",
+      "url": "https://raw.githubusercontent.com/OpenVPN/openvpn/master/README",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/OpenVPN/openvpn/master/README",
+      "bytes": 2202,
+      "sha256": "9e77f4059d99efade4c1aae0201c5af7727e844a98cf2d210724955ac42a99a3"
+    },
+    {
+      "id": "strongswan",
+      "url": "https://raw.githubusercontent.com/strongswan/strongswan/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/strongswan/strongswan/master/README.md",
+      "bytes": 21598,
+      "sha256": "db17c5534b5ec262982e9f0e8a0c4f91d1125b8199708c0a377f15c3e5ecc646"
+    },
+    {
+      "id": "reality",
+      "url": "https://raw.githubusercontent.com/XTLS/REALITY/main/README.en.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/XTLS/REALITY/main/README.en.md",
+      "bytes": 8266,
+      "sha256": "5658a983b4335f8af1e0e24edba51fc1f50f57b0e6826660f14b65b5c5800c13"
+    },
+    {
+      "id": "hysteria_protocol",
+      "url": "https://raw.githubusercontent.com/HyNetworks/hysteria/master/PROTOCOL.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/HyNetworks/hysteria/master/PROTOCOL.md",
+      "bytes": 8028,
+      "sha256": "b984d8e430c9afd6eb39010ba29c923a71907c2a58f56e55c68fc925712829be"
+    },
+    {
+      "id": "hysteria_performance",
+      "url": "https://v2.hysteria.network/docs/advanced/Performance/",
+      "retrieved": "2026-10-20",
+      "status": "error",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "tuic",
+      "url": "https://raw.githubusercontent.com/tuic-protocol/tuic/master/SPEC.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/tuic-protocol/tuic/master/SPEC.md",
+      "bytes": 7194,
+      "sha256": "0e7042cb46634bda61351a7366f7478642183aa9af2f394b6a434ea1321363fa"
+    },
+    {
+      "id": "naiveproxy",
+      "url": "https://raw.githubusercontent.com/klzgrad/naiveproxy/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/klzgrad/naiveproxy/master/README.md",
+      "bytes": 9197,
+      "sha256": "855044387ea59832044d8ec1683020f45e2656907b7f92ad3d92dcd7dbcc3afd"
+    },
+    {
+      "id": "shadowtls",
+      "url": "https://raw.githubusercontent.com/ihciah/shadow-tls/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/ihciah/shadow-tls/master/README.md",
+      "bytes": 4016,
+      "sha256": "0fba3b3a770b67a193ec76f7e22f0fd7166450ecdd3f76177c7981bf3267dcf4"
+    },
+    {
+      "id": "cloak",
+      "url": "https://raw.githubusercontent.com/cbeuw/Cloak/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/cbeuw/Cloak/master/README.md",
+      "bytes": 12881,
+      "sha256": "b584fbe609a9a7eac408cd006b0f44c1b278cecf3cc8a2162f61aab69f5f6b48"
+    },
+    {
+      "id": "shadowsocks2022",
+      "url": "https://shadowsocks.org/doc/sip022.html",
+      "retrieved": "2026-10-20",
+      "status": "error",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "id": "mieru",
+      "url": "https://raw.githubusercontent.com/enfein/mieru/main/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/enfein/mieru/main/README.md",
+      "bytes": 3375,
+      "sha256": "431826abb8d34f312f1d38c1f41053e4585bf8203fe540439093085d69aa810a"
+    },
+    {
+      "id": "anytls",
+      "url": "https://raw.githubusercontent.com/anytls/anytls-go/main/readme.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/anytls/anytls-go/main/readme.md",
+      "bytes": 1853,
+      "sha256": "e5842f6075a65699462d949dd933229517d44bc21dbb1bfe5da1ad7ddf574a07"
+    },
+    {
+      "id": "anytls_protocol",
+      "url": "https://raw.githubusercontent.com/anytls/anytls-go/main/docs/protocol.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/anytls/anytls-go/main/docs/protocol.md",
+      "bytes": 10577,
+      "sha256": "d5c703fb5ff2f9ec8727d2c1070f7e812ca2789633e1e9290ea504b998bb31de"
+    },
+    {
+      "id": "trusttunnel",
+      "url": "https://raw.githubusercontent.com/TrustTunnel/TrustTunnel/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/TrustTunnel/TrustTunnel/master/README.md",
+      "bytes": 21407,
+      "sha256": "64a805261820c6d7dbe5589664617230396c52673e0e0e4c15a1ccf1ec98c338"
+    },
+    {
+      "id": "backhaul",
+      "url": "https://raw.githubusercontent.com/Musixal/Backhaul/main/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/Musixal/Backhaul/main/README.md",
+      "bytes": 20709,
+      "sha256": "083cd794b12889d84251fc94bf605999a203175631d7dff7c0f8186aa35b58f7"
+    },
+    {
+      "id": "waterwall",
+      "url": "https://raw.githubusercontent.com/radkesvat/WaterWall/main/readme.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/radkesvat/WaterWall/main/readme.md",
+      "bytes": 2310,
+      "sha256": "cf8bb7f92fb7297e3dd10c334cdaa19c9f67f879e2a9fc5f6752e5ad9a097424"
+    },
+    {
+      "id": "frp",
+      "url": "https://raw.githubusercontent.com/fatedier/frp/dev/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/fatedier/frp/dev/README.md",
+      "bytes": 47766,
+      "sha256": "9f138f429780931be81bfcd31a3e017602040e2b9df0537f5bff9335a0ae39a1"
+    },
+    {
+      "id": "rathole",
+      "url": "https://raw.githubusercontent.com/rathole-org/rathole/main/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/rathole-org/rathole/main/README.md",
+      "bytes": 11232,
+      "sha256": "2eda155efc4e105933137ce2a2d61ac6e197e2772b36e5083f77e4c14e4d98fe"
+    },
+    {
+      "id": "gost",
+      "url": "https://raw.githubusercontent.com/go-gost/gost/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/go-gost/gost/master/README.md",
+      "bytes": 3953,
+      "sha256": "2a1c805fcdcf8908cf2a1ac0e3aaeb1aa521ac8bf63b2b37b3cd737821274456"
+    },
+    {
+      "id": "chisel",
+      "url": "https://raw.githubusercontent.com/jpillora/chisel/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/jpillora/chisel/master/README.md",
+      "bytes": 31748,
+      "sha256": "95df2e9dcd7bd3584cead15caf8405b52320a60997faab1170e0aaf247e77a08"
+    },
+    {
+      "id": "wstunnel",
+      "url": "https://raw.githubusercontent.com/erebe/wstunnel/main/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/erebe/wstunnel/main/README.md",
+      "bytes": 34845,
+      "sha256": "02956eef93187574d0ce14c4334ae76c7d4787ebcfb8fe9c9f3d98b73f8d1817"
+    },
+    {
+      "id": "paqet",
+      "url": "https://raw.githubusercontent.com/hanselime/paqet/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/hanselime/paqet/master/README.md",
+      "bytes": 13954,
+      "sha256": "ff8a59bf158e1da846e46bc4a9e32fe6b5b1e6d772eb3bb06fb885bcbcd05457"
+    },
+    {
+      "id": "udp2raw",
+      "url": "https://raw.githubusercontent.com/wangyu-/udp2raw/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/wangyu-/udp2raw/master/README.md",
+      "bytes": 15367,
+      "sha256": "8dd156c303e1cdcfecad4aedd41ac279b1369f42753f074fdf0138241a567c9b"
+    },
+    {
+      "id": "phantun",
+      "url": "https://raw.githubusercontent.com/dndx/phantun/main/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/dndx/phantun/main/README.md",
+      "bytes": 16320,
+      "sha256": "fbd1d8c2869583c587c664114b31a8f1f9d6fd186ca6d4c10a80cc73b25d3b3e"
+    },
+    {
+      "id": "kcptun",
+      "url": "https://raw.githubusercontent.com/xtaci/kcptun/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": "error",
+      "error": "HTTP Error 404: Not Found"
+    },
+    {
+      "id": "kcp_protocol",
+      "url": "https://raw.githubusercontent.com/skywind3000/kcp/master/README.en.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/skywind3000/kcp/master/README.en.md",
+      "bytes": 17468,
+      "sha256": "435a76d8131377b31b50ffd678efdd6bd3813b4d91ac1f066c032055a1e11e6e"
+    },
+    {
+      "id": "udpspeeder",
+      "url": "https://raw.githubusercontent.com/wangyu-/UDPspeeder/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/wangyu-/UDPspeeder/master/README.md",
+      "bytes": 8119,
+      "sha256": "0d4ff1ce32506b8840cdbe967dca179586ad8c68bfafee3f842c9e236a57962a"
+    },
+    {
+      "id": "spoof_tunnel",
+      "url": "https://raw.githubusercontent.com/ParsaKSH/spoof-tunnel/main/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/ParsaKSH/spoof-tunnel/main/README.md",
+      "bytes": 20275,
+      "sha256": "a35b7ba20134cd57878d35f2c11614a0fcfee1a09eb61829e0a43762f439835c"
+    },
+    {
+      "id": "dnstt",
+      "url": "https://www.bamsoftware.com/software/dnstt/",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://www.bamsoftware.com/software/dnstt/",
+      "bytes": 22141,
+      "sha256": "f3dbb7ff46eacaea54a77293a6d1fdd94a671528a390e5d63ece84a6704ec791"
+    },
+    {
+      "id": "slipstream",
+      "url": "https://raw.githubusercontent.com/EndPositive/slipstream/main/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/EndPositive/slipstream/main/README.md",
+      "bytes": 1533,
+      "sha256": "09ca58ef7cc87d9169edca516f420f2d9e6b5bb6468835b394d77e61ce174eb3"
+    },
+    {
+      "id": "snowflake",
+      "url": "https://snowflake.torproject.org/",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://snowflake.torproject.org/",
+      "bytes": 38276,
+      "sha256": "f97793deba5501862fc3ea3ae11dcbd6af09bec91057c88e39de38ae22723fab"
+    },
+    {
+      "id": "psiphon",
+      "url": "https://raw.githubusercontent.com/Psiphon-Labs/psiphon-tunnel-core/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/Psiphon-Labs/psiphon-tunnel-core/master/README.md",
+      "bytes": 7783,
+      "sha256": "f92331150d4e757f64c279e80a3fe7c35a24679ba21eb6f4479e0fa0472cbe53"
+    },
+    {
+      "id": "outline",
+      "url": "https://raw.githubusercontent.com/Jigsaw-Code/outline-apps/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/Jigsaw-Code/outline-apps/master/README.md",
+      "bytes": 2308,
+      "sha256": "4154ddc4f3ff76493f5c17c8240a6ec07f576e745a547f3d212a30b9f24509bc"
+    },
+    {
+      "id": "conjure",
+      "url": "https://raw.githubusercontent.com/refraction-networking/conjure/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/refraction-networking/conjure/master/README.md",
+      "bytes": 7068,
+      "sha256": "f44e54e5150a0be6e6c17524d5746578b7072bd8bd295bf0636c7c3862b0cd03"
+    },
+    {
+      "id": "glorytun",
+      "url": "https://raw.githubusercontent.com/angt/glorytun/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/angt/glorytun/master/README.md",
+      "bytes": 2547,
+      "sha256": "09ac7ac4cc5f08a60c07d0de54d05174824b45a72957ca17fac5a5717a422401"
+    },
+    {
+      "id": "openmptcprouter",
+      "url": "https://raw.githubusercontent.com/Ysurac/openmptcprouter/develop/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/Ysurac/openmptcprouter/develop/README.md",
+      "bytes": 2709,
+      "sha256": "d3761ddc52a46f262918d5d7f10fe6a604bd5d922eeaf109978cffad2b0f2637"
+    },
+    {
+      "id": "trojan",
+      "url": "https://raw.githubusercontent.com/trojan-gfw/trojan/master/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/trojan-gfw/trojan/master/README.md",
+      "bytes": 1224,
+      "sha256": "99f58f5fcaadfcb11b0bc1461f6f7694d0a91caa23808f876cac2cf75f4ae2f7"
+    },
+    {
+      "id": "mieru_protocol",
+      "url": "https://raw.githubusercontent.com/enfein/mieru/main/docs/protocol.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/enfein/mieru/main/docs/protocol.md",
+      "bytes": 11333,
+      "sha256": "e14a421e505650b5c497369e18c94bf4c3bd5069f2040f4a63f4968f2748412a"
+    },
+    {
+      "id": "mieru_patterns",
+      "url": "https://raw.githubusercontent.com/enfein/mieru/main/docs/traffic-pattern.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/enfein/mieru/main/docs/traffic-pattern.md",
+      "bytes": 10700,
+      "sha256": "b29748c6186633f3ebf91f3595549e1ef50f74a41c8b8acebbdd4be4633b6b6a"
+    },
+    {
+      "id": "shadowtls_protocol",
+      "url": "https://raw.githubusercontent.com/ihciah/shadow-tls/master/docs/protocol-v3-en.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/ihciah/shadow-tls/master/docs/protocol-v3-en.md",
+      "bytes": 12402,
+      "sha256": "9cd6aa2694e05130f8bc918861158a8fd4f4cb9263041ab732051f95d64e6084"
+    },
+    {
+      "id": "naive_tuning",
+      "url": "https://raw.githubusercontent.com/wiki/klzgrad/naiveproxy/Performance-Tuning.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/wiki/klzgrad/naiveproxy/Performance-Tuning.md",
+      "bytes": 4547,
+      "sha256": "d9e4b9457b0c7569afd7432f5cae40048eb7eaca82770ace99167a0166b27e19"
+    },
+    {
+      "id": "slipstream_rust",
+      "url": "https://raw.githubusercontent.com/Mygod/slipstream-rust/main/README.md",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://raw.githubusercontent.com/Mygod/slipstream-rust/main/README.md",
+      "bytes": 4319,
+      "sha256": "e7bda9ab20d45f3b30229d92a12332d2220571e481ebb28fade56eea3d89113f"
+    },
+    {
+      "id": "spoofer",
+      "url": "https://www.caida.org/projects/spoofer/faq/",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://www.caida.org/projects/spoofer/faq/",
+      "bytes": 59236,
+      "sha256": "7a8487e0840d5aba4671efe16ae5b05038ead9e52f94de77e6274e716aa346ce"
+    },
+    {
+      "id": "bcp38",
+      "url": "https://www.rfc-editor.org/rfc/rfc2827.txt",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://www.rfc-editor.org/rfc/rfc2827.txt",
+      "bytes": 21258,
+      "sha256": "6eaa66f058ad3b7b6ddb7010e1a71939e2085b0604d0e1950d43609642135c44"
+    },
+    {
+      "id": "bcp84",
+      "url": "https://www.rfc-editor.org/rfc/rfc3704.txt",
+      "retrieved": "2026-10-20",
+      "status": 200,
+      "resolved_url": "https://www.rfc-editor.org/rfc/rfc3704.txt",
+      "bytes": 35942,
+      "sha256": "79aadfe01455bcb96b1663b0bd299c93649f12e623e20105ee0810839a128f89"
+    }
+  ],
+  "additional_primary_sources": [
+    "https://arxiv.org/html/2605.00187v2",
+    "https://arxiv.org/html/2603.28753v1",
+    "https://arxiv.org/abs/1203.1673",
+    "https://www.caida.org/projects/spoofer/faq/",
+    "https://www.rfc-editor.org/rfc/rfc2827.txt",
+    "https://www.rfc-editor.org/rfc/rfc3704.txt",
+    "https://v2.hysteria.network/docs/advanced/Performance/",
+    "https://v2.hysteria.network/docs/getting-started/Client/",
+    "https://github.com/Ysurac/openmptcprouter",
+    "https://radkesvat.github.io/WaterWall-Docs/docs/getting-started/tutorial-part1",
+    "https://github.com/bol-van/zapret2"
+  ]
+}
