@@ -4,15 +4,17 @@ import (
 	"errors"
 	"github.com/DashSaman/tg/internal/config"
 	"net"
+	"net/netip"
 	"sync"
 	"time"
 )
 
 type application struct {
-	conn *net.UDPConn
-	exit bool
-	mu   sync.Mutex
-	peer *net.UDPAddr
+	conn       *net.UDPConn
+	exit       bool
+	mu         sync.Mutex
+	peer       netip.AddrPort
+	readBuffer []byte
 }
 
 func openApplication(c config.Config) (*application, error) {
@@ -20,7 +22,7 @@ func openApplication(c config.Config) (*application, error) {
 	if err != nil {
 		return nil, err
 	}
-	a := &application{exit: c.Role == "exit"}
+	a := &application{exit: c.Role == "exit", readBuffer: make([]byte, c.MaxPacketBytes+1)}
 	if a.exit {
 		a.conn, err = net.DialUDP("udp", nil, addr)
 	} else {
@@ -29,11 +31,14 @@ func openApplication(c config.Config) (*application, error) {
 	if err != nil {
 		return nil, err
 	}
+	// A per-socket hint, never a global sysctl change. The OS may clamp it.
+	// Absorb short scheduler bursts independently of the bounded frame queue.
+	_ = a.conn.SetReadBuffer(1 << 20)
 	return a, nil
 }
 func (a *application) read(limit int) ([]byte, error) {
-	b := make([]byte, limit+1)
-	n, peer, err := a.conn.ReadFromUDP(b)
+	b := a.readBuffer[:limit+1]
+	n, peer, err := a.conn.ReadFromUDPAddrPort(b)
 	if err != nil {
 		return nil, err
 	}
@@ -42,7 +47,12 @@ func (a *application) read(limit int) ([]byte, error) {
 		a.peer = peer
 		a.mu.Unlock()
 	}
-	return b[:n], nil
+	if n == 0 || n > limit {
+		return b[:n], nil
+	}
+	// The asynchronous transmit queue owns this exact-size copy. Never enqueue
+	// the reusable read buffer, which the next socket read will overwrite.
+	return append([]byte(nil), b[:n]...), nil
 }
 func (a *application) write(b []byte, timeout time.Duration) error {
 	// Serialize the write deadline and peer snapshot, independent of carrier locks.
@@ -53,10 +63,10 @@ func (a *application) write(b []byte, timeout time.Duration) error {
 		_, err := a.conn.Write(b)
 		return err
 	}
-	if a.peer == nil {
+	if !a.peer.IsValid() {
 		return errors.New("no application peer yet")
 	}
-	_, err := a.conn.WriteToUDP(b, a.peer)
+	_, err := a.conn.WriteToUDPAddrPort(b, a.peer)
 	return err
 }
 func (a *application) close() { _ = a.conn.Close() }

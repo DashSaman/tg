@@ -40,6 +40,13 @@ receipt for final command outcomes. The systemd template is not deployed or test
 under an actual service manager. GitHub CI configuration is supplied; local checks
 do not imply a GitHub Actions run has completed.
 
+The local performance follow-up now exercises real encrypted carriers with a
+receiver-counted load generator. Five-minute HTTPS, two-minute reverse QUIC,
+duplex outage recovery and smaller datagrams are recorded separately in
+[performance.md](performance.md). These are same-host application UDP measurements;
+they do not include WireGuard or establish two-host WAN acceptance. Failed
+diagnostic runs are retained in the delivery receipts alongside successful runs.
+
 An optional attempt to obtain iperf3 in the disposable container failed because apt
 could not locate the package; no host packages were installed. Thus automated schema
 fixtures are verified, but live iperf3 receipt compatibility remains a host-test gate.

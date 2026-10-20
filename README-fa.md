@@ -48,6 +48,7 @@ go build -trimpath -o bin/tg ./cmd/tg
 - [طراحی نهایی](docs/spec-v0.1.md)
 - [راهنمای اجرا روی دو میزبان](docs/operations.md)
 - [سنجش ۳۰۰ مگابیت دریافتی](docs/benchmark.md)
+- [آزمون فشار محلی، رفع گلوگاه و روش تکرار تست](docs/performance.md)
 - [نتایج آزمون و موارد باقی‌مانده](docs/validation.md)
 - [گزارش مقایسه](docs/research/tunnel-research-fa.html)
 - [منابع](docs/research/sources.json)

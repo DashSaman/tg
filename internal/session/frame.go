@@ -44,10 +44,20 @@ func (f Frame) validate() error {
 }
 
 func Encode(f Frame) ([]byte, error) {
+	return EncodeInto(nil, f)
+}
+
+// EncodeInto overwrites dst's storage when capacity permits. The returned bytes
+// belong to the caller and must remain unchanged until the carrier consumes them.
+func EncodeInto(dst []byte, f Frame) ([]byte, error) {
 	if err := f.validate(); err != nil {
 		return nil, err
 	}
-	b := make([]byte, Header+len(f.Payload))
+	size := Header + len(f.Payload)
+	if cap(dst) < size {
+		dst = make([]byte, size)
+	}
+	b := dst[:size]
 	b[0] = 1
 	b[1] = f.Kind
 	binary.BigEndian.PutUint64(b[2:10], f.ID)
@@ -67,11 +77,20 @@ func Decode(b []byte) (Frame, error) {
 }
 
 func Fragment(packet []byte, id uint64) ([]Frame, error) {
+	return FragmentInto(nil, packet, id)
+}
+
+// FragmentInto reuses frame descriptors, never the application's payload buffer.
+// Queues must copy descriptors and retain payload ownership until transmission.
+func FragmentInto(dst []Frame, packet []byte, id uint64) ([]Frame, error) {
 	if len(packet) == 0 || len(packet) > MaxPacket || id == 0 {
 		return nil, errors.New("invalid application packet")
 	}
 	count := (len(packet) + Chunk - 1) / Chunk
-	frames := make([]Frame, 0, count)
+	frames := dst[:0]
+	if cap(frames) < count {
+		frames = make([]Frame, 0, count)
+	}
 	for i := 0; i < count; i++ {
 		frames = append(frames, Frame{Kind: Data, ID: id, Index: uint16(i), Count: uint16(count), Total: uint16(len(packet)), Payload: packet[i*Chunk : min((i+1)*Chunk, len(packet))]})
 	}

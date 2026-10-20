@@ -44,10 +44,24 @@ Files: cmd/tg, examples, deploy, tools/acceptance.py, tools/test_acceptance.py, 
 - [x] Publish the feature branch and [draft PR #1](https://github.com/DashSaman/tg/pull/1).
 
 ## Progress
-Core implementation and fresh local verification are complete: six Go packages,
+Core implementation and initial local verification covered six Go packages,
 21 Go test/subtest cases including fuzz seeds, four Python test cases, race and vet.
 Linux amd64/arm64 and Windows amd64 builds passed; two native architecture smoke
 runs passed. Published on `codex/tg-v0.1` for review. See validation.md for evidence
 and limitations.
 The owner explicitly deferred real-host acceptance. It remains mandatory before
 claiming production Iran stability or the 300 Mbps aggregate target.
+
+### 5. Local performance follow-up (owner authorized, no real hosts)
+Files: internal/engine/load_test.go, application/link data path, session reassembly,
+HTTP carrier and docs/performance.md.
+- [x] Capture failing real encrypted load measurements before optimization.
+- [x] Batch already queued HTTPS frames; preserve framing, deadlines and cancellation.
+- [x] Reuse bounded buffers with explicit ownership; test byte integrity under load.
+- [x] Reproduce incomplete-fragment admission stalls and regress them deterministically.
+- [x] Measure receive-buffer and frame-queue burst headroom independently.
+- [x] Complete longer steady load, reverse/duplex, packet-size and outage cases.
+- [x] Run fresh race/vet/fuzz and build all three targets; retain delivery receipts.
+
+Local goodput is a separate milestone from the two-host Iran acceptance described
+above. Allocation churn, live heap and final receiver bytes must be reported separately.

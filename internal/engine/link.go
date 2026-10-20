@@ -65,6 +65,9 @@ func (l *link) path() session.Path {
 	return session.Path{ID: l.carrier.Name, Ready: !l.closed.Load(), LastPong: l.lastPong, RTT: l.rtt, Jitter: l.jitter, Cost: time.Duration(l.carrier.CostMS) * time.Millisecond, Queued: len(l.data), Capacity: cap(l.data)}
 }
 func (l *link) transmit() {
+	batchWire, canBatch := l.wire.(transport.BatchWire)
+	var batch [transport.MaxBatchFrames][]byte
+	var buffers [transport.MaxBatchFrames][session.MaxFrame]byte
 	for {
 		var f session.Frame
 		select {
@@ -79,14 +82,49 @@ func (l *link) transmit() {
 			case f = <-l.data:
 			}
 		}
-		b, err := session.Encode(f)
+		b, err := session.EncodeInto(buffers[0][:0], f)
 		if err != nil {
 			return
 		}
-		if err = l.wire.Send(b); err != nil {
+		batch[0] = b
+		count := 1
+		size := len(b)
+		if canBatch {
+		drain:
+			for count < len(batch) {
+				select {
+				case <-l.ctx.Done():
+					return
+				case f = <-l.control:
+				default:
+					select {
+					case f = <-l.control:
+					case f = <-l.data:
+					default:
+						break drain
+					}
+				}
+				b, err = session.EncodeInto(buffers[count][:0], f)
+				if err != nil {
+					return
+				}
+				batch[count] = b
+				count++
+				size += len(b)
+			}
+		}
+		if canBatch {
+			err = batchWire.SendBatch(batch[:count])
+		} else {
+			err = l.wire.Send(b)
+		}
+		if err != nil {
 			return
 		}
-		l.engine.counters.wireSent.Add(uint64(len(b)))
+		for i := 0; i < count; i++ {
+			batch[i] = nil
+		}
+		l.engine.counters.wireSent.Add(uint64(size))
 	}
 }
 func (l *link) receive() {

@@ -69,6 +69,13 @@ costs 20ms by default. These are test starting points, not validated Iran tuning
 Queue pressure can try another healthy carrier immediately. Failure detection can
 drop UDP; lossless handover and TG-level application retransmission are not provided.
 
+New configurations use `queue_frames: 1024` per carrier. Existing explicit values
+are preserved. With two frames per 1400-byte application packet at 350 Mbps, this
+is roughly 16ms of burst headroom, not a latency guarantee. The application UDP
+socket requests a 1MiB receive buffer; OS limits can clamp it. Increase queues only
+with receiver loss and latency measurements: longer queues retain more memory and
+may increase latency on slow paths. See [local performance evidence](performance.md).
+
 TG never restarts remote daemons or changes kernel networking. Recovery backoff does
 not stop surviving probes. All-path failure drops new packets instead of accumulating
 backlog. Exit restart replaces the app socket; continuity covers carrier reconnects

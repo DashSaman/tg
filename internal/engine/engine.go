@@ -184,6 +184,8 @@ func (e *Engine) supervise(ctx context.Context, p config.Carrier) {
 }
 
 func (e *Engine) readApplication(ctx context.Context) {
+	var frameStorage [session.MaxPacket / session.Chunk]session.Frame
+	var pathStorage [4]session.Path
 	for ctx.Err() == nil {
 		packet, err := e.app.read(e.cfg.MaxPacketBytes)
 		if err != nil {
@@ -205,14 +207,14 @@ func (e *Engine) readApplication(ctx context.Context) {
 			continue
 		}
 		e.counters.inputBytes.Add(uint64(len(packet)))
-		frames, err := session.Fragment(packet, e.sequence.Add(1))
+		frames, err := session.FragmentInto(frameStorage[:0], packet, e.sequence.Add(1))
 		if err != nil {
 			e.counters.dropped.Add(1)
 			continue
 		}
 		e.mu.Lock()
 		now := time.Now()
-		paths := e.paths(now)
+		paths := e.pathsInto(pathStorage[:0])
 		chosen := e.selector.Choose(now, paths)
 		sent := false
 		if l := e.links[chosen]; l != nil {
@@ -245,7 +247,9 @@ func (e *Engine) readApplication(ctx context.Context) {
 
 // paths must be called with e.mu held. Link locks never acquire e.mu.
 func (e *Engine) paths(now time.Time) []session.Path {
-	out := make([]session.Path, 0, len(e.links))
+	return e.pathsInto(make([]session.Path, 0, len(e.links)))
+}
+func (e *Engine) pathsInto(out []session.Path) []session.Path {
 	for _, l := range e.links {
 		out = append(out, l.path())
 	}
@@ -261,7 +265,8 @@ func (e *Engine) onData(l *link, f session.Frame) {
 		e.mu.Unlock()
 		return
 	}
-	packet, complete, err := e.receive.Push(time.Now(), f)
+	reassembler := e.receive
+	packet, complete, err := reassembler.Push(time.Now(), f)
 	e.mu.Unlock()
 	if err != nil {
 		e.counters.dropped.Add(1)
@@ -270,6 +275,7 @@ func (e *Engine) onData(l *link, f session.Frame) {
 	if !complete {
 		return
 	}
+	defer reassembler.Release(packet)
 	if err := e.app.write(packet, e.cfg.Timeout()); err != nil {
 		e.counters.appErrors.Add(1)
 		return

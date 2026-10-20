@@ -12,10 +12,18 @@ import (
 )
 
 type Wire interface {
+	// Send consumes b before returning. Receive bytes remain valid until the next Receive.
 	Send([]byte) error
 	Receive(context.Context) ([]byte, error)
 	Close() error
 }
+
+// BatchWire coalesces already available frames without changing their wire format.
+// Implementations consume every input slice before returning, including on failure.
+type BatchWire interface{ SendBatch([][]byte) error }
+
+const MaxBatchFrames = 16
+
 type Accept func(context.Context, Wire, uint64) error
 
 func Listen(ctx context.Context, c config.Config, p config.Carrier, epoch uint64, accept Accept) (net.Addr, func(), error) {

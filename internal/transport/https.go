@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/subtle"
+	"encoding/binary"
 	"errors"
 	"github.com/DashSaman/tg/internal/config"
 	"github.com/DashSaman/tg/internal/pki"
+	"github.com/DashSaman/tg/internal/session"
 	"io"
 	"log"
 	"net"
@@ -17,18 +19,42 @@ import (
 )
 
 type httpWire struct {
-	reader io.ReadCloser
-	writer io.Writer
-	flush  func() error
-	cancel func()
-	once   sync.Once
-	mu     sync.Mutex
+	reader      io.ReadCloser
+	writer      io.Writer
+	flush       func() error
+	cancel      func()
+	once        sync.Once
+	mu          sync.Mutex
+	beforeWrite func() error
+	sendBuffer  [MaxBatchFrames * (session.MaxFrame + 2)]byte
+	readBuffer  [session.MaxFrame]byte
 }
 
 func (w *httpWire) Send(b []byte) error {
+	return w.SendBatch([][]byte{b})
+}
+func (w *httpWire) SendBatch(frames [][]byte) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
-	if err := sendStream(w.writer, b); err != nil {
+	if len(frames) == 0 || len(frames) > MaxBatchFrames {
+		return errors.New("HTTP batch limit exceeded")
+	}
+	n := 0
+	for _, b := range frames {
+		if len(b) == 0 || len(b) > session.MaxFrame {
+			return errors.New("invalid carrier frame size")
+		}
+		binary.BigEndian.PutUint16(w.sendBuffer[n:n+2], uint16(len(b)))
+		n += 2
+		copy(w.sendBuffer[n:], b)
+		n += len(b)
+	}
+	if w.beforeWrite != nil {
+		if err := w.beforeWrite(); err != nil {
+			return err
+		}
+	}
+	if err := writeAll(w.writer, w.sendBuffer[:n]); err != nil {
 		return err
 	}
 	if w.flush != nil {
@@ -36,8 +62,19 @@ func (w *httpWire) Send(b []byte) error {
 	}
 	return nil
 }
-func (w *httpWire) Receive(ctx context.Context) ([]byte, error) { return recvStream(w.reader) }
-func (w *httpWire) Close() error                                { w.once.Do(func() { w.cancel(); _ = w.reader.Close() }); return nil }
+func (w *httpWire) Receive(ctx context.Context) ([]byte, error) {
+	if _, err := io.ReadFull(w.reader, w.readBuffer[:2]); err != nil {
+		return nil, err
+	}
+	size := int(binary.BigEndian.Uint16(w.readBuffer[:2]))
+	if size < 1 || size > session.MaxFrame {
+		return nil, errors.New("carrier frame size out of bounds")
+	}
+	b := w.readBuffer[:size]
+	_, err := io.ReadFull(w.reader, b)
+	return b, err
+}
+func (w *httpWire) Close() error { w.once.Do(func() { w.cancel(); _ = w.reader.Close() }); return nil }
 
 func listenHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch uint64, accept Accept) (net.Addr, func(), error) {
 	tc, err := pki.Server(c.TLS, false)
@@ -83,7 +120,7 @@ func listenHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 		if e = controller.Flush(); e != nil {
 			return
 		}
-		w := &httpWire{reader: r.Body, writer: rw, flush: func() error { _ = controller.SetWriteDeadline(time.Now().Add(c.Timeout())); return controller.Flush() }, cancel: func() {
+		w := &httpWire{reader: r.Body, writer: rw, beforeWrite: func() error { return controller.SetWriteDeadline(time.Now().Add(c.Timeout())) }, flush: controller.Flush, cancel: func() {
 			_ = controller.SetReadDeadline(time.Now().Add(-time.Second))
 			_ = controller.SetWriteDeadline(time.Now().Add(-time.Second))
 		}}

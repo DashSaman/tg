@@ -45,7 +45,7 @@ type Config struct {
 }
 
 func Defaults() Config {
-	return Config{AppAddress: "127.0.0.1:31820", Metrics: "127.0.0.1:19090", TLS: TLS{CA: "ca.crt", Cert: "edge.crt", Key: "edge.key", ServerName: "localhost", PeerName: "tg-edge"}, TokenFile: "web.token", ProbeIntervalMS: 1000, ProbeTimeoutMS: 4000, HoldDownMS: 5000, QueueFrames: 256, MaxPacketBytes: 2048, Carriers: []Carrier{{Name: "web", Kind: "https", Address: "127.0.0.1:8443", Path: "/private-channel", CostMS: 20}, {Name: "udp", Kind: "quic", Address: "127.0.0.1:8444"}}}
+	return Config{AppAddress: "127.0.0.1:31820", Metrics: "127.0.0.1:19090", TLS: TLS{CA: "ca.crt", Cert: "edge.crt", Key: "edge.key", ServerName: "localhost", PeerName: "tg-edge"}, TokenFile: "web.token", ProbeIntervalMS: 1000, ProbeTimeoutMS: 4000, HoldDownMS: 5000, QueueFrames: 1024, MaxPacketBytes: 2048, Carriers: []Carrier{{Name: "web", Kind: "https", Address: "127.0.0.1:8443", Path: "/private-channel", CostMS: 20}, {Name: "udp", Kind: "quic", Address: "127.0.0.1:8444"}}}
 }
 
 func validAddress(address string, loopback bool) bool {

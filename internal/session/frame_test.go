@@ -48,11 +48,35 @@ func TestFragmentReorderDuplicateAndExpiry(t *testing.T) {
 	incomplete, _ := Fragment(payload, 10)
 	_, _, _ = r.Push(now, incomplete[0])
 	next, _ := Fragment(payload, 11)
-	if _, _, err := r.Push(now, next[0]); err == nil {
-		t.Fatal("unfinished-packet limit not enforced")
+	if _, _, err := r.Push(now, next[0]); err != nil || len(r.pending) > 1 {
+		t.Fatal("bounded fresh-packet admission failed", err)
 	}
 	if _, _, err := r.Push(now.Add(2*time.Second), next[0]); err != nil {
 		t.Fatal("expired assembly not released", err)
+	}
+}
+
+func TestIncompletePacketLossDoesNotBlockNewCompletePackets(t *testing.T) {
+	r := NewReassembler(2, 2*time.Second)
+	now := time.Now()
+	for _, id := range []uint64{1, 2} {
+		frames, _ := Fragment(make([]byte, 1400), id)
+		_, _, _ = r.Push(now, frames[0])
+	}
+	frames, _ := Fragment(bytes.Repeat([]byte{9}, 1400), 3)
+	var complete bool
+	for _, f := range frames {
+		packet, ok, err := r.Push(now.Add(time.Millisecond), f)
+		if err != nil {
+			t.Fatal("old incomplete packets blocked fresh traffic", err)
+		}
+		if ok {
+			complete = true
+			r.Release(packet)
+		}
+	}
+	if !complete || len(r.pending) > 2 {
+		t.Fatal("fresh packet lost or memory bound exceeded")
 	}
 }
 
@@ -104,4 +128,74 @@ func FuzzDecode(f *testing.F) {
 			t.Fatal("noncanonical wire accepted", err)
 		}
 	})
+}
+
+func TestEncodeIntoReusesCallerBuffer(t *testing.T) {
+	frames, _ := Fragment(bytes.Repeat([]byte{7}, 1400), 3)
+	var scratch [MaxFrame]byte
+	for _, f := range frames {
+		want, _ := Encode(f)
+		got, err := EncodeInto(scratch[:0], f)
+		if err != nil || !bytes.Equal(want, got) {
+			t.Fatal("different reusable encoding", err)
+		}
+	}
+	if got, err := EncodeInto(scratch[:0], Frame{Kind: Pong, ID: 0}); err == nil || len(got) != 0 {
+		t.Fatal("invalid frame encoded")
+	}
+	if allocations := testing.AllocsPerRun(100, func() { _, _ = EncodeInto(scratch[:0], frames[0]) }); allocations != 0 {
+		t.Fatal("encoder allocated with enough capacity", allocations)
+	}
+}
+
+func TestFragmentIntoDoesNotRetainFrameStorage(t *testing.T) {
+	packet := bytes.Repeat([]byte{8}, 2048)
+	var scratch [8]Frame
+	got, err := FragmentInto(scratch[:0], packet, 12)
+	if err != nil || len(got) != 2 {
+		t.Fatal(err)
+	}
+	copied := got[0]
+	_, _ = FragmentInto(scratch[:0], []byte{9}, 13)
+	if copied.ID != 12 || copied.Total != 2048 || !bytes.Equal(copied.Payload, packet[:Chunk]) {
+		t.Fatal("previously enqueued frame was overwritten")
+	}
+	if n := testing.AllocsPerRun(100, func() { _, _ = FragmentInto(scratch[:0], packet, 14) }); n != 0 {
+		t.Fatal("fragment storage allocated", n)
+	}
+}
+
+func TestReassemblyBuffersAreOwnedUntilRelease(t *testing.T) {
+	r := NewReassembler(2, time.Second)
+	now := time.Now()
+	complete := func(id uint64, value byte) []byte {
+		t.Helper()
+		frames, _ := Fragment(bytes.Repeat([]byte{value}, 1400), id)
+		var packet []byte
+		for _, f := range frames {
+			b, ok, err := r.Push(now, f)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if ok {
+				packet = b
+			}
+		}
+		return packet
+	}
+	first := complete(1, 3)
+	second := complete(2, 4)
+	if !bytes.Equal(first, bytes.Repeat([]byte{3}, 1400)) {
+		t.Fatal("borrowed buffer reused before release")
+	}
+	r.Release(first)
+	r.Release(second)
+	third := complete(3, 9)
+	if !bytes.Equal(third, bytes.Repeat([]byte{9}, 1400)) {
+		t.Fatal("recycled buffer leaked previous payload")
+	}
+	r.Release(third)
+	if len(r.free) > 2 {
+		t.Fatal("unbounded cache")
+	}
 }

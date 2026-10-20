@@ -6,7 +6,8 @@ authenticated QUIC DATAGRAM and full-duplex HTTPS/2 carriers.
 **Status: v0.1 development prototype, locally tested. Real Iran-path performance
 and censorship resistance are unverified.** Initial acceptance target: **300 Mbps
 aggregate receiver goodput**. Future 10 Gbps aggregate requires separate profiling
-and capacity validation. Neither speed is a current measured claim.
+and capacity validation. Local load results and their limited scope are recorded
+in [the performance report](docs/performance.md); real-host acceptance is pending.
 
 TG forwards one application's opaque UDP packets. WireGuard is the intended inner
 IP tunnel, configured separately. TG keeps the exit UDP socket across carrier
@@ -46,6 +47,7 @@ FEC, REALITY/XHTTP and spoof adapters remain future work.
 - [Final v0.1 specification and reference decisions](docs/spec-v0.1.md)
 - [Implementation plan](docs/implementation-plan.md)
 - [Local verification and remaining acceptance](docs/validation.md)
+- [Encrypted local load tests, bottlenecks and reproduction](docs/performance.md)
 - [Receiver-based benchmark procedure](docs/benchmark.md)
 - [Persian comparative report](docs/research/tunnel-research-fa.html)
 - [Primary-source provenance](docs/research/sources.json)

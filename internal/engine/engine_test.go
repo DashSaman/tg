@@ -6,6 +6,7 @@ import (
 	"github.com/DashSaman/tg/internal/config"
 	"github.com/DashSaman/tg/internal/pki"
 	"github.com/DashSaman/tg/internal/session"
+	"math/rand"
 	"net"
 	"path/filepath"
 	"strings"
@@ -316,6 +317,9 @@ func TestPeerRestartResetsDedupWithoutReplacingExitSocket(t *testing.T) {
 }
 
 func udpProxy(t *testing.T, target string) (*net.UDPConn, *atomic.Bool) {
+	return udpProxyWithLoss(t, target, 0)
+}
+func udpProxyWithLoss(t *testing.T, target string, lossPercent float64) (*net.UDPConn, *atomic.Bool) {
 	t.Helper()
 	remote, err := net.ResolveUDPAddr("udp4", target)
 	if err != nil {
@@ -329,12 +333,13 @@ func udpProxy(t *testing.T, target string) (*net.UDPConn, *atomic.Bool) {
 	go func() {
 		b := make([]byte, 65536)
 		var client *net.UDPAddr
+		random := rand.New(rand.NewSource(7))
 		for {
 			n, a, e := p.ReadFromUDP(b)
 			if e != nil {
 				return
 			}
-			if drop.Load() {
+			if drop.Load() || (lossPercent > 0 && random.Float64()*100 < lossPercent) {
 				continue
 			}
 			if a.String() == remote.String() {
