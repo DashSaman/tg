@@ -1,36 +1,21 @@
-# TG design direction — research stage, 2026-10-20
+# TG architecture decision, 2026-10-20
 
-Owner requirements: a personal Iran-to-overseas tunnel resilient to changing
-network conditions and censorship. Start with 300 Mbps aggregate goodput; future
-scale target is 10 Gbps aggregate, not one connection. Test hosts will be supplied
-later. The owner explicitly requested broad research before implementation and
-included IP source spoofing among the options.
+The owner authorized finalizing the researched design and starting implementation.
+The [v0.1 specification](spec-v0.1.md) supersedes the research-only proposal.
 
-Read [the comparative report](research/tunnel-research-fa.html) and its
-[source manifest](research/sources.json). These are documentation and selected
-static source reviews, not an exhaustive source audit or a runtime benchmark.
+One opaque UDP application session uses mTLS QUIC DATAGRAM and bearer-authenticated
+HTTPS/2. The inner WireGuard application and exit UDP socket remain independent of
+carrier selection. Bounded queues, fragmentation, duplicate suppression, continuing
+probes and hysteresis form the original session layer. RTT variation penalizes
+unstable paths. Target: 300 Mbps aggregate receiver goodput, then 10 Gbps aggregate.
 
-The earlier generic pooled reverse-TLS proposal is superseded. A generic TLS
-transport alone does not satisfy the stated censorship-resilience requirement.
-No tunnel implementation or performance verification is being shipped at this stage.
+Local correctness tests do not certify speed or Iranian DPI resilience. Application
+exit checks, flow classes, FEC, bonding, REALITY/XHTTP and capability-gated spoof
+adapters remain future work. Health explicitly means authenticated carrier round
+trip. A timeout does not diagnose censorship.
 
-Proposed direction, subject to experimental validation:
-
-- Keep an authenticated inner session and stable overseas egress independent of
-  the outer carrier; preserve virtual addresses through short carrier changes.
-- Compare two heterogeneous carriers first, selected from native UDP/WireGuard or
-  AmneziaWG, QUIC-based transports, and a web-compatible transport.
-- Evaluate IP-spoofing carriers as a separate capability-gated experiment. Both
-  directions and the inner security layer must work; a raw carrier is not encryption.
-- Select by authenticated payload delivery, loaded latency, capacity and failure
-  domain. Track uncertainty; do not declare censorship from a single timeout.
-- Separate interactive and bulk scheduling; bound queues, probes, padding and FEC.
-- Test against existing adaptive/multipath baselines before claiming original value.
-
-Known prior art includes Psiphon tactics, sing-box URLTest, XHTTP directional
-separation, Spoof Tunnel asymmetry, Glorytun/MPTCP bonding and TunnelGuard hysteresis.
-These capabilities must not be presented as inventions of TG.
-
-Next design decision: after the research is reviewed, define the first two carrier
-interfaces, inner-session continuity contract and reproducible impairment testbed.
-Real-host acceptance remains pending the owner's test servers.
+See [research](research/tunnel-research-fa.html), [sources](research/sources.json),
+and [validation](validation.md). Psiphon tactics, sing-box URLTest, XHTTP direction
+separation, Spoof Tunnel asymmetry, Glorytun/MPTCP bonding and TunnelGuard hysteresis
+are prior art, not TG inventions. GoldWaterTunnel and private t6 were additionally
+reviewed; private implementation is excluded.
