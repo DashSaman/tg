@@ -17,6 +17,9 @@ type link struct {
 	ctx            context.Context
 	cancel         context.CancelFunc
 	data, control  chan session.Frame
+	ack            chan session.Frame
+	repair         chan session.Frame
+	ackMu          sync.Mutex
 	space          chan struct{}
 	enqueueMu      sync.Mutex
 	once           sync.Once
@@ -30,9 +33,11 @@ type link struct {
 
 func newLink(e *Engine, ctx context.Context, p config.Carrier, w transport.Wire) *link {
 	local, cancel := context.WithCancel(ctx)
-	return &link{engine: e, carrier: p, wire: w, ctx: local, cancel: cancel, data: make(chan session.Frame, e.cfg.QueueFrames), control: make(chan session.Frame, 8), space: make(chan struct{}, 1), born: time.Now(), pending: make(map[uint64]time.Time)}
+	return &link{engine: e, carrier: p, wire: w, ctx: local, cancel: cancel, data: make(chan session.Frame, e.cfg.QueueFrames), repair: make(chan session.Frame, 1024), control: make(chan session.Frame, 8), ack: make(chan session.Frame, 1), space: make(chan struct{}, 1), born: time.Now(), pending: make(map[uint64]time.Time)}
 }
-func (l *link) stop() { l.once.Do(func() { l.closed.Store(true); l.cancel(); _ = l.wire.Close() }) }
+func (l *link) stop() {
+	l.once.Do(func() { l.closed.Store(true); l.cancel(); l.notifySpace(); _ = l.wire.Close() })
+}
 func (l *link) run() {
 	var wg sync.WaitGroup
 	for _, fn := range []func(){l.transmit, l.receive, l.probe} {
@@ -42,13 +47,16 @@ func (l *link) run() {
 	wg.Wait()
 }
 func (l *link) enqueue(frames []session.Frame) bool {
+	return l.enqueueTo(l.data, frames)
+}
+func (l *link) enqueueTo(queue chan session.Frame, frames []session.Frame) bool {
 	l.enqueueMu.Lock()
 	defer l.enqueueMu.Unlock()
-	if l.closed.Load() || cap(l.data)-len(l.data) < len(frames) {
+	if l.closed.Load() || cap(queue)-len(queue) < len(frames) {
 		return false
 	}
 	for _, f := range frames {
-		l.data <- f
+		queue <- f
 	}
 	return true
 }
@@ -91,27 +99,61 @@ func (l *link) sendControl(f session.Frame) bool {
 		return false
 	}
 }
+
+// ACK storage is independent of health probes and bounded to one latest prefix.
+func (l *link) sendAck(f session.Frame) {
+	l.ackMu.Lock()
+	defer l.ackMu.Unlock()
+	select {
+	case <-l.ack:
+	default:
+	}
+	select {
+	case l.ack <- f:
+	default:
+	}
+}
 func (l *link) path() session.Path {
 	l.mu.Lock()
 	defer l.mu.Unlock()
 	return session.Path{ID: l.carrier.Name, Ready: !l.closed.Load(), LastPong: l.lastPong, RTT: l.rtt, Jitter: l.jitter, Cost: time.Duration(l.carrier.CostMS) * time.Millisecond, Queued: len(l.data), Capacity: cap(l.data)}
+}
+
+func (l *link) queuedFrame() (session.Frame, bool) {
+	select {
+	case f := <-l.control:
+		return f, true
+	default:
+	}
+	select {
+	case f := <-l.repair:
+		return f, true
+	default:
+	}
+	select {
+	case f := <-l.data:
+		return f, true
+	default:
+		return session.Frame{}, false
+	}
 }
 func (l *link) transmit() {
 	batchWire, canBatch := l.wire.(transport.BatchWire)
 	var batch [transport.MaxBatchFrames][]byte
 	var buffers [transport.MaxBatchFrames][session.MaxFrame]byte
 	for {
-		var f session.Frame
-		select {
-		case <-l.ctx.Done():
+		if l.ctx.Err() != nil {
 			return
-		case f = <-l.control:
-		default:
+		}
+		f, queued := l.queuedFrame()
+		if !queued {
 			select {
 			case <-l.ctx.Done():
 				return
 			case f = <-l.control:
 			case f = <-l.data:
+			case f = <-l.repair:
+			case f = <-l.ack:
 			}
 		}
 		b, err := session.EncodeInto(buffers[0][:0], f)
@@ -120,21 +162,21 @@ func (l *link) transmit() {
 		}
 		batch[0] = b
 		count := 1
+		ackIncluded := f.Kind == session.Ack
 		size := len(b)
 		if canBatch {
+			limit := len(batch)
+			if l.engine.cfg.Redundant {
+				limit--
+			}
 		drain:
-			for count < len(batch) {
-				select {
-				case <-l.ctx.Done():
+			for count < limit {
+				if l.ctx.Err() != nil {
 					return
-				case f = <-l.control:
-				default:
-					select {
-					case f = <-l.control:
-					case f = <-l.data:
-					default:
-						break drain
-					}
+				}
+				f, queued = l.queuedFrame()
+				if !queued {
+					break drain
 				}
 				b, err = session.EncodeInto(buffers[count][:0], f)
 				if err != nil {
@@ -143,6 +185,19 @@ func (l *link) transmit() {
 				batch[count] = b
 				count++
 				size += len(b)
+			}
+			if l.engine.cfg.Redundant && !ackIncluded {
+				select {
+				case f = <-l.ack:
+					b, err = session.EncodeInto(buffers[count][:0], f)
+					if err != nil {
+						return
+					}
+					batch[count] = b
+					count++
+					size += len(b)
+				default:
+				}
 			}
 		}
 		l.notifySpace()
@@ -175,6 +230,12 @@ func (l *link) receive() {
 		switch f.Kind {
 		case session.Data:
 			l.engine.onData(l, f)
+		case session.Ack:
+			if !l.engine.cfg.Redundant {
+				l.engine.counters.malformed.Add(1)
+				return
+			}
+			l.engine.onAck(l, f)
 		case session.Probe:
 			if !l.sendControl(session.Frame{Kind: session.Pong, ID: f.ID}) {
 				return

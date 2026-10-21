@@ -20,13 +20,23 @@ type Reassembler struct {
 	ttl            time.Duration
 	pending        map[uint64]*assembly
 	highest        uint64
-	seen           [4096]uint64
+	contiguous     uint64
+	seen           []uint64
 	free           chan []byte
 	oldest, newest *assembly
 }
 
 func NewReassembler(limit int, ttl time.Duration) *Reassembler {
-	return &Reassembler{limit: max(1, limit), ttl: ttl, pending: make(map[uint64]*assembly, max(1, limit)), free: make(chan []byte, min(128, max(1, limit)))}
+	return newReassembler(limit, ttl, 4096)
+}
+
+// Delayed replicas must not evict a unique surviving packet after only 4096 newer
+// completions. This keeps a bounded 2 MiB ID history; payload cache limits do not grow.
+func NewRedundantReassembler(limit int, ttl time.Duration) *Reassembler {
+	return newReassembler(limit, ttl, 262144)
+}
+func newReassembler(limit int, ttl time.Duration, window int) *Reassembler {
+	return &Reassembler{limit: max(1, limit), ttl: ttl, pending: make(map[uint64]*assembly, max(1, limit)), free: make(chan []byte, min(128, max(1, limit))), seen: make([]uint64, window)}
 }
 
 func (r *Reassembler) remove(a *assembly) {
@@ -59,6 +69,13 @@ func (r *Reassembler) Release(packet []byte) {
 	}
 }
 
+// AckState and Completed share Push's external receive lock. Cumulative ACKs
+// never release a missing packet just because a newer packet completed.
+func (r *Reassembler) AckState() (uint64, uint64) { return r.contiguous, r.highest }
+func (r *Reassembler) Completed(id uint64) bool {
+	return id != 0 && (id <= r.contiguous || r.seen[id%uint64(len(r.seen))] == id)
+}
+
 func (r *Reassembler) Push(now time.Time, f Frame) ([]byte, bool, error) {
 	if err := f.validate(); err != nil {
 		return nil, false, err
@@ -66,7 +83,8 @@ func (r *Reassembler) Push(now time.Time, f Frame) ([]byte, bool, error) {
 	if f.Kind != Data {
 		return nil, false, errors.New("not a data frame")
 	}
-	if (r.highest >= 4096 && f.ID <= r.highest-4096) || r.seen[f.ID%4096] == f.ID {
+	window := uint64(len(r.seen))
+	if (r.highest >= window && f.ID <= r.highest-window) || r.seen[f.ID%window] == f.ID {
 		return nil, false, nil
 	}
 	for r.oldest != nil && now.Sub(r.oldest.born) >= r.ttl {
@@ -107,7 +125,10 @@ func (r *Reassembler) Push(now time.Time, f Frame) ([]byte, bool, error) {
 		return nil, false, nil
 	}
 	r.remove(a)
-	r.seen[f.ID%4096] = f.ID
+	r.seen[f.ID%window] = f.ID
 	r.highest = max(r.highest, f.ID)
+	for r.contiguous < r.highest && r.seen[(r.contiguous+1)%window] == r.contiguous+1 {
+		r.contiguous++
+	}
 	return a.data, true, nil
 }

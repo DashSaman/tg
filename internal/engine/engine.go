@@ -17,22 +17,28 @@ import (
 )
 
 type Engine struct {
-	cfg              config.Config
-	epoch            uint64
-	mu               sync.Mutex
-	started, closing bool
-	ctx              context.Context
-	links            map[string]*link
-	addresses        map[string]string
-	app              *application
-	peerEpoch        uint64
-	receive          *session.Reassembler
-	selector         session.Selector
-	active           string
-	workers          sync.WaitGroup
-	sequence         atomic.Uint64
-	counters         counters
-	output           chan delivery
+	cfg               config.Config
+	epoch             uint64
+	mu                sync.Mutex
+	deliveryMu        sync.Mutex
+	started, closing  bool
+	ctx               context.Context
+	links             map[string]*link
+	addresses         map[string]string
+	app               *application
+	peerEpoch         uint64
+	receive           *session.Reassembler
+	selector          session.Selector
+	active            string
+	workers           sync.WaitGroup
+	sequence          atomic.Uint64
+	counters          counters
+	output            chan delivery
+	retained          map[uint64]*retainedPacket
+	acked, ackHighest uint64
+	repairWake        chan struct{}
+	lastAck           time.Time
+	ackPending        bool
 }
 
 func New(c config.Config) (*Engine, error) {
@@ -45,7 +51,14 @@ func New(c config.Config) (*Engine, error) {
 			return nil, err
 		}
 	}
-	return &Engine{cfg: c, epoch: binary.BigEndian.Uint64(b[:]), links: make(map[string]*link), addresses: make(map[string]string), receive: session.NewReassembler(128, 2*time.Second), selector: session.Selector{AutoUpgrade: c.AutoUpgrade, Timeout: c.Timeout(), HoldDown: time.Duration(c.HoldDownMS) * time.Millisecond, Margin: 10 * time.Millisecond, Confirmations: 2}}, nil
+	return &Engine{cfg: c, epoch: binary.BigEndian.Uint64(b[:]), links: make(map[string]*link), addresses: make(map[string]string), receive: newReceiver(c), selector: session.Selector{AutoUpgrade: c.AutoUpgrade, Timeout: c.Timeout(), HoldDown: time.Duration(c.HoldDownMS) * time.Millisecond, Margin: 10 * time.Millisecond, Confirmations: 2}}, nil
+}
+
+func newReceiver(c config.Config) *session.Reassembler {
+	if c.Redundant {
+		return session.NewRedundantReassembler(128, 2*time.Second)
+	}
+	return session.NewReassembler(128, 2*time.Second)
 }
 
 // Run owns all sockets until cancellation and is intentionally single-use.
@@ -83,6 +96,9 @@ func (e *Engine) Run(ctx context.Context) error {
 		}
 		e.workers.Done()
 		e.workers.Wait()
+		e.mu.Lock()
+		clear(e.retained)
+		e.mu.Unlock()
 		for len(e.output) > 0 {
 			d := <-e.output
 			d.owner.Release(d.packet)
@@ -95,7 +111,12 @@ func (e *Engine) Run(ctx context.Context) error {
 	e.mu.Lock()
 	e.app = a
 	e.output = make(chan delivery, 256)
+	e.repairWake = make(chan struct{}, 1)
 	e.mu.Unlock()
+	if e.cfg.Redundant {
+		e.workers.Add(1)
+		go func() { defer e.workers.Done(); e.repairSession(local) }()
+	}
 	e.workers.Add(1)
 	go func() { defer e.workers.Done(); e.writeApplication(local) }()
 	if e.cfg.Metrics != "" {
@@ -141,8 +162,15 @@ func (e *Engine) attach(ctx context.Context, p config.Carrier, w transport.Wire,
 		return errors.New("peer epoch conflict")
 	}
 	if peer != e.peerEpoch {
+		if e.cfg.Redundant && e.peerEpoch != 0 {
+			clear(e.retained)
+			e.sequence.Store(0)
+			e.acked, e.ackHighest = 0, 0
+			e.lastAck = time.Time{}
+			e.ackPending = false
+		}
 		e.peerEpoch = peer
-		e.receive = session.NewReassembler(128, 2*time.Second)
+		e.receive = newReceiver(e.cfg)
 	}
 	// Refuse a duplicate live carrier rather than let delayed reconnects evict it.
 	if e.links[p.Name] != nil {
@@ -215,15 +243,27 @@ func (e *Engine) readApplication(ctx context.Context) {
 			continue
 		}
 		e.counters.inputBytes.Add(uint64(len(packet)))
+		if e.cfg.Redundant {
+			e.mu.Lock()
+			if e.admitRedundantLocked(packet, time.Now()) {
+				e.active = "redundant"
+				e.counters.queuedBytes.Add(uint64(len(packet)))
+			} else {
+				e.counters.dropped.Add(1)
+			}
+			e.mu.Unlock()
+			continue
+		}
 		frames, err := session.FragmentInto(frameStorage[:0], packet, e.sequence.Add(1))
 		if err != nil {
 			e.counters.dropped.Add(1)
 			continue
 		}
 		e.mu.Lock()
-		now := time.Now()
-		paths := e.pathsInto(pathStorage[:0])
-		chosen := e.selector.Choose(now, paths)
+		chosen := ""
+		if !e.cfg.Redundant {
+			chosen = e.selector.Choose(time.Now(), e.pathsInto(pathStorage[:0]))
+		}
 		sent := false
 		if l := e.links[chosen]; l != nil {
 			sent = l.enqueue(frames)
@@ -265,6 +305,13 @@ func (e *Engine) pathsInto(out []session.Path) []session.Path {
 	return out
 }
 func (e *Engine) onData(l *link, f session.Frame) {
+	// Keep completion and publishing in one order across concurrent carriers.
+	// Never hold the engine lock while waiting for application output space.
+	e.deliveryMu.Lock()
+	defer e.deliveryMu.Unlock()
+	if e.ctx.Err() != nil {
+		return
+	}
 	if int(f.Total) > e.cfg.MaxPacketBytes {
 		e.counters.dropped.Add(1)
 		return
@@ -276,6 +323,9 @@ func (e *Engine) onData(l *link, f session.Frame) {
 	}
 	reassembler := e.receive
 	packet, complete, err := reassembler.Push(time.Now(), f)
+	if !complete && reassembler.Completed(f.ID) {
+		e.acknowledgeLocked(reassembler)
+	}
 	e.mu.Unlock()
 	if err != nil {
 		e.counters.dropped.Add(1)
@@ -285,7 +335,10 @@ func (e *Engine) onData(l *link, f session.Frame) {
 		return
 	}
 	select {
-	case e.output <- delivery{packet: packet, owner: reassembler}:
+	case e.output <- delivery{id: f.ID, packet: packet, owner: reassembler}:
+		e.mu.Lock()
+		e.acknowledgeLocked(reassembler)
+		e.mu.Unlock()
 	case <-e.ctx.Done():
 		reassembler.Release(packet)
 	}

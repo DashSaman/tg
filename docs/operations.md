@@ -134,3 +134,25 @@ and edge restarts while exit remains alive.
 `/usr/local/bin/tg`, and `/etc/tg/{edge,exit}.json` plus private credentials readable
 by that user. It is a template, not an installer. TG on high ports needs no root or
 CAP_NET_ADMIN. WireGuard, open ports and user routes are separate deployment tasks.
+# Acknowledged redundant mode
+
+Provision a new pair with `tg init --dir lab --server-name YOUR_TLS_NAME --redundant`.
+For an existing pair, set `"redundant": true` on **both** upgraded endpoints and
+keep at least two reliable carriers (`quic-stream` and/or `https`). A mismatch is
+rejected by QUIC ALPN or the HTTPS mode header before data mode. DATAGRAM `quic`
+is not supported in this mode. The ordinary default keeps its legacy mode.
+
+The latest short local profile used `queue_frames: 1024`, `max_packet_bytes: 2048`,
+WireGuard MTU 1280 and GOMAXPROCS=4 per process. Do not enlarge queues as a generic
+speed fix: measured deeper queues increased transition delay. Full copies consume
+extra carrier bandwidth; every surviving carrier needs enough capacity for the
+desired aggregate goodput. Single IP blocking can remove both protocols.
+
+Status now reports `retained_packets`, `selectively_received_packets`,
+`oldest_unacknowledged_ms`, `replayed_packets`, receive prefix/highest IDs and
+per-path `repair_queued_frames`. Sender retention is at most 8192 packets; ordinary
+and repair queues are bounded separately. ACK denotes receiver reassembly ownership,
+not UDP application delivery. All-path outage can exhaust admission; restoration
+permits repair, but traffic cannot be delivered while every path is blocked. A peer
+process restart resets the session and may lose unacknowledged data. See the
+[repair design and evidence limits](reliable-redundancy-design.md).

@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"context"
+	"github.com/DashSaman/tg/internal/config"
 	"os"
 	"path/filepath"
 	"testing"
@@ -38,6 +39,23 @@ func TestInitCreatesCheckablePairAndNeverOverwrites(t *testing.T) {
 	}
 	if err := command(context.Background(), []string{"check", "--config", filepath.Join(dir, "edge.json")}, &out); err == nil {
 		t.Fatal("missing TLS identity accepted")
+	}
+}
+
+func TestInitRedundantPairIsExplicitAndCheckable(t *testing.T) {
+	dir := filepath.Join(t.TempDir(), "lab")
+	if err := command(context.Background(), []string{"init", "--dir", dir, "--redundant"}, &bytes.Buffer{}); err != nil {
+		t.Fatal(err)
+	}
+	for _, role := range []string{"edge", "exit"} {
+		path := filepath.Join(dir, role+".json")
+		c, err := config.Load(path)
+		if err != nil || !c.Redundant {
+			t.Fatal("redundancy was not provisioned on both peers", err)
+		}
+		if err := command(context.Background(), []string{"check", "--config", path}, &bytes.Buffer{}); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
 

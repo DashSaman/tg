@@ -26,6 +26,31 @@ def docker(*args, check=True):
     return p
 
 
+def fault_schedule(kind,seconds):
+    plan=[]
+    for base in (0,60,120):
+        if kind=='single-path':
+            plan += [(base+10,'udp',True),(base+20,'udp',False),(base+35,'tcp',True),(base+45,'tcp',False)]
+        else:
+            plan += [(base+10,'udp',True),(base+16,'udp',False),(base+25,'tcp',True),(base+31,'tcp',False),
+                     (base+40,'udp',True),(base+40,'tcp',True),(base+43,'udp',False),(base+43,'tcp',False)]
+    result=[];active=set();last_clear=0
+    for event in plan:
+        at,protocol,blocked=event
+        if at>seconds-10:break
+        result.append(event)
+        if blocked:active.add(protocol)
+        else:active.remove(protocol)
+        if not active:last_clear=len(result)
+    return result[:last_clear]
+
+
+def check_redundant_setup(configuration,required):
+    for role in ('edge','exit'):
+        if bool(configuration[role].get('redundant',False))!=required:
+            raise ValueError('requested redundancy differs from actual '+role+' configuration')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary', type=Path, required=True)
@@ -41,6 +66,10 @@ def main():
     parser.add_argument('--carrier', choices=['both', 'quic', 'quic-stream', 'https'], default='both')
     parser.add_argument('--mtu', type=int, default=1280)
     parser.add_argument('--mbps', type=float, default=350, help='aggregate TCP pacing target; 0 uses unpaced bulk TCP')
+    parser.add_argument('--redundant',action='store_true')
+    parser.add_argument('--window',type=float,default=10,help='receiver rolling window in seconds; 1 is stricter than original acceptance')
+    parser.add_argument('--fault-plan',choices=['mixed','single-path'],default='mixed')
+    parser.add_argument('--extra-mixed-faults',action='store_true',help='also repeat mixed/all-path cuts after the main fault phase')
     args = parser.parse_args()
     if args.seconds < 30 or args.fault_seconds < 90:
         raise ValueError('use >=30 steady seconds and >=90 fault seconds; only >=1800 qualifies as a soak')
@@ -61,6 +90,7 @@ def main():
                     gomaxprocs=args.gomaxprocs or None, live_receiver_telemetry=True,
                     offered_aggregate_mbps=args.mbps if args.mbps else None, tcp_pacing=bool(args.mbps), mtu=args.mtu, carrier=args.carrier, started_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                     queue_frames=args.queue_frames, block_size=args.block_size,
+                    redundant=args.redundant, window_seconds=args.window, fault_plan=args.fault_plan, extra_mixed_faults=args.extra_mixed_faults,
                     scope='two isolated network namespaces on one Linux Docker VM; kernel WireGuard and TG; no WAN or DPI')
     (out/'manifest.json').write_text(json.dumps(manifest, indent=2))
     created = []
@@ -80,7 +110,7 @@ def main():
         lines = path.read_text().splitlines()
         return [json.loads(line) for line in lines if line.endswith('}')]
 
-    def trial(case, seconds, faults=False, reverse=False):
+    def trial(case, seconds, faults=False, reverse=False, fault_kind=None):
         server_file = open(out/(case+'-server.json'), 'w')
         server = subprocess.Popen(['docker', 'exec', names['exit'], 'iperf3', '-s', '-1', '-B', '10.77.0.2', '-J'], stdout=server_file, stderr=subprocess.STDOUT)
         client_file = open(out/(case+'-client.json'), 'w')
@@ -97,12 +127,7 @@ def main():
         print('START '+case+' '+str(seconds)+'s', flush=True)
         plan = []
         if faults:
-            for base in (0, 60, 120):
-                plan += [(base+10, 'udp', True), (base+16, 'udp', False),
-                         (base+25, 'tcp', True), (base+31, 'tcp', False),
-                         (base+40, 'udp', True), (base+40, 'tcp', True),
-                         (base+43, 'udp', False), (base+43, 'tcp', False)]
-            plan = [p for p in plan if p[0] < seconds-10]
+            plan = fault_schedule(fault_kind or args.fault_plan, seconds)
         next_event, report_at = 0, 60
         try:
             while client.poll() is None:
@@ -145,12 +170,12 @@ def main():
         document = json.loads((out/(case+'-client.json')).read_text())
         if faults:
             # Retain ordinary acceptance verdict even when deliberate all-path cuts fail it.
-            result = analyze(document, duration=seconds)
+            result = analyze(document, duration=seconds, window=args.window)
             receiver = document if reverse else document['server_output_json']
             health = {role: rows(role)[-1].get('tg', {}).get('healthy_carriers') for role in names}
             result.update(assess_recovery(receiver['intervals'], result, seconds, health))
         else:
-            result = analyze(document, duration=seconds)
+            result = analyze(document, duration=seconds, window=args.window)
         result.update(start=before, end=after, case=case, reverse=reverse)
         (out/(case+'-acceptance.json')).write_text(json.dumps(result, indent=2))
         print('RESULT '+json.dumps(result), flush=True)
@@ -163,7 +188,7 @@ def main():
     try:
         docker('network', 'create', '--internal', '--label', 'tg.wgsoak='+prefix, network)
         docker('volume', 'create', '--label', 'tg.wgsoak='+prefix, volume)
-        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier)
+        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier, '1' if args.redundant else '0')
         for role in ('exit', 'edge'):
             docker('run', '-d', '--name', names[role], '--network', network, '--cap-add', 'NET_ADMIN',
                    *(['-e', 'TG_DIAGNOSTIC_PROFILE=/out/'+role] if args.profile else []),
@@ -179,6 +204,7 @@ def main():
             raise RuntimeError('WireGuard handshake/connectivity failed; inspect node logs')
         manifest['versions'] = execute('edge', 'sh', '-c', 'uname -r; wg --version; iperf3 --version; ip -details link show wg-tg; ip route get 10.77.0.2')
         manifest['lab_configuration'] = json.loads((out/'lab-config-summary.json').read_text())
+        check_redundant_setup(manifest['lab_configuration'],args.redundant)
         (out/'manifest.json').write_text(json.dumps(manifest, indent=2))
         for role in names:
             (out/(role+'-udp-socket-memory.txt')).write_text(execute(role,'ss','-u','-a','-n','-m'))
@@ -201,14 +227,17 @@ def main():
         steady = trial('steady', args.seconds)
         # Do not restart TG: the same processes continue through all fault cycles.
         fault = trial('faults', args.fault_seconds, faults=True)
+        additional=trial('all-path-faults',args.fault_seconds,faults=True,fault_kind='mixed') if args.extra_mixed_faults else None
         time.sleep(6)
         result = dict(steady=steady, faults=fault, memory={}, scope=manifest['scope'])
+        if additional is not None:result['additional_faults']=additional
+        result['single_path_speed_gate_required']=args.fault_plan=='single-path'
         if args.seconds >= 1800:
             for role in names:
                 result['memory'][role] = analyze_memory(rows(role), steady['start'], steady['start']+args.seconds)
         else:
             result['memory_note'] = 'short setup validation only; not 30-minute acceptance'
-        result['passed'] = steady['passed'] and fault['recovery_passed'] and all(m['passed'] for m in result['memory'].values())
+        result['passed'] = steady['passed'] and fault['recovery_passed'] and (fault['passed'] if args.fault_plan=='single-path' else True) and (additional['recovery_passed'] if additional else True) and all(m['passed'] for m in result['memory'].values())
         (out/'summary.json').write_text(json.dumps(result, indent=2))
         print('SUMMARY '+json.dumps(result), flush=True)
         return 0 if result['passed'] else 1

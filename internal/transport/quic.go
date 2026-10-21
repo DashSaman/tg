@@ -20,8 +20,11 @@ import (
 // Both peers must upgrade together; v1 peers fail ALPN negotiation.
 const alpn = "tg-dgram-v2"
 
-func quicALPN(kind string) string {
+func quicALPN(kind string, redundant bool) string {
 	if kind == "quic-stream" {
+		if redundant {
+			return "tg-repair-v1"
+		}
 		return "tg-stream-v1"
 	}
 	return alpn
@@ -220,7 +223,7 @@ func listenQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 	if err != nil {
 		return nil, nil, err
 	}
-	tc.NextProtos = []string{quicALPN(p.Kind)}
+	tc.NextProtos = []string{quicALPN(p.Kind, c.Redundant)}
 	l, err := quic.ListenAddr(p.Address, tc, quicModeConfig(p))
 	if err != nil {
 		return nil, nil, err
@@ -289,7 +292,7 @@ func dialQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	if err != nil {
 		return nil, 0, err
 	}
-	tc.NextProtos = []string{quicALPN(p.Kind)}
+	tc.NextProtos = []string{quicALPN(p.Kind, c.Redundant)}
 	tc.MinVersion = tls.VersionTLS13
 	dialCtx, cancel := context.WithTimeout(ctx, 4*time.Second)
 	defer cancel()

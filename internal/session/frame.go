@@ -11,9 +11,12 @@ const (
 	Header         = 16
 	MaxPacket      = 8192
 	MaxFrame       = Chunk + Header
+	AckBits        = 1024
+	AckBytes       = 8 + AckBits/8 // highest completed ID, followed by selective completion bits
 	Data      byte = 1
 	Probe     byte = 2
 	Pong      byte = 3
+	Ack       byte = 4
 )
 
 type Frame struct {
@@ -24,6 +27,18 @@ type Frame struct {
 }
 
 func (f Frame) validate() error {
+	if f.Kind == Ack {
+		if f.Index != 0 || f.Count != 0 || f.Total != 0 || len(f.Payload) != AckBytes || binary.BigEndian.Uint64(f.Payload) < f.ID {
+			return errors.New("malformed acknowledgement")
+		}
+		high := binary.BigEndian.Uint64(f.Payload)
+		for bit := 0; bit < AckBits; bit++ {
+			if f.Payload[8+bit/8]&(byte(1)<<uint(bit%8)) != 0 && (bit == 0 || uint64(bit)+1 > high-f.ID) {
+				return errors.New("impossible selective acknowledgement")
+			}
+		}
+		return nil
+	}
 	if f.ID == 0 {
 		return errors.New("zero frame sequence")
 	}

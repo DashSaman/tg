@@ -12,14 +12,19 @@ import (
 )
 
 type application struct {
-	conn          *net.UDPConn
-	exit          bool
-	mu            sync.Mutex
-	peer          netip.AddrPort
-	readBuffer    []byte
-	batch         *ipv4.PacketConn
-	writeMessages [32]ipv4.Message
-	writeBuffers  [32][1][]byte
+	conn                *net.UDPConn
+	exit                bool
+	mu                  sync.Mutex
+	peer                netip.AddrPort
+	readBuffer          []byte
+	batch               *ipv4.PacketConn
+	writeMessages       [32]ipv4.Message
+	writeBuffers        [32][1][]byte
+	readMessages        [32]ipv4.Message
+	readBuffers         [32][1][]byte
+	readStorage         []byte
+	readNext, readCount int
+	readError           error
 }
 
 func openApplication(c config.Config) (*application, error) {
@@ -42,6 +47,13 @@ func openApplication(c config.Config) (*application, error) {
 	a.batch = ipv4.NewPacketConn(a.conn)
 	for i := range a.writeMessages {
 		a.writeMessages[i].Buffers = a.writeBuffers[i][:]
+	}
+	if runtime.GOOS == "linux" {
+		a.readStorage = make([]byte, len(a.readMessages)*(c.MaxPacketBytes+1))
+		for i := range a.readMessages {
+			a.readBuffers[i][0] = a.readStorage[i*(c.MaxPacketBytes+1) : (i+1)*(c.MaxPacketBytes+1)]
+			a.readMessages[i].Buffers = a.readBuffers[i][:]
+		}
 	}
 	return a, nil
 }
@@ -106,7 +118,39 @@ func (a *application) writeBatch(packets [][]byte, timeout time.Duration) (int, 
 }
 func (a *application) read(limit int) ([]byte, error) {
 	b := a.readBuffer[:limit+1]
-	n, peer, err := a.conn.ReadFromUDPAddrPort(b)
+	var n int
+	var peer netip.AddrPort
+	var err error
+	if runtime.GOOS == "linux" {
+		if a.readNext == a.readCount {
+			if a.readError != nil {
+				err = a.readError
+				a.readError = nil
+				return nil, err
+			}
+			a.readNext = 0
+			a.readCount, a.readError = a.batch.ReadBatch(a.readMessages[:], 0)
+			if a.readCount <= 0 {
+				err = a.readError
+				a.readError = nil
+				a.readCount = 0
+				if err == nil {
+					err = errors.New("empty application read batch")
+				}
+				return nil, err
+			}
+		}
+		m := &a.readMessages[a.readNext]
+		a.readNext++
+		n = m.N
+		b = m.Buffers[0]
+		if addr, ok := m.Addr.(*net.UDPAddr); ok {
+			peer = addr.AddrPort()
+		}
+		m.Addr = nil
+	} else {
+		n, peer, err = a.conn.ReadFromUDPAddrPort(b)
+	}
 	if err != nil {
 		return nil, err
 	}

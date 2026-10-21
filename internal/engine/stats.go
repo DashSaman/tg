@@ -12,31 +12,47 @@ import (
 	"time"
 )
 
-type counters struct{ inputBytes, queuedBytes, outputBytes, wireSent, wireReceived, dropped, appErrors, malformed, reconnects, switches atomic.Uint64 }
+type counters struct{ inputBytes, queuedBytes, outputBytes, wireSent, wireReceived, dropped, appErrors, malformed, reconnects, switches, extraCopies, replicaSkips, reorderAhead, reorderLate, reorderGaps, reorderPeak, replayed atomic.Uint64 }
 type PathStatus struct {
 	Name               string  `json:"name"`
 	Healthy            bool    `json:"healthy"`
 	RTTMilliseconds    float64 `json:"rtt_ms"`
 	JitterMilliseconds float64 `json:"rtt_variation_ms"`
 	QueuedFrames       int     `json:"queued_frames"`
+	RepairQueuedFrames int     `json:"repair_queued_frames"`
 }
 type Snapshot struct {
-	Scope           string            `json:"health_scope"`
-	Addresses       map[string]string `json:"addresses"`
-	AppAddress      string            `json:"app_address"`
-	HealthyCarriers int               `json:"healthy_carriers"`
-	ActiveCarrier   string            `json:"active_carrier"`
-	Paths           []PathStatus      `json:"paths"`
-	InputBytes      uint64            `json:"app_input_bytes"`
-	QueuedBytes     uint64            `json:"app_queued_bytes"`
-	OutputBytes     uint64            `json:"app_output_bytes"`
-	WireSent        uint64            `json:"frame_sent_bytes"`
-	WireReceived    uint64            `json:"frame_received_bytes"`
-	Dropped         uint64            `json:"dropped_packets"`
-	AppErrors       uint64            `json:"app_errors"`
-	Malformed       uint64            `json:"malformed_frames"`
-	Reconnects      uint64            `json:"reconnect_attempts"`
-	Switches        uint64            `json:"carrier_switches"`
+	ReceivePrefix     uint64            `json:"received_contiguous_id"`
+	ReceiveHighest    uint64            `json:"received_highest_id"`
+	OldestPendingMS   float64           `json:"oldest_unacknowledged_ms"`
+	SelectiveReceived int               `json:"selectively_received_packets"`
+	OutputQueued      int               `json:"completed_output_queue"`
+	Retained          int               `json:"retained_packets"`
+	Replayed          uint64            `json:"replayed_packets"`
+	Acked             uint64            `json:"acknowledged_packet_id"`
+	Redundant         bool              `json:"redundant"`
+	ExtraCopies       uint64            `json:"extra_packet_copies"`
+	ReplicaSkips      uint64            `json:"skipped_packet_copies"`
+	ReorderAhead      uint64            `json:"out_of_order_packets"`
+	ReorderLate       uint64            `json:"expired_late_packets"`
+	ReorderGaps       uint64            `json:"missing_packet_ids_skipped"`
+	ReorderPeak       uint64            `json:"peak_reorder_packets"`
+	Scope             string            `json:"health_scope"`
+	Addresses         map[string]string `json:"addresses"`
+	AppAddress        string            `json:"app_address"`
+	HealthyCarriers   int               `json:"healthy_carriers"`
+	ActiveCarrier     string            `json:"active_carrier"`
+	Paths             []PathStatus      `json:"paths"`
+	InputBytes        uint64            `json:"app_input_bytes"`
+	QueuedBytes       uint64            `json:"app_queued_bytes"`
+	OutputBytes       uint64            `json:"app_output_bytes"`
+	WireSent          uint64            `json:"frame_sent_bytes"`
+	WireReceived      uint64            `json:"frame_received_bytes"`
+	Dropped           uint64            `json:"dropped_packets"`
+	AppErrors         uint64            `json:"app_errors"`
+	Malformed         uint64            `json:"malformed_frames"`
+	Reconnects        uint64            `json:"reconnect_attempts"`
+	Switches          uint64            `json:"carrier_switches"`
 }
 
 func (e *Engine) Snapshot() Snapshot {
@@ -56,9 +72,32 @@ func (e *Engine) Snapshot() Snapshot {
 			s.HealthyCarriers++
 		}
 		s.Paths = append(s.Paths, PathStatus{Name: p.ID, Healthy: h, RTTMilliseconds: float64(p.RTT) / float64(time.Millisecond), JitterMilliseconds: float64(p.Jitter) / float64(time.Millisecond), QueuedFrames: p.Queued})
+		s.Paths[len(s.Paths)-1].RepairQueuedFrames = len(e.links[p.ID].repair)
 	}
 	sort.Slice(s.Paths, func(i, j int) bool { return s.Paths[i].Name < s.Paths[j].Name })
 	c := &e.counters
+	if e.receive != nil {
+		s.ReceivePrefix, s.ReceiveHighest = e.receive.AckState()
+	}
+	if p := e.retained[e.acked+1]; p != nil && !p.born.IsZero() {
+		s.OldestPendingMS = float64(time.Since(p.born)) / float64(time.Millisecond)
+	}
+	for _, p := range e.retained {
+		if p.received {
+			s.SelectiveReceived++
+		}
+	}
+	s.OutputQueued = len(e.output)
+	s.Retained = len(e.retained)
+	s.Replayed = c.replayed.Load()
+	s.Acked = e.acked
+	s.Redundant = e.cfg.Redundant
+	s.ExtraCopies = c.extraCopies.Load()
+	s.ReplicaSkips = c.replicaSkips.Load()
+	s.ReorderAhead = c.reorderAhead.Load()
+	s.ReorderLate = c.reorderLate.Load()
+	s.ReorderGaps = c.reorderGaps.Load()
+	s.ReorderPeak = c.reorderPeak.Load()
 	s.InputBytes = c.inputBytes.Load()
 	s.QueuedBytes = c.queuedBytes.Load()
 	s.OutputBytes = c.outputBytes.Load()
@@ -96,13 +135,16 @@ func (e *Engine) serveMetrics(ctx context.Context) (func(), error) {
 		s := e.Snapshot()
 		w.Header().Set("Content-Type", "text/plain; version=0.0.4")
 		_, _ = fmt.Fprintf(w, "tg_healthy_carriers %d\ntg_app_input_bytes_total %d\ntg_app_queued_bytes_total %d\ntg_app_output_bytes_total %d\ntg_frame_sent_bytes_total %d\ntg_frame_received_bytes_total %d\ntg_dropped_packets_total %d\ntg_app_errors_total %d\ntg_malformed_frames_total %d\ntg_reconnect_attempts_total %d\ntg_carrier_switches_total %d\n", s.HealthyCarriers, s.InputBytes, s.QueuedBytes, s.OutputBytes, s.WireSent, s.WireReceived, s.Dropped, s.AppErrors, s.Malformed, s.Reconnects, s.Switches)
+		_, _ = fmt.Fprintf(w, "tg_extra_packet_copies_total %d\ntg_skipped_packet_copies_total %d\ntg_out_of_order_packets_total %d\ntg_expired_late_packets_total %d\ntg_missing_packet_ids_skipped_total %d\ntg_peak_reorder_packets %d\n", s.ExtraCopies, s.ReplicaSkips, s.ReorderAhead, s.ReorderLate, s.ReorderGaps, s.ReorderPeak)
 		for _, p := range s.Paths {
+			// Paths retain their own authenticated health measurements.
 			h := 0
 			if p.Healthy {
 				h = 1
 			}
 			_, _ = fmt.Fprintf(w, "tg_carrier_healthy{carrier=%q} %d\ntg_carrier_rtt_seconds{carrier=%q} %g\ntg_carrier_rtt_variation_seconds{carrier=%q} %g\ntg_carrier_queued_frames{carrier=%q} %d\n", p.Name, h, p.Name, p.RTTMilliseconds/1000, p.Name, p.JitterMilliseconds/1000, p.Name, p.QueuedFrames)
 		}
+		_, _ = fmt.Fprintf(w, "tg_retained_packets %d\ntg_replayed_packets_total %d\ntg_acknowledged_packet_id %d\n", s.Retained, s.Replayed, s.Acked)
 	})
 	srv := &http.Server{Handler: mux, ReadHeaderTimeout: 2 * time.Second, WriteTimeout: 2 * time.Second, IdleTimeout: 10 * time.Second, MaxHeaderBytes: 8192}
 	var once sync.Once

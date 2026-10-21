@@ -3,6 +3,7 @@ package engine
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/DashSaman/tg/internal/config"
 	"github.com/DashSaman/tg/internal/pki"
 	"github.com/DashSaman/tg/internal/session"
@@ -252,6 +253,12 @@ func TestQueueWaitAbsorbsBurstWithoutPartialAdmission(t *testing.T) {
 }
 
 func TestPeerRestartResetsDedupWithoutReplacingExitSocket(t *testing.T) {
+	for _, redundant := range []bool{false, true} {
+		t.Run(fmt.Sprint("redundant=", redundant), func(t *testing.T) { peerRestartPreservesSocket(t, redundant) })
+	}
+}
+
+func peerRestartPreservesSocket(t *testing.T, redundant bool) {
 	dir := filepath.Join(t.TempDir(), "keys")
 	if err := pki.Generate(dir, "localhost"); err != nil {
 		t.Fatal(err)
@@ -274,6 +281,7 @@ func TestPeerRestartResetsDedupWithoutReplacingExitSocket(t *testing.T) {
 		}
 	}()
 	c := config.Defaults()
+	c.Redundant = redundant
 	c.Role = "exit"
 	c.SessionID = strings.Repeat("2", 32)
 	c.AppAddress = echo.LocalAddr().String()
@@ -284,8 +292,12 @@ func TestPeerRestartResetsDedupWithoutReplacingExitSocket(t *testing.T) {
 	c.TLS.Cert = filepath.Join(dir, "server.crt")
 	c.TLS.Key = filepath.Join(dir, "server.key")
 	c.TokenFile = filepath.Join(dir, "web.token")
-	c.Carriers = c.Carriers[:1]
-	c.Carriers[0].Address = "127.0.0.1:0"
+	if !redundant {
+		c.Carriers = c.Carriers[:1]
+	}
+	for i := range c.Carriers {
+		c.Carriers[i].Address = "127.0.0.1:0"
+	}
 	ex, err := New(c)
 	if err != nil {
 		t.Fatal(err)
@@ -294,7 +306,7 @@ func TestPeerRestartResetsDedupWithoutReplacingExitSocket(t *testing.T) {
 	defer cancel()
 	done := make(chan error, 1)
 	go func() { done <- ex.Run(ctx) }()
-	until(t, func() bool { return len(ex.Snapshot().Addresses) == 1 })
+	until(t, func() bool { return len(ex.Snapshot().Addresses) == len(c.Carriers) })
 	var original any
 	for i := 0; i < 2; i++ {
 		edgeCfg := c
@@ -303,7 +315,9 @@ func TestPeerRestartResetsDedupWithoutReplacingExitSocket(t *testing.T) {
 		edgeCfg.TLS.Cert = filepath.Join(dir, "edge.crt")
 		edgeCfg.TLS.Key = filepath.Join(dir, "edge.key")
 		edgeCfg.Carriers = append([]config.Carrier{}, c.Carriers...)
-		edgeCfg.Carriers[0].Address = ex.Snapshot().Addresses["web"]
+		for j := range edgeCfg.Carriers {
+			edgeCfg.Carriers[j].Address = ex.Snapshot().Addresses[edgeCfg.Carriers[j].Name]
+		}
 		edge, err := New(edgeCfg)
 		if err != nil {
 			t.Fatal(err)
@@ -311,7 +325,7 @@ func TestPeerRestartResetsDedupWithoutReplacingExitSocket(t *testing.T) {
 		ec, stop := context.WithCancel(ctx)
 		ed := make(chan error, 1)
 		go func() { ed <- edge.Run(ec) }()
-		until(t, func() bool { return edge.Snapshot().HealthyCarriers == 1 })
+		until(t, func() bool { return edge.Snapshot().HealthyCarriers == len(c.Carriers) })
 		app, err := net.Dial("udp", edge.Snapshot().AppAddress)
 		if err != nil {
 			t.Fatal(err)

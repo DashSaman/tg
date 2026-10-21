@@ -18,6 +18,12 @@ The repaired default `quic-stream` completed a new local 30-minute test:
 with bounded TG RSS/PSS and three loaded outage recoveries.
 [Final local evidence and profile](docs/wireguard-fixed-validation.md). [Diagnosis and failed intermediate controls](docs/wireguard-fix.md) are retained.
 
+An explicit `tg init --redundant` mode now combines both reliable carriers with
+bounded session retention, selective acknowledgements, priority repair and ordered
+delivery. Both endpoints must upgrade and opt in. Its latest short kernel-WireGuard
+control passed the stricter one-second target during single-path cuts; a new full
+soak is pending. [Design, failed controls and scope](docs/reliable-redundancy-design.md).
+
 TG forwards one application's opaque UDP packets. WireGuard is the intended inner
 IP tunnel, configured separately. TG keeps the exit UDP socket across carrier
 changes and probes both carriers. Default selection retains a healthy active path
@@ -50,7 +56,8 @@ Linux modes are 0700/0600; protect Windows directories with appropriate ACLs.
 Read the [operator guide](docs/operations.md) before configuring two hosts. Health
 means carrier round trip, not application Internet access. Native QUIC is
 identifiable; HTTPS/2 alone does not prove DPI resistance. Both carriers on one IP
-share IP-block risk. TG does not bond capacities or retransmit application UDP.
+share IP-block risk. TG does not bond capacities. Redundant mode retransmits
+unacknowledged datagrams within its bounded session; the ordinary default does not.
 FEC, REALITY/XHTTP and spoof adapters remain future work.
 
 ## Design and verification

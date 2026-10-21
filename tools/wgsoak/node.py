@@ -13,9 +13,9 @@ def command(*args, **kwargs):
     return subprocess.run(args, check=True, capture_output=True, text=True, **kwargs).stdout.strip()
 
 
-def initialize(exit_name, queue, carrier):
+def initialize(exit_name, queue, carrier, redundant='0'):
     os.umask(0o077)
-    command('/tg', 'init', '--dir', '/private/pki', '--server-name', 'localhost')
+    command('/tg', 'init', '--dir', '/private/pki', '--server-name', 'localhost', *(['--redundant'] if redundant=='1' else []))
     public = {}
     for role in ('edge', 'exit'):
         p = Path('/private/pki') / (role+'.json')
@@ -32,7 +32,7 @@ def initialize(exit_name, queue, carrier):
             port = 8443 if path['kind'] == 'https' else 8444
             path['address'] = f'{exit_name if role == "edge" else "0.0.0.0"}:{port}'
         p.write_text(json.dumps(config))
-        public[role] = {k:config.get(k) for k in ('auto_upgrade','queue_frames','max_packet_bytes','probe_interval_ms','probe_timeout_ms','hold_down_ms')}
+        public[role] = {k:config.get(k) for k in ('auto_upgrade','redundant','queue_frames','max_packet_bytes','probe_interval_ms','probe_timeout_ms','hold_down_ms')}
         public[role]['carriers'] = [{k:c[k] for k in ('name','kind')} for c in config['carriers']]
         key = command('wg', 'genkey')
         Path('/private/'+role+'.key').write_text(key+'\n')
@@ -118,7 +118,7 @@ def run(role, mtu):
 
 if __name__ == '__main__':
     if sys.argv[1] == 'init':
-        initialize(sys.argv[2], sys.argv[3], sys.argv[4])
+        initialize(*sys.argv[2:])
     elif sys.argv[1] == 'direct':
         command('wg', 'set', 'wg-tg', 'peer', Path('/private/exit.pub').read_text().strip(), 'endpoint', sys.argv[2]+':51820')
     else:

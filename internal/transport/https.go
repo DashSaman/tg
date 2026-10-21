@@ -30,6 +30,13 @@ type httpWire struct {
 	readBuffer  [session.MaxFrame]byte
 }
 
+func sessionMode(c config.Config) string {
+	if c.Redundant {
+		return "repair-v1"
+	}
+	return ""
+}
+
 func (w *httpWire) Send(b []byte) error {
 	return w.SendBatch([][]byte{b})
 }
@@ -94,7 +101,7 @@ func listenHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 	srv := &http.Server{TLSConfig: tc, ReadHeaderTimeout: 3 * time.Second, MaxHeaderBytes: 8192, IdleTimeout: 10 * time.Second, ErrorLog: log.New(io.Discard, "", 0)}
 	srv.Handler = http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		got := sha256.Sum256([]byte(r.Header.Get("Authorization")))
-		if r.Method != "POST" || r.URL.Path != p.Path || r.ProtoMajor != 2 || subtle.ConstantTimeCompare(got[:], want[:]) != 1 || r.Header.Get("X-Tg-Session") != c.SessionID {
+		if r.Method != "POST" || r.URL.Path != p.Path || r.ProtoMajor != 2 || subtle.ConstantTimeCompare(got[:], want[:]) != 1 || r.Header.Get("X-Tg-Session") != c.SessionID || r.Header.Get("X-Tg-Mode") != sessionMode(c) {
 			if r.Method == "GET" && r.URL.Path == "/" {
 				rw.Header().Set("Content-Type", "text/plain; charset=utf-8")
 				_, _ = io.WriteString(rw, "Service online.\n")
@@ -116,6 +123,9 @@ func listenHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 		rw.Header().Set("Content-Type", "application/octet-stream")
 		rw.Header().Set("Cache-Control", "no-store")
 		rw.Header().Set("X-Tg-Epoch", strconv.FormatUint(epoch, 16))
+		if c.Redundant {
+			rw.Header().Set("X-Tg-Mode", sessionMode(c))
+		}
 		rw.WriteHeader(200)
 		if e = controller.Flush(); e != nil {
 			return
@@ -160,6 +170,9 @@ func dialHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	req.Header.Set("Authorization", "Bearer "+token)
 	req.Header.Set("X-Tg-Session", c.SessionID)
 	req.Header.Set("X-Tg-Epoch", strconv.FormatUint(epoch, 16))
+	if c.Redundant {
+		req.Header.Set("X-Tg-Mode", sessionMode(c))
+	}
 	req.Header.Set("Content-Type", "application/octet-stream")
 	resp, err := (&http.Client{Transport: tr}).Do(req)
 	if err != nil {
@@ -167,7 +180,7 @@ func dialHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 		return nil, 0, err
 	}
 	other, e := strconv.ParseUint(resp.Header.Get("X-Tg-Epoch"), 16, 64)
-	if resp.StatusCode != 200 || resp.ProtoMajor != 2 || e != nil || other == 0 {
+	if resp.StatusCode != 200 || resp.ProtoMajor != 2 || e != nil || other == 0 || resp.Header.Get("X-Tg-Mode") != sessionMode(c) {
 		resp.Body.Close()
 		closeAll()
 		return nil, 0, errors.New("HTTPS session rejected")

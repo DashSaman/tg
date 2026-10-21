@@ -9,6 +9,17 @@ def receipt():
 
 
 class AcceptanceTests(unittest.TestCase):
+    def test_weighted_window_cannot_hide_low_complete_interval(self):
+        r=receipt()
+        for i,interval in enumerate(r['intervals']):
+            s=interval['sum']; s.update(start=i*.999,end=(i+1)*.999,seconds=.999)
+            s['bytes']=(299.99 if i==0 else 320)*1e6*.999/8
+        r['end']['sum_received'].update(seconds=3.996,bytes=sum(x['sum']['bytes'] for x in r['intervals']))
+        result=analyze(r,duration=3.99,window=1)
+        self.assertGreater(result['minimum_window_mbps'],300)
+        self.assertEqual(result['complete_one_second_below_target'],1)
+        self.assertFalse(result['passed'])
+
     def test_receiver_bytes_and_windows(self):
         r = receipt()
         result = analyze(r, duration=4, window=2)

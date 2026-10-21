@@ -41,6 +41,7 @@ type Config struct {
 	ProbeTimeoutMS  int       `json:"probe_timeout_ms"`
 	HoldDownMS      int       `json:"hold_down_ms"`
 	AutoUpgrade     bool      `json:"auto_upgrade"`
+	Redundant       bool      `json:"redundant"`
 	QueueFrames     int       `json:"queue_frames"`
 	MaxPacketBytes  int       `json:"max_packet_bytes"`
 }
@@ -91,9 +92,15 @@ func (c Config) Validate() error {
 	if len(c.Carriers) < 1 || len(c.Carriers) > 4 {
 		return errors.New("one to four carriers required")
 	}
+	if c.Redundant && len(c.Carriers) < 2 {
+		return errors.New("redundant mode needs at least two configured carriers")
+	}
 	names := map[string]bool{}
 	addresses := map[string]bool{}
 	for _, p := range c.Carriers {
+		if c.Redundant && p.Kind == "quic" {
+			return errors.New("redundant mode requires reliable quic-stream or https carriers")
+		}
 		if p.Name == "" || len(p.Name) > 32 || names[p.Name] || !safeName(p.Name) {
 			return errors.New("invalid or duplicate carrier name")
 		}

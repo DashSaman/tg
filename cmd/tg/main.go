@@ -45,13 +45,14 @@ func command(ctx context.Context, args []string, out io.Writer) error {
 	case "init":
 		dir := flags.String("dir", "", "new private directory for configs and test identities")
 		name := flags.String("server-name", "localhost", "verified server DNS name or IP")
+		redundant := flags.Bool("redundant", false, "enable acknowledged packet redundancy across reliable carriers; extra bandwidth required")
 		if err := flags.Parse(args[1:]); err != nil {
 			return err
 		}
 		if *dir == "" || flags.NArg() != 0 {
 			return errors.New("init requires --dir and no positional arguments")
 		}
-		return initialize(*dir, *name, out)
+		return initialize(*dir, *name, *redundant, out)
 	case "check", "run":
 		path := flags.String("config", "", "JSON configuration path")
 		if err := flags.Parse(args[1:]); err != nil {
@@ -81,7 +82,7 @@ func command(ctx context.Context, args []string, out io.Writer) error {
 		return errors.New("unknown command")
 	}
 }
-func initialize(dir, name string, out io.Writer) error {
+func initialize(dir, name string, redundant bool, out io.Writer) error {
 	sessionID := make([]byte, 16)
 	path := make([]byte, 16)
 	if _, err := rand.Read(sessionID); err != nil {
@@ -94,6 +95,7 @@ func initialize(dir, name string, out io.Writer) error {
 		return err
 	}
 	c := config.Defaults()
+	c.Redundant = redundant
 	c.SessionID = hex.EncodeToString(sessionID)
 	c.TLS.ServerName = name
 	c.Carriers[0].Path = "/" + hex.EncodeToString(path)

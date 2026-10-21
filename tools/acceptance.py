@@ -94,6 +94,10 @@ def analyze(document, *, target=300, duration=1800, window=10, max_loss=1, max_j
             size = bytes_at(finish)-bytes_at(begin)
             windows.append(size*8/window/1_000_000)
         failures = []
+        full_one_second = [size*8/(b-a)/1_000_000 for a,b,size in samples if 0.95 <= b-a <= 1.05]
+        below_one_second = sum(value < target for value in full_one_second)
+        if window == 1 and (not full_one_second or below_one_second):
+            failures.append("complete one-second receiver interval below target or absent")
         if span+0.05 < duration:
             failures.append("insufficient receiver duration")
         if received < target:
@@ -107,6 +111,8 @@ def analyze(document, *, target=300, duration=1800, window=10, max_loss=1, max_j
         return {"passed": not failures, "protocol": protocol, "scope": "receiver_application_goodput",
                 "seconds": span, "received_mbps": received, "minimum_window_mbps": min(windows) if windows else None,
                 "window_seconds": window, "maximum_udp_interval_loss_percent": max(losses) if losses else None,
+                "minimum_complete_one_second_mbps": min(full_one_second) if full_one_second else None,
+                "complete_one_second_intervals": len(full_one_second), "complete_one_second_below_target": below_one_second,
                 "maximum_udp_interval_jitter_ms": max(jitters) if jitters else None, "failures": failures}
     except (KeyError, TypeError, AttributeError) as exc:
         raise InvalidReceipt("missing or unsupported receiver JSON fields") from exc

@@ -73,3 +73,21 @@ func TestNativeQUICModesCannotShareUDPListenerEndpoint(t *testing.T) {
 		t.Fatal("QUIC modes can conflict on one UDP listener")
 	}
 }
+
+func TestRedundancyRequiresMultipleReliableCarriers(t *testing.T) {
+	c := valid()
+	c.Redundant = true
+	if err := c.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	c.Carriers = c.Carriers[:1]
+	if err := c.Validate(); err == nil {
+		t.Fatal("single carrier accepted for redundant setup")
+	}
+	c = valid()
+	c.Redundant = true
+	c.Carriers[1].Kind = "quic"
+	if err := c.Validate(); err == nil {
+		t.Fatal("unordered DATAGRAM accepted for ordered redundant mode")
+	}
+}

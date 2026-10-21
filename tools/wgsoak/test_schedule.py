@@ -1,0 +1,38 @@
+import unittest
+from run import fault_schedule,check_redundant_setup
+
+
+class ScheduleTests(unittest.TestCase):
+    def test_requested_mode_cannot_silently_disappear_at_container_boundary(self):
+        c={role:{'redundant':False} for role in ('edge','exit')}
+        with self.assertRaises(ValueError):check_redundant_setup(c,True)
+        c['edge']['redundant']=True
+        with self.assertRaises(ValueError):check_redundant_setup(c,True)
+        c['exit']['redundant']=True
+        check_redundant_setup(c,True)
+    def test_every_supported_duration_ends_with_all_rules_restored(self):
+        for kind in ('mixed','single-path'):
+            for seconds in range(90,201):
+                rules=set()
+                for _,protocol,blocked in fault_schedule(kind,seconds):
+                    if blocked:rules.add(protocol)
+                    else:rules.remove(protocol)
+                self.assertEqual(rules,set(),(kind,seconds))
+    def test_single_path_never_blocks_both_and_restores_every_rule(self):
+        rules=set()
+        plan=fault_schedule('single-path',180)
+        self.assertEqual(len(plan),12)
+        for _,protocol,blocked in plan:
+            if blocked:rules.add(protocol)
+            else:rules.remove(protocol)
+            self.assertLessEqual(len(rules),1)
+        self.assertEqual(rules,set())
+
+    def test_mixed_retains_three_explicit_all_path_cuts(self):
+        rules=set();both=0
+        for _,protocol,blocked in fault_schedule('mixed',180):
+            if blocked:rules.add(protocol)
+            else:rules.remove(protocol)
+            if len(rules)==2:both+=1
+        self.assertEqual(both,3)
+        self.assertEqual(rules,set())
