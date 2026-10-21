@@ -26,7 +26,7 @@ import (
 var loadEnabled = flag.Bool("tg.load", false, "opt-in real encrypted loopback load test")
 var loadDuration = flag.Duration("tg.duration", 10*time.Second, "measurement duration, excluding warmup")
 var loadRate = flag.Float64("tg.mbps", 350, "offered aggregate application Mbps")
-var loadCarrier = flag.String("tg.carrier", "quic", "quic, https or both")
+var loadCarrier = flag.String("tg.carrier", "quic-stream", "quic-stream, quic (DATAGRAM), https or both")
 var loadDirection = flag.String("tg.direction", "forward", "forward, reverse or duplex")
 var loadFault = flag.String("tg.fault", "none", "none or cycle (requires both and >=36s)")
 var loadReport = flag.String("tg.report", "", "JSON receipt relative to repository root or absolute")
@@ -73,7 +73,7 @@ func TestLocalLoad(t *testing.T) {
 	if *loadDuration < 3*time.Second || *loadDuration > time.Hour || *loadRate <= 0 || *loadRate > 2000 || *loadPacket < 64 || *loadPacket > 8192 || *loadLoss < 0 || *loadLoss > 10 || (*loadLoss > 0 && *loadCarrier == "https") {
 		t.Fatal("invalid bounded load parameters")
 	}
-	if *loadCarrier != "quic" && *loadCarrier != "https" && *loadCarrier != "both" {
+	if *loadCarrier != "quic" && *loadCarrier != "quic-stream" && *loadCarrier != "https" && *loadCarrier != "both" {
 		t.Fatal("invalid carrier")
 	}
 	if *loadDirection != "forward" && *loadDirection != "reverse" && *loadDirection != "duplex" {
@@ -106,8 +106,9 @@ func TestLocalLoad(t *testing.T) {
 	c.TLS.Cert = filepath.Join(dir, "server.crt")
 	c.TLS.Key = filepath.Join(dir, "server.key")
 	c.TokenFile = filepath.Join(dir, "web.token")
-	if *loadCarrier == "quic" {
+	if *loadCarrier == "quic" || *loadCarrier == "quic-stream" {
 		c.Carriers = c.Carriers[1:]
+		c.Carriers[0].Kind = *loadCarrier
 	} else if *loadCarrier == "https" {
 		c.Carriers = c.Carriers[:1]
 	}
@@ -137,7 +138,7 @@ func TestLocalLoad(t *testing.T) {
 	if *loadFault != "none" || *loadLoss > 0 {
 		for i := range ec.Carriers {
 			p := &ec.Carriers[i]
-			if p.Kind == "quic" {
+			if p.Kind == "quic" || p.Kind == "quic-stream" {
 				proxy, drop := udpProxyWithLoss(t, p.Address, *loadLoss)
 				defer proxy.Close()
 				udpDrop = drop

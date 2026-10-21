@@ -62,3 +62,14 @@ func TestLoadStrictAndConfigRelativePaths(t *testing.T) {
 		t.Fatal("trailing JSON accepted")
 	}
 }
+
+func TestNativeQUICModesCannotShareUDPListenerEndpoint(t *testing.T) {
+	c := valid()
+	other := c.Carriers[1]
+	other.Name = "datagram"
+	other.Kind = "quic"
+	c.Carriers = append(c.Carriers, other)
+	if err := c.Validate(); err == nil {
+		t.Fatal("QUIC modes can conflict on one UDP listener")
+	}
+}

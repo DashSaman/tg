@@ -22,13 +22,18 @@ def initialize(exit_name, queue, carrier):
         config = json.loads(p.read_text())
         config['metrics'] = '127.0.0.1:19090'
         config['queue_frames'] = int(queue)
-        if carrier != 'both':
+        if carrier in ('quic','quic-stream'):
+            config['carriers'] = [c for c in config['carriers'] if c['kind'] in ('quic','quic-stream')]
+            for c in config['carriers']:
+                c['kind'] = carrier
+        elif carrier != 'both':
             config['carriers'] = [c for c in config['carriers'] if c['kind'] == carrier]
         for path in config['carriers']:
             port = 8443 if path['kind'] == 'https' else 8444
             path['address'] = f'{exit_name if role == "edge" else "0.0.0.0"}:{port}'
         p.write_text(json.dumps(config))
         public[role] = {k:config.get(k) for k in ('auto_upgrade','queue_frames','max_packet_bytes','probe_interval_ms','probe_timeout_ms','hold_down_ms')}
+        public[role]['carriers'] = [{k:c[k] for k in ('name','kind')} for c in config['carriers']]
         key = command('wg', 'genkey')
         Path('/private/'+role+'.key').write_text(key+'\n')
         Path('/private/'+role+'.pub').write_text(command('wg', 'pubkey', input=key)+'\n')

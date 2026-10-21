@@ -6,7 +6,8 @@ receiver goodput, future target 10 Gbps aggregate. Neither is certified by local
 
 ## Selected architecture
 A single peer pair exchanges opaque UDP application packets over two authenticated,
-encrypted carriers: QUIC DATAGRAM and a full-duplex HTTPS/2 POST. The intended inner
+encrypted default carriers: a reliable QUIC stream and a full-duplex HTTPS/2 POST.
+Optional `quic` DATAGRAM mode is retained separately. The intended inner
 application is WireGuard; its virtual addresses and overseas egress stay unchanged
 when the outer carrier changes. TG keeps the same exit-side UDP socket across carrier
 reconnects. This version forwards UDP packets and does not modify routes, firewall,
@@ -33,13 +34,20 @@ REALITY/XHTTP and raw/spoof integrations are later adapters, not simulated featu
 - Reassembly: max 128 unfinished packets, 2 second expiry; exact shape validation,
   no allocate-before-check, and a 4096-packet duplicate window across carriers.
 - HTTPS stream framing uses a 2-byte length prefix, strictly bounded to 1040 bytes.
-  QUIC ALPN `tg-dgram-v2` bundles these length-prefixed frames (at most 16) into
+- Default `quic-stream` uses the same bounded length framing over one full-duplex
+  native QUIC stream, ALPN `tg-stream-v1`, with mutual TLS. Handshake deadlines are
+  cleared before data mode and write deadlines refresh per batch. Native flow
+  control and retransmission preserve ordered frame bytes. The receive-window
+  maxima are 8 MiB per stream / 16 MiB per connection; one incoming bidirectional
+  stream is permitted. Stream head-of-line delay under loss is a measured tradeoff
+  for future WAN tests, not a guarantee of low application jitter.
+- Optional `quic` ALPN `tg-dgram-v2` bundles length-prefixed frames (at most 16) into
   DATAGRAMs of at most 1400 bytes. `SendDatagram`'s current path limit can split
   an unsent bundle without replaying an already accepted bundle. The limit is
   reconsidered once per second as native QUIC PMTU discovery progresses.
   The TG frame body stays version 1. No custom cryptography. Both peers must
   upgrade together: the earlier `tg-dgram-v1` carrier is incompatible.
-- QUIC receive draining is independent of frame processing: at most 2,048 native
+- DATAGRAM receive draining is independent of frame processing: at most 2,048 native
   datagrams, each checked at <=1,400 bytes before queue retention. Payload ownership
   transfers without another copy. Cancellation and native closure interrupt a
   full queue; a receive-call deadline does not poison later receives.
@@ -62,7 +70,8 @@ individual UDP writes. No batching delay is added. Completed buffers retain thei
 original reassembler owner until synchronous write consumption or cancellation.
 The output queue retains at most 2 MiB of payload storage, plus at most 256 KiB
 in the current write batch, independently of the partial-assembly and free-cache
-bounds. No retransmission of application UDP inside TG.
+bounds. TG adds no application-packet ARQ or FEC; reliable stream carriers perform
+their own transport retransmission. DATAGRAM mode remains best effort.
 No automatic remote service restart. Bounded reconnect backoff never disables probes
 on surviving links. Queueing encrypted WireGuard packets does not expose user flow
 classes; application-aware traffic scheduling and FEC are future work.

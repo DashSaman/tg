@@ -30,7 +30,7 @@ func Listen(ctx context.Context, c config.Config, p config.Carrier, epoch uint64
 	if p.Kind == "https" {
 		return listenHTTP(ctx, c, p, epoch, accept)
 	}
-	if p.Kind == "quic" {
+	if p.Kind == "quic" || p.Kind == "quic-stream" {
 		return listenQUIC(ctx, c, p, epoch, accept)
 	}
 	return nil, nil, errors.New("unsupported carrier")
@@ -39,7 +39,7 @@ func Dial(ctx context.Context, c config.Config, p config.Carrier, epoch uint64) 
 	if p.Kind == "https" {
 		return dialHTTP(ctx, c, p, epoch)
 	}
-	if p.Kind == "quic" {
+	if p.Kind == "quic" || p.Kind == "quic-stream" {
 		return dialQUIC(ctx, c, p, epoch)
 	}
 	return nil, 0, errors.New("unsupported carrier")

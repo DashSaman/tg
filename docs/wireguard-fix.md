@@ -1,5 +1,9 @@
 # WireGuard throughput diagnosis and repair
 
+The current candidate default is reliable `quic-stream` plus HTTPS/2 backup.
+The best-effort DATAGRAM experiments below are retained as diagnostic history,
+not presented as stable bulk-TCP acceptance. See the [reliable QUIC decision](reliable-quic-decision.md).
+
 The earlier complete 30-minute test received 199.76 Mbps and failed its 300 Mbps
 gate. Direct kernel WireGuard bypassing TG received 350.08 Mbps in a short control.
 The deficit was in the combined relay pipeline, not evidence that WireGuard itself

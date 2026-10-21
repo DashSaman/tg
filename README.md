@@ -1,7 +1,7 @@
 # TG
 
 Personal Iran-to-overseas tunnel with an original bounded session layer over
-authenticated QUIC DATAGRAM and full-duplex HTTPS/2 carriers.
+authenticated reliable QUIC and full-duplex HTTPS/2 carriers.
 
 **Status: v0.1 development prototype, locally tested. Real Iran-path performance
 and censorship resistance are unverified.** Initial acceptance target: **300 Mbps
@@ -9,15 +9,19 @@ aggregate receiver goodput**. Future 10 Gbps aggregate requires separate profili
 and capacity validation. Local load results and their limited scope are recorded
 in [the performance report](docs/performance.md); real-host acceptance is pending.
 
-**Full-stack acceptance currently fails:** a 30-minute, eight-stream TCP test
+**The earlier DATAGRAM baseline failed:** a 30-minute, eight-stream TCP test
 through kernel WireGuard and TG received 199.76 Mbps, with a minimum rolling
 10-second rate of 74.19 Mbps. TG process memory remained bounded during that run.
 See the [WireGuard results and reproduction](docs/wireguard-validation.md).
+The repaired candidate uses `quic-stream` by default; full long-run validation is
+pending. [Diagnosis and failed intermediate controls](docs/wireguard-fix.md) are retained.
 
 TG forwards one application's opaque UDP packets. WireGuard is the intended inner
 IP tunnel, configured separately. TG keeps the exit UDP socket across carrier
-changes, probes both carriers, debounces preferred-path upgrades, and falls back under
-failure or queue pressure. It does not configure WireGuard, routes, firewall or NAT.
+changes and probes both carriers. Default selection retains a healthy active path
+and fails over when it stops responding. It does not configure WireGuard, routes,
+firewall or NAT. Optional `quic` DATAGRAM mode remains available; its short rate
+passes did not establish a stable 30-minute TCP result.
 See [فارسی](README-fa.md).
 
 ## Local lab

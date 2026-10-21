@@ -38,7 +38,7 @@ def main():
     parser.add_argument('--skip-https-probe', action='store_true')
     parser.add_argument('--profile', action='store_true', help='set lab-only profiling wrapper environment')
     parser.add_argument('--gomaxprocs', type=int, default=0, help='diagnostic scheduler control; 0 keeps runtime default')
-    parser.add_argument('--carrier', choices=['both', 'quic', 'https'], default='both')
+    parser.add_argument('--carrier', choices=['both', 'quic', 'quic-stream', 'https'], default='both')
     parser.add_argument('--mtu', type=int, default=1280)
     parser.add_argument('--mbps', type=float, default=350, help='aggregate TCP pacing target; 0 uses unpaced bulk TCP')
     args = parser.parse_args()

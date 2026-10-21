@@ -20,6 +20,32 @@ import (
 // Both peers must upgrade together; v1 peers fail ALPN negotiation.
 const alpn = "tg-dgram-v2"
 
+func quicALPN(kind string) string {
+	if kind == "quic-stream" {
+		return "tg-stream-v1"
+	}
+	return alpn
+}
+
+func quicModeConfig(p config.Carrier) *quic.Config {
+	cfg := quicConfig()
+	if p.Kind == "quic-stream" {
+		cfg.EnableDatagrams = false
+		cfg.MaxStreamReceiveWindow = 8 << 20
+		cfg.MaxConnectionReceiveWindow = 16 << 20
+	}
+	return cfg
+}
+
+// Reuse bounded two-byte stream framing and batching. No HTTP is sent here:
+// this is a full-duplex authenticated native QUIC stream with flow control.
+func newQUICStreamWire(conn *quic.Conn, stream *quic.Stream, timeout time.Duration) Wire {
+	return &httpWire{reader: stream, writer: stream,
+		beforeWrite: func() error { return stream.SetWriteDeadline(time.Now().Add(timeout)) },
+		cancel:      func() { stream.CancelRead(0); stream.CancelWrite(0); _ = conn.CloseWithError(0, "closed") },
+	}
+}
+
 type quicWire struct {
 	conn         datagramConnection
 	sendMu       sync.Mutex
@@ -194,8 +220,8 @@ func listenQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 	if err != nil {
 		return nil, nil, err
 	}
-	tc.NextProtos = []string{alpn}
-	l, err := quic.ListenAddr(p.Address, tc, quicConfig())
+	tc.NextProtos = []string{quicALPN(p.Kind)}
+	l, err := quic.ListenAddr(p.Address, tc, quicModeConfig(p))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -238,6 +264,15 @@ func listenQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 				if e = writeAll(stream, ack[:]); e != nil {
 					return
 				}
+				if p.Kind == "quic-stream" {
+					if e = stream.SetDeadline(time.Time{}); e != nil {
+						return
+					}
+					w := newQUICStreamWire(conn, stream, c.Timeout())
+					defer w.Close()
+					_ = accept(local, w, peerEpoch)
+					return
+				}
 				_ = stream.Close()
 				stream.CancelRead(0)
 				w := &quicWire{conn: conn}
@@ -254,11 +289,11 @@ func dialQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	if err != nil {
 		return nil, 0, err
 	}
-	tc.NextProtos = []string{alpn}
+	tc.NextProtos = []string{quicALPN(p.Kind)}
 	tc.MinVersion = tls.VersionTLS13
 	dialCtx, cancel := context.WithTimeout(ctx, 4*time.Second)
 	defer cancel()
-	conn, err := quic.DialAddr(dialCtx, p.Address, tc, quicConfig())
+	conn, err := quic.DialAddr(dialCtx, p.Address, tc, quicModeConfig(p))
 	if err != nil {
 		return nil, 0, err
 	}
@@ -282,9 +317,18 @@ func dialQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	if _, err = io.ReadFull(stream, ack[:]); err != nil {
 		return fail(err)
 	}
+	other := binary.BigEndian.Uint64(ack[:])
+	if other == 0 {
+		return fail(errors.New("zero peer epoch"))
+	}
+	if p.Kind == "quic-stream" {
+		if err = stream.SetDeadline(time.Time{}); err != nil {
+			return fail(err)
+		}
+		return newQUICStreamWire(conn, stream, c.Timeout()), other, nil
+	}
 	_ = stream.Close()
 	stream.CancelRead(0)
-	other := binary.BigEndian.Uint64(ack[:])
 	state := conn.ConnectionState()
 	if other == 0 || !state.SupportsDatagrams.Remote || !state.SupportsDatagrams.Local {
 		return fail(errors.New("peer cannot use datagram session"))

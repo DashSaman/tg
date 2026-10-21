@@ -17,7 +17,11 @@ addressing, NAT, keys, AllowedIPs and routes separately; keep outer endpoints ou
 the inner default route to avoid a loop.
 
 Start inner MTU testing around 1280, then measure. Default max UDP payload is 2048;
-fragment payload is 1024. HTTPS fallback can add TCP head-of-line blocking. Socket
+fragment payload is 1024. The default UDP carrier kind is `quic-stream`, ALPN
+`tg-stream-v1`: native QUIC retransmits and flow-controls the ordered byte stream.
+HTTPS/2 is the backup. Both stream carriers can add head-of-line delay under loss.
+Kind `quic` selects optional best-effort DATAGRAM mode, ALPN `tg-dgram-v2`; do not
+treat its short rate controls as a stable 30-minute TCP certification. Socket
 continuity does not recover lost UDP packets; inner TCP/application recovery and
 WireGuard handshakes are still needed.
 
@@ -84,8 +88,11 @@ can still replace the carrier when adaptive mode is explicitly enabled. Carrier
 failure always permits replacement. A deliberate switch can reorder in-flight UDP;
 handover does not guarantee zero TCP retransmissions.
 
-Upgrade both endpoints together. QUIC now uses `tg-dgram-v2` with length-prefixed
-frame bundles and native path-MTU limits; it cannot negotiate the old v1 carrier.
+Upgrade both endpoints together. Existing default configurations need their UDP
+carrier `kind` changed to `quic-stream` on both peers to use the reliable primary.
+The stream ALPN is `tg-stream-v1`. Optional kind `quic` uses `tg-dgram-v2` with
+length-prefixed frame bundles and native path-MTU limits; neither negotiates the
+original DATAGRAM v1 carrier.
 HTTPS framing and TG session frame version 1 are unchanged. A small outer MTU
 still works by splitting unsent bundles; larger bundles are an optimization, not
 a requirement. TG never changes the configured WireGuard MTU.
@@ -110,7 +117,7 @@ prove the capacity of a 4-vCPU host. Tune again on real servers; scheduler choic
 were measured separately on this local workload. The executable keeps Go's
 normal runtime default unless the operator sets the environment variable.
 
-QUIC has an independent bounded receive drainer: at most 2,048 datagrams, each
+Optional DATAGRAM mode has an independent bounded receive drainer: at most 2,048 datagrams, each
 validated to at most 1,400 bytes before retention (about 2.74 MiB of payload per
 connection plus queue metadata). It does not copy the native datagram again.
 Per-call receive deadlines do not cancel the connection's reader. Wire close and

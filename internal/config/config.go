@@ -46,7 +46,7 @@ type Config struct {
 }
 
 func Defaults() Config {
-	return Config{AppAddress: "127.0.0.1:31820", Metrics: "127.0.0.1:19090", TLS: TLS{CA: "ca.crt", Cert: "edge.crt", Key: "edge.key", ServerName: "localhost", PeerName: "tg-edge"}, TokenFile: "web.token", ProbeIntervalMS: 1000, ProbeTimeoutMS: 4000, HoldDownMS: 5000, QueueFrames: 1024, MaxPacketBytes: 2048, Carriers: []Carrier{{Name: "web", Kind: "https", Address: "127.0.0.1:8443", Path: "/private-channel", CostMS: 20}, {Name: "udp", Kind: "quic", Address: "127.0.0.1:8444"}}}
+	return Config{AppAddress: "127.0.0.1:31820", Metrics: "127.0.0.1:19090", TLS: TLS{CA: "ca.crt", Cert: "edge.crt", Key: "edge.key", ServerName: "localhost", PeerName: "tg-edge"}, TokenFile: "web.token", ProbeIntervalMS: 1000, ProbeTimeoutMS: 4000, HoldDownMS: 5000, QueueFrames: 1024, MaxPacketBytes: 2048, Carriers: []Carrier{{Name: "web", Kind: "https", Address: "127.0.0.1:8443", Path: "/private-channel", CostMS: 20}, {Name: "udp", Kind: "quic-stream", Address: "127.0.0.1:8444"}}}
 }
 
 func validAddress(address string, loopback bool) bool {
@@ -98,13 +98,17 @@ func (c Config) Validate() error {
 			return errors.New("invalid or duplicate carrier name")
 		}
 		names[p.Name] = true
-		if p.Kind != "https" && p.Kind != "quic" {
-			return errors.New("carrier kind must be https or quic")
+		if p.Kind != "https" && p.Kind != "quic" && p.Kind != "quic-stream" {
+			return errors.New("carrier kind must be https, quic-stream or quic")
 		}
 		if !validAddress(p.Address, false) || p.CostMS < 0 || p.CostMS > 10000 {
 			return errors.New("invalid carrier address/cost")
 		}
-		key := p.Kind + "/" + p.Address
+		network := p.Kind
+		if network == "quic-stream" {
+			network = "quic"
+		}
+		key := network + "/" + p.Address
 		if addresses[key] {
 			return errors.New("duplicate carrier endpoint")
 		}
