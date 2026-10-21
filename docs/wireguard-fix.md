@@ -1,6 +1,9 @@
 # WireGuard throughput diagnosis and repair
 
-The current candidate default is reliable `quic-stream` plus HTTPS/2 backup.
+The validated local default is reliable `quic-stream` plus HTTPS/2 backup:
+the [completed repaired test](wireguard-fixed-validation.md) received 350.00 Mbps,
+minimum ten-second window 303.59 Mbps, with both TG memory gates and three loaded
+outage recoveries passing. The profile includes 50 ms bounded packet admission.
 The best-effort DATAGRAM experiments below are retained as diagnostic history,
 not presented as stable bulk-TCP acceptance. See the [reliable QUIC decision](reliable-quic-decision.md).
 
@@ -40,10 +43,10 @@ their original reassembler owner until consumed or cancelled. A real oversized
 second UDP datagram exercised a partial syscall result and caught x/net returning
 `-1` on the failing syscall; that error cannot subtract the previously sent prefix.
 
-Before overflow fallback, ingress now waits about 2 ms for preferred queue space.
-It releases the engine lock during that wait. This absorbs a short scheduling or
-TCP burst while retaining whole-packet admission; persistent congestion can still
-use a healthy alternate. Control probes and cancellation remain independent.
+An intermediate repair waited about 2 ms for preferred queue space, releasing the
+engine lock. Later controls below eliminated overflow path spraying altogether;
+the final default retains a pending whole packet for up to 50 ms on that same
+bounded queue. Control probes and cancellation remain independent.
 
 The 2 ms wait alone was insufficient: a 300-second control still reached only
 90.18 Mbps in its slowest ten-second window and exposed ingress UDP buffer drops.
@@ -60,7 +63,7 @@ for isolated QUIC. This isolates the remaining problem to per-packet overflow
 steering in the combined policy, rather than an intrinsic per-carrier capacity cap.
 TG carries an opaque WireGuard aggregate; it has no inner-flow classification and
 no packet resequencing. The repair therefore uses a single active data carrier,
-switching on carrier failure or confirmed measured improvement, with bounded
+switching on carrier failure by default (healthy improvement needs opt-in), with bounded
 whole-packet admission and explicit overload drops instead of packet spraying.
 
 Candidate `12049ea` removed per-packet spraying but its adaptive queue score still
@@ -89,7 +92,7 @@ Controlled profiled QUIC checks at 350 Mbps: a 512-slot drainer with Go concurre
 55; the same 2,048-slot binary with concurrency 4 recorded 4. All three short checks
 received about 350 Mbps with minimum windows above 349 Mbps. Drop counters cover
 only the first 25 seconds including setup; these are not 30-minute acceptance.
-The final candidate profile uses `GOMAXPROCS=4` per TG on the same 12-logical-CPU VM.
+The final measured profile uses `GOMAXPROCS=4` per TG on the same 12-logical-CPU VM.
 
 Tests cover a paused frame consumer with a 2,048-datagram burst, per-call deadlines
 followed by successful receives, explicit close with full prefetch, and native
@@ -114,12 +117,26 @@ diagnostic comparisons, not long-run certifications.
 | Sticky fallback, cost still drives upgrades | 90s | 350.03 | 151.93 | fail |
 | Measured upgrade required (`a63e8c6`) | 90s | 350.04 | 347.63 | short pass, later long attempt failed |
 | Same candidate, manually interrupted long attempt | ~332s | not acceptance | 140.50 | fail; incomplete/error receipt retained |
+| Reliable stream, 2 ms admission, interrupted | ~859s | not acceptance | 278.20 | fail; ingress burst drops remain |
+| Reliable stream, 50 ms admission (`eef5f85`) | 1800s | 350.00 | 303.59 | full local receiver/memory pass; then three outage recoveries |
+
+The first reliable stream attempt still discarded pending ingress packets after
+two milliseconds, even though path changes and kernel UDP errors were then zero.
+A real application-loop regression reproduces the loss with a ten-ms carrier
+stall. Holding the pending packet up to 50 ms fixes that regression without adding
+queue slots. The completed follow-up still recorded sparse kernel ingress losses
+and two TG drops; its acceptance is receiver goodput over ten-second windows, not
+zero loss or an instantaneous 300 Mbps floor. Twelve full one-second intervals
+were below 300 Mbps, minimum 182.52 Mbps. See the complete evidence and scope in
+[the final validation](wireguard-fixed-validation.md).
 
 ## Compatibility and remaining scope
 
-Both endpoints must upgrade together: QUIC ALPN is now `tg-dgram-v2`; old carrier
-v1 is incompatible. TG session frame version 1 and HTTPS framing are unchanged.
-Bundles are bounded to 1400 bytes and 16 frames. Native `SendDatagram` rejection
+Both endpoint configurations must upgrade together: default `quic-stream` uses
+ALPN `tg-stream-v1`; optional `quic` DATAGRAM uses `tg-dgram-v2`. The modes do not
+negotiate with each other or with old carrier v1. TG session frame version 1 and
+HTTPS framing are unchanged. Optional DATAGRAM bundles are bounded to 1400 bytes
+and 16 frames. Native `SendDatagram` rejection
 splits only the unsent bundle; no previously accepted bundle is replayed. The
 limit is reconsidered once per second as native PMTU discovery advances.
 

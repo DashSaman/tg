@@ -1,5 +1,10 @@
 # Receiver acceptance protocol
 
+Latest follow-up (2026-10-22): [repaired full-stack WireGuard](wireguard-fixed-validation.md)
+passed the local 30-minute receiver and TG memory gates: 350.00 Mbps
+average / 303.59 Mbps minimum ten-second window, plus repeated
+loaded outage recovery. Earlier results below retain their historical scope.
+
 The completed local kernel-WireGuard test is recorded in
 [wireguard-validation.md](wireguard-validation.md). Its 30-minute receiver-speed
 gate failed. The procedure below remains the future real-host acceptance protocol.

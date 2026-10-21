@@ -1,5 +1,10 @@
 # Local validation ledger — 2026-10-20
 
+Latest follow-up (2026-10-22): [repaired full-stack WireGuard](wireguard-fixed-validation.md)
+passed the local 30-minute receiver and TG memory gates: 350.00 Mbps
+average / 303.59 Mbps minimum ten-second window, plus repeated
+loaded outage recovery. Earlier results below retain their historical scope.
+
 Scope: Linux Docker on the developer's Windows machine, Go 1.26, quic-go v0.64.1.
 The later [full-stack WireGuard validation](wireguard-validation.md) measured a
 complete 30-minute TCP run, resident memory and repeated loaded path outages. It
@@ -54,7 +59,7 @@ An optional attempt to obtain iperf3 in the disposable container failed because 
 could not locate the package; no host packages were installed. Thus automated schema
 fixtures are verified, but live iperf3 receipt compatibility remains a host-test gate.
 
-**Unverified:** >=300 Mbps aggregate receiver goodput for 30 minutes, 24-hour soak,
+**Unverified on real Iran/overseas hosts:** >=300 Mbps aggregate receiver goodput for 30 minutes, 24-hour soak,
 loaded application latency/loss/jitter on Iran routes, real DPI/IP blocking behavior,
 physical host capacity and future 10Gbps scaling. QUIC DATAGRAM overhead and TCP
 fallback head-of-line behavior require profiling. Read [the acceptance procedure](benchmark.md).

@@ -26,8 +26,8 @@ up to 50 ms on the same bounded queue, without holding the engine lock. This add
 no queue slots; cancellation and closed-carrier context still interrupt the wait.
 A regression through the real application read loop first failed with a ten-ms
 carrier stall and now passes. Prolonged overload can still drop packets; this is
-not lossless failover or unbounded buffering. The final 30-minute run must validate
-this combined repair separately.
+not lossless failover or unbounded buffering. The completed 30-minute follow-up
+validated this combined repair separately; its receiver/memory result is linked below.
 
 The stream receive-window ceilings are 8 MiB per stream and 16 MiB per connection,
 with only one incoming bidirectional stream. Local packet reassembly/output limits
@@ -44,5 +44,6 @@ stable bulk-TCP mode.
 
 A 60-second kernel-WireGuard control of the new default received 350.079 Mbps,
 minimum ten-second window 349.798 Mbps, with zero TG overload drops at both ends.
-This is setup validation only; the full 30-minute receiver and memory gates must
-be recorded separately before claiming acceptance.
+This was setup validation only. The subsequent completed [30-minute test](wireguard-fixed-validation.md)
+received 350.00 Mbps, minimum ten-second window 303.59 Mbps;
+both TG memory gates and all three loaded outage recoveries passed.

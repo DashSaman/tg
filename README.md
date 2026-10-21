@@ -13,8 +13,10 @@ in [the performance report](docs/performance.md); real-host acceptance is pendin
 through kernel WireGuard and TG received 199.76 Mbps, with a minimum rolling
 10-second rate of 74.19 Mbps. TG process memory remained bounded during that run.
 See the [WireGuard results and reproduction](docs/wireguard-validation.md).
-The repaired candidate uses `quic-stream` by default; full long-run validation is
-pending. [Diagnosis and failed intermediate controls](docs/wireguard-fix.md) are retained.
+The repaired default `quic-stream` completed a new local 30-minute test:
+**350.00 Mbps average / 303.59 Mbps minimum 10s**,
+with bounded TG RSS/PSS and three loaded outage recoveries.
+[Final local evidence and profile](docs/wireguard-fixed-validation.md). [Diagnosis and failed intermediate controls](docs/wireguard-fix.md) are retained.
 
 TG forwards one application's opaque UDP packets. WireGuard is the intended inner
 IP tunnel, configured separately. TG keeps the exit UDP socket across carrier

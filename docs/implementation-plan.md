@@ -1,5 +1,10 @@
 # TG v0.1 Implementation Plan
 
+Latest follow-up (2026-10-22): [repaired full-stack WireGuard](wireguard-fixed-validation.md)
+passed the local 30-minute receiver and TG memory gates: 350.00 Mbps
+average / 303.59 Mbps minimum ten-second window, plus repeated
+loaded outage recovery. Earlier results below retain their historical scope.
+
 > Execution: direct in this session, explicitly authorized by the owner.
 > Skills: writing-plans, executing-plans, test-driven-development.
 

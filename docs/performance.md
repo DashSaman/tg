@@ -1,5 +1,10 @@
 # Local load validation
 
+Latest follow-up (2026-10-22): [repaired full-stack WireGuard](wireguard-fixed-validation.md)
+passed the local 30-minute receiver and TG memory gates: 350.00 Mbps
+average / 303.59 Mbps minimum ten-second window, plus repeated
+loaded outage recovery. Earlier results below retain their historical scope.
+
 The later [kernel-WireGuard TCP follow-up](wireguard-validation.md) completed a
 30-minute run and failed the 300 Mbps receiver gate. The measurements below cover
 the earlier opaque-UDP application load.
