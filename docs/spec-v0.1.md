@@ -61,7 +61,7 @@ retains a healthy active carrier even when another idle path has a better score;
 restoring a failed path does not force failback. Optional `auto_upgrade: true`
 enables repeated-advantage/hold-down healthy replacement, which remains experimental
 after its failed loaded controls. One carrier carries application data
-at a time. Full queues wait about 2 ms for whole-packet space, without holding the
+at a time. Full queues wait up to 50 ms for whole-packet space, without holding the
 engine lock; persistent overflow drops a whole packet. Overflow does not spray
 adjacent encrypted packets across different healthy carriers.
 Completed UDP packets enter one 256-packet output queue and one writer drains up

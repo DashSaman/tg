@@ -15,6 +15,20 @@ cryptography or packet-level ARQ is implemented in TG. Native QUIC provides byte
 ordering, retransmission and flow control. The handshake's absolute three-second
 deadline is cleared before data mode; each write refreshes the configured deadline.
 
+The first reliable-stream long attempt (`1e2aa19`) still exposed a separate
+ingress admission defect. Around receiver seconds 730–740, the live floor fell to
+275.87 Mbps; the preserved interrupted server receipt reconstructs a 278.20 Mbps
+minimum ten-second window over 859 seconds. Carrier changes and kernel UDP drops
+remained zero, but TG's ingress dropped pending packets when queue space took
+more than two milliseconds to return. Reliability inside the carrier cannot
+repair a packet discarded before admission. The pending whole packet now waits
+up to 50 ms on the same bounded queue, without holding the engine lock. This adds
+no queue slots; cancellation and closed-carrier context still interrupt the wait.
+A regression through the real application read loop first failed with a ten-ms
+carrier stall and now passes. Prolonged overload can still drop packets; this is
+not lossless failover or unbounded buffering. The final 30-minute run must validate
+this combined repair separately.
+
 The stream receive-window ceilings are 8 MiB per stream and 16 MiB per connection,
 with only one incoming bidirectional stream. Local packet reassembly/output limits
 remain bounded separately. A paused receiver therefore applies stream backpressure

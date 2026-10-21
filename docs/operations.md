@@ -81,7 +81,7 @@ alone is insufficient to send traffic back after congestion fallback.
 Failure detection can
 drop UDP; lossless handover and TG-level application retransmission are not provided.
 One carrier carries application data at a time. A full transmit queue waits about
-2 ms for whole-packet space; persistent overflow drops that packet rather than
+50 ms for whole-packet space; persistent overflow drops that packet rather than
 spraying it onto another healthy path. The previous overflow policy generated
 thousands of switches under load. Failure and confirmed measured improvement
 can still replace the carrier when adaptive mode is explicitly enabled. Carrier

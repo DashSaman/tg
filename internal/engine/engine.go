@@ -229,7 +229,11 @@ func (e *Engine) readApplication(ctx context.Context) {
 			sent = l.enqueue(frames)
 			if !sent {
 				e.mu.Unlock()
-				sent = l.enqueueWait(ctx, frames, 2*time.Millisecond)
+				// Preserve the pending whole packet across a brief scheduler or
+				// flow-control stall. Two ms caused sparse burst drops even on
+				// a healthy reliable carrier, collapsing inner TCP for seconds.
+				// This wait adds no queue slots and remains cancellation-aware.
+				sent = l.enqueueWait(ctx, frames, 50*time.Millisecond)
 				e.mu.Lock()
 			}
 		}

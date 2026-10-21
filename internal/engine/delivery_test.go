@@ -191,6 +191,59 @@ func TestApplicationBatchReportsPartialKernelWrite(t *testing.T) {
 	}
 }
 
+// A brief stalled carrier must not turn a scheduling burst into inner TCP loss.
+// Exercise the application's real admission policy, rather than passing a longer
+// timeout directly to enqueueWait and bypassing the production two-ms limit.
+func TestApplicationAdmissionRetainsPacketAcrossBriefCarrierStall(t *testing.T) {
+	c := config.Defaults()
+	c.Role = "edge"
+	c.AppAddress = "127.0.0.1:0"
+	app, err := openApplication(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer app.close()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	e := &Engine{cfg: c, app: app, ctx: ctx, links: make(map[string]*link), selector: session.Selector{Timeout: time.Second}}
+	l := &link{ctx: ctx, carrier: c.Carriers[1], data: make(chan session.Frame, 4), space: make(chan struct{}, 1), lastPong: time.Now(), rtt: time.Millisecond}
+	e.links[l.carrier.Name] = l
+	for i := 0; i < cap(l.data); i++ {
+		l.data <- session.Frame{ID: 99}
+	}
+	sender, err := net.Dial("udp", app.conn.LocalAddr().String())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer sender.Close()
+	done := make(chan struct{})
+	go func() { e.readApplication(ctx); close(done) }()
+	defer func() { cancel(); app.close(); <-done }()
+	payload := bytes.Repeat([]byte{42}, 2048)
+	if _, err = sender.Write(payload); err != nil {
+		t.Fatal(err)
+	}
+	until(t, func() bool { return e.counters.inputBytes.Load() == uint64(len(payload)) })
+	time.Sleep(10 * time.Millisecond)
+	if e.counters.dropped.Load() != 0 {
+		t.Fatal("brief carrier stall discarded the pending application packet")
+	}
+	for i := 0; i < 2; i++ {
+		<-l.data
+	}
+	l.notifySpace()
+	until(t, func() bool { return e.counters.queuedBytes.Load() == uint64(len(payload)) })
+	if len(l.data) != 4 {
+		t.Fatal("fragmented packet was not admitted atomically")
+	}
+	<-l.data
+	<-l.data
+	first, second := <-l.data, <-l.data
+	if first.ID != second.ID || first.ID == 99 || !bytes.Equal(append(first.Payload, second.Payload...), payload) {
+		t.Fatal("pending packet changed during backpressure")
+	}
+}
+
 func TestConfiguredHealthyUpgradeRequiresExplicitOptIn(t *testing.T) {
 	for _, enabled := range []bool{false, true} {
 		c := config.Defaults()
