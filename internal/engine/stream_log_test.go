@@ -55,22 +55,22 @@ func TestBackupLogDefersFreshCopyButSendsUnacknowledgedOrFailedPrimary(t *testin
 		t.Fatal("admission failed")
 	}
 	var batch [transport.MaxBatchFrames][]byte
-	var storage [transport.MaxBatchFrames][session.MaxFrame]byte
+	storage := logBuffers(false)
 	backup := e.links["web"]
-	if n, _ := backup.fillLog(&batch, &storage, 0); n != 0 {
+	if n, _ := backup.fillLog(&batch, storage, 0); n != 0 {
 		t.Fatal("backup immediately duplicated fresh traffic instead of awaiting short ACK grace")
 	}
 	// No ACK: even an apparently healthy blackholed primary must not suppress
 	// backup delivery until the multi-second health timeout.
 	e.retained[1].born = time.Now().Add(-time.Second)
-	if n, _ := backup.fillLog(&batch, &storage, 0); n != 1 {
+	if n, _ := backup.fillLog(&batch, storage, 0); n != 1 {
 		t.Fatal("backup stranded unacknowledged packet")
 	}
 	if !e.admitRedundantLocked([]byte("failed-primary"), time.Now()) {
 		t.Fatal("second admission failed")
 	}
 	e.links["udp"].closed.Store(true)
-	if n, _ := backup.fillLog(&batch, &storage, 0); n != 1 {
+	if n, _ := backup.fillLog(&batch, storage, 0); n != 1 {
 		t.Fatal("known primary failure still delayed backup")
 	}
 }

@@ -22,6 +22,7 @@ type PathStatus struct {
 	RepairQueuedFrames int     `json:"repair_queued_frames"`
 }
 type Snapshot struct {
+	StreamPackets     bool              `json:"stream_packets"`
 	OrderedOutput     bool              `json:"ordered_output"`
 	Deferred          uint64            `json:"deferred_first_sends"`
 	SessionRTTMS      float64           `json:"session_ack_rtt_ms"`
@@ -113,6 +114,7 @@ func (e *Engine) Snapshot() Snapshot {
 	s.Replayed = c.replayed.Load()
 	s.Acked = e.acked
 	s.Redundant = e.cfg.Redundant
+	s.StreamPackets = e.cfg.StreamPackets
 	s.OrderedOutput = e.cfg.OrderedOutput
 	s.ExtraCopies = c.extraCopies.Load()
 	s.ReplicaSkips = c.replicaSkips.Load()

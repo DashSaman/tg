@@ -7,16 +7,18 @@ import (
 )
 
 const (
-	Chunk          = 1024
-	Header         = 16
-	MaxPacket      = 8192
-	MaxFrame       = Chunk + Header
-	AckBits        = 1024
-	AckBytes       = 8 + AckBits/8 // highest completed ID, followed by selective completion bits
-	Data      byte = 1
-	Probe     byte = 2
-	Pong      byte = 3
-	Ack       byte = 4
+	Chunk               = 1024
+	Header              = 16
+	MaxPacket           = 8192
+	MaxFrame            = Chunk + Header
+	MaxStreamFrame      = MaxPacket + Header
+	AckBits             = 1024
+	AckBytes            = 8 + AckBits/8 // highest completed ID, followed by selective completion bits
+	Data           byte = 1
+	Probe          byte = 2
+	Pong           byte = 3
+	Ack            byte = 4
+	Packet         byte = 5
 )
 
 type Frame struct {
@@ -45,6 +47,12 @@ func (f Frame) validate() error {
 	if f.Kind == Probe || f.Kind == Pong {
 		if f.Index != 0 || f.Count != 0 || f.Total != 0 || len(f.Payload) != 0 {
 			return errors.New("malformed control frame")
+		}
+		return nil
+	}
+	if f.Kind == Packet {
+		if f.Index != 0 || f.Count != 1 || f.Total == 0 || f.Total > MaxPacket || len(f.Payload) != int(f.Total) {
+			return errors.New("invalid complete packet shape")
 		}
 		return nil
 	}
@@ -84,10 +92,24 @@ func EncodeInto(dst []byte, f Frame) ([]byte, error) {
 }
 
 func Decode(b []byte) (Frame, error) {
-	if len(b) < Header || len(b) > MaxFrame || b[0] != 1 {
+	return decodeMode(b, false)
+}
+
+// DecodePacketStream is only used after explicit complete-packet negotiation.
+// Reject fragments even when they fit, rather than silently mixing protocols.
+func DecodePacketStream(b []byte) (Frame, error) { return decodeMode(b, true) }
+func decodeMode(b []byte, packets bool) (Frame, error) {
+	limit := MaxFrame
+	if packets {
+		limit = MaxStreamFrame
+	}
+	if len(b) < Header || len(b) > limit || b[0] != 1 {
 		return Frame{}, errors.New("invalid frame envelope")
 	}
 	f := Frame{Kind: b[1], ID: binary.BigEndian.Uint64(b[2:10]), Index: binary.BigEndian.Uint16(b[10:12]), Count: binary.BigEndian.Uint16(b[12:14]), Total: binary.BigEndian.Uint16(b[14:16]), Payload: b[Header:]}
+	if (!packets && f.Kind == Packet) || (packets && f.Kind == Data) {
+		return Frame{}, errors.New("frame kind does not match negotiated stream mode")
+	}
 	return f, f.validate()
 }
 

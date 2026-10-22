@@ -15,6 +15,24 @@ func valid() Config {
 	return c
 }
 
+func TestCompletePacketModeRequiresAcknowledgedReliableCarriers(t *testing.T) {
+	c := valid()
+	if err := json.Unmarshal([]byte(`{"stream_packets":true}`), &c); err != nil {
+		t.Fatal(err)
+	}
+	if c.Validate() == nil {
+		t.Fatal("packet mode accepted without acknowledged replay")
+	}
+	c.Redundant = true
+	if err := c.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	c.Carriers[1].Kind = "quic"
+	if c.Validate() == nil {
+		t.Fatal("packet mode accepted DATAGRAM carrier")
+	}
+}
+
 func TestCapacityWindowsAreBoundedBeforeUse(t *testing.T) {
 	for key, values := range map[string][]int{"retained_packets": {0, 127, 131073}, "stream_window_bytes": {-1, 1, (256 << 20) + 1}} {
 		for _, value := range values {

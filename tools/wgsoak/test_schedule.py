@@ -3,6 +3,16 @@ from run import fault_schedule,check_redundant_setup,check_qos_setup,check_qos_a
 
 
 class ScheduleTests(unittest.TestCase):
+    def test_complete_packet_mode_must_match_both_actual_peers(self):
+        import inspect
+        self.assertIn('stream_packets',inspect.signature(check_redundant_setup).parameters)
+        c={r:dict(redundant=True,stream_packets=False) for r in ('edge','exit')}
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,stream_packets=True)
+        c['edge']['stream_packets']=True
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,stream_packets=True)
+        c['exit']['stream_packets']=True
+        check_redundant_setup(c,True,stream_packets=True)
+
     def test_capacity_windows_must_match_both_peers(self):
         import inspect
         self.assertIn('retained_packets',inspect.signature(check_redundant_setup).parameters)

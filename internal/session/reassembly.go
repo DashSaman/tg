@@ -80,7 +80,7 @@ func (r *Reassembler) Push(now time.Time, f Frame) ([]byte, bool, error) {
 	if err := f.validate(); err != nil {
 		return nil, false, err
 	}
-	if f.Kind != Data {
+	if f.Kind != Data && f.Kind != Packet {
 		return nil, false, errors.New("not a data frame")
 	}
 	window := uint64(len(r.seen))
@@ -89,6 +89,20 @@ func (r *Reassembler) Push(now time.Time, f Frame) ([]byte, bool, error) {
 	}
 	for r.oldest != nil && now.Sub(r.oldest.born) >= r.ttl {
 		r.discardOldest()
+	}
+	if f.Kind == Packet {
+		if r.pending[f.ID] != nil {
+			return nil, false, errors.New("complete packet conflicts with pending fragments")
+		}
+		var data []byte
+		select {
+		case data = <-r.free:
+		default:
+			data = make([]byte, MaxPacket)
+		}
+		copy(data, f.Payload)
+		r.complete(f.ID)
+		return data[:len(f.Payload)], true, nil
 	}
 	a := r.pending[f.ID]
 	if a == nil {
@@ -125,10 +139,15 @@ func (r *Reassembler) Push(now time.Time, f Frame) ([]byte, bool, error) {
 		return nil, false, nil
 	}
 	r.remove(a)
-	r.seen[f.ID%window] = f.ID
-	r.highest = max(r.highest, f.ID)
+	r.complete(f.ID)
+	return a.data, true, nil
+}
+
+func (r *Reassembler) complete(id uint64) {
+	window := uint64(len(r.seen))
+	r.seen[id%window] = id
+	r.highest = max(r.highest, id)
 	for r.contiguous < r.highest && r.seen[(r.contiguous+1)%window] == r.contiguous+1 {
 		r.contiguous++
 	}
-	return a.data, true, nil
 }

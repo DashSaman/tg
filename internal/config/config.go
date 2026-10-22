@@ -48,6 +48,7 @@ type Config struct {
 	AppUDPGRO         bool      `json:"app_udp_gro"`
 	RetainedPackets   int       `json:"retained_packets"`
 	StreamWindowBytes int       `json:"stream_window_bytes"`
+	StreamPackets     bool      `json:"stream_packets"`
 	QueueFrames       int       `json:"queue_frames"`
 	MaxPacketBytes    int       `json:"max_packet_bytes"`
 }
@@ -73,6 +74,16 @@ func validAddress(address string, loopback bool) bool {
 }
 
 func (c Config) Validate() error {
+	if c.StreamPackets {
+		if !c.Redundant {
+			return errors.New("stream packets require acknowledged redundant mode")
+		}
+		for _, p := range c.Carriers {
+			if p.Kind != "https" && p.Kind != "quic-stream" {
+				return errors.New("stream packets require reliable carriers")
+			}
+		}
+	}
 	if c.RetainedPackets < 128 || c.RetainedPackets > 131072 || (c.OrderedOutput && c.RetainedPackets > 16384) {
 		return errors.New("retained packet budget must be 128..131072, at most 16384 with ordered output")
 	}

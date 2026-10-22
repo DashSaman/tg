@@ -13,7 +13,7 @@ def command(*args, **kwargs):
     return subprocess.run(args, check=True, capture_output=True, text=True, **kwargs).stdout.strip()
 
 
-def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0', pacing='0', preferred='auto',replica_delay='10',udp_gro='0',max_packet='2048',retained='8192',stream_window='0'):
+def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0', pacing='0', preferred='auto',replica_delay='10',udp_gro='0',max_packet='2048',retained='8192',stream_window='0',stream_packets='0'):
     os.umask(0o077)
     command('/tg', 'init', '--dir', '/private/pki', '--server-name', 'localhost', *(['--redundant'] if redundant=='1' else []))
     public = {}
@@ -26,6 +26,7 @@ def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordere
         config['app_pacing_mbps'] = int(pacing)
         config['replica_delay_ms'] = int(replica_delay)
         config['max_packet_bytes'] = int(max_packet)
+        if stream_packets=='1':config['stream_packets']=True
         if int(retained)!=8192:config['retained_packets']=int(retained)
         if int(stream_window)!=0:config['stream_window_bytes']=int(stream_window)
         if udp_gro=='1':config['app_udp_gro']=True
@@ -49,6 +50,7 @@ def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordere
         public[role]['carriers'] = [dict(name=c['name'],kind=c['kind'],cost_ms=c.get('cost_ms',0)) for c in config['carriers']]
         public[role]['retained_packets']=config.get('retained_packets',8192)
         public[role]['stream_window_bytes']=config.get('stream_window_bytes',0)
+        public[role]['stream_packets']=config.get('stream_packets',False)
         key = command('wg', 'genkey')
         Path('/private/'+role+'.key').write_text(key+'\n')
         Path('/private/'+role+'.pub').write_text(command('wg', 'pubkey', input=key)+'\n')

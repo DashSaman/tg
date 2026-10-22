@@ -223,19 +223,23 @@ func (l *link) transmit() {
 	}
 }
 func (l *link) receive() {
+	decode := session.Decode
+	if l.engine.cfg.StreamPackets {
+		decode = session.DecodePacketStream
+	}
 	for {
 		b, err := l.wire.Receive(l.ctx)
 		if err != nil {
 			return
 		}
 		l.engine.counters.wireReceived.Add(uint64(len(b)))
-		f, err := session.Decode(b)
+		f, err := decode(b)
 		if err != nil {
 			l.engine.counters.malformed.Add(1)
 			return
 		}
 		switch f.Kind {
-		case session.Data:
+		case session.Data, session.Packet:
 			l.engine.onData(l, f)
 		case session.Ack:
 			if !l.engine.cfg.Redundant {

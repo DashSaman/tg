@@ -52,7 +52,7 @@ func (e *Engine) admitLogLocked(packet []byte, now time.Time) bool {
 // Encode under engine.mu into transmitter-owned storage, then release the lock
 // BEFORE native I/O. ACK release cannot invalidate encoded frames. Whole packets
 // fit within one batch (at most 8 frames), including on a non-batching test wire.
-func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers *[transport.MaxBatchFrames][session.MaxFrame]byte, count int) (int, int) {
+func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers *[transport.MaxBatchFrames][]byte, count int) (int, int) {
 	e := l.engine
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -85,11 +85,21 @@ func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers *[transp
 			break
 		}
 		needed := (len(p.packet) + session.Chunk - 1) / session.Chunk
+		if e.cfg.StreamPackets {
+			needed = 1
+		}
 		if len(batch)-count < needed {
 			break
 		}
 		var storage [session.MaxPacket / session.Chunk]session.Frame
-		frames, err := session.FragmentInto(storage[:0], p.packet, l.logNext)
+		var frames []session.Frame
+		var err error
+		if e.cfg.StreamPackets {
+			storage[0] = session.Frame{Kind: session.Packet, ID: l.logNext, Count: 1, Total: uint16(len(p.packet)), Payload: p.packet}
+			frames = storage[:1]
+		} else {
+			frames, err = session.FragmentInto(storage[:0], p.packet, l.logNext)
+		}
 		if err != nil {
 			panic("invalid retained packet")
 		}
@@ -111,9 +121,25 @@ func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers *[transp
 	return count, size
 }
 
+// Every row has a full slice bound, so no encoder can consume a neighbouring
+// frame's storage. Only opted-in packet mode allocates the larger arena.
+func logBuffers(packets bool) *[transport.MaxBatchFrames][]byte {
+	size := session.MaxFrame
+	if packets {
+		size = session.MaxStreamFrame
+	}
+	arena := make([]byte, transport.MaxBatchFrames*size)
+	rows := new([transport.MaxBatchFrames][]byte)
+	for i := range rows {
+		begin, end := i*size, (i+1)*size
+		rows[i] = arena[begin:end:end]
+	}
+	return rows
+}
+
 func (l *link) transmitLog() {
 	var batch [transport.MaxBatchFrames][]byte
-	var buffers [transport.MaxBatchFrames][session.MaxFrame]byte
+	buffers := logBuffers(l.engine.cfg.StreamPackets)
 	batchWire, canBatch := l.wire.(transport.BatchWire)
 	timer := time.NewTimer(time.Hour)
 	timer.Stop()
@@ -148,7 +174,7 @@ func (l *link) transmitLog() {
 			}
 		default:
 		}
-		n, dataBytes := l.fillLog(&batch, &buffers, count)
+		n, dataBytes := l.fillLog(&batch, buffers, count)
 		count = n
 		size += dataBytes
 		if count == 0 {

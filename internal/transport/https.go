@@ -27,16 +27,27 @@ type httpWire struct {
 	once        sync.Once
 	mu          sync.Mutex
 	beforeWrite func() error
-	sendBuffer  [MaxBatchFrames * (session.MaxFrame + 2)]byte
-	readBuffer  [session.MaxFrame]byte
+	sendBuffer  []byte // selected-mode bounded storage, allocated on first write
+	readBuffer  []byte
+	packetMode  bool
 	buffered    *bufio.Reader // sole receive worker; bounded, no fill delay
 }
 
 func sessionMode(c config.Config) string {
+	if c.StreamPackets {
+		return "packet-repair-v1"
+	}
 	if c.Redundant {
 		return "repair-v1"
 	}
 	return ""
+}
+
+func (w *httpWire) frameLimit() int {
+	if w.packetMode {
+		return session.MaxStreamFrame
+	}
+	return session.MaxFrame
 }
 
 func httpWindowConfig(c config.Config) *http.HTTP2Config {
@@ -55,11 +66,17 @@ func (w *httpWire) SendBatch(frames [][]byte) error {
 	if len(frames) == 0 || len(frames) > MaxBatchFrames {
 		return errors.New("HTTP batch limit exceeded")
 	}
-	n := 0
+	limit := w.frameLimit()
 	for _, b := range frames {
-		if len(b) == 0 || len(b) > session.MaxFrame {
+		if len(b) == 0 || len(b) > limit {
 			return errors.New("invalid carrier frame size")
 		}
+	}
+	if w.sendBuffer == nil {
+		w.sendBuffer = make([]byte, MaxBatchFrames*(limit+2))
+	}
+	n := 0
+	for _, b := range frames {
 		binary.BigEndian.PutUint16(w.sendBuffer[n:n+2], uint16(len(b)))
 		n += 2
 		copy(w.sendBuffer[n:], b)
@@ -79,6 +96,9 @@ func (w *httpWire) SendBatch(frames [][]byte) error {
 	return nil
 }
 func (w *httpWire) Receive(ctx context.Context) ([]byte, error) {
+	if w.readBuffer == nil {
+		w.readBuffer = make([]byte, w.frameLimit())
+	}
 	if w.buffered == nil {
 		w.buffered = bufio.NewReaderSize(w.reader, 64<<10)
 	}
@@ -86,7 +106,7 @@ func (w *httpWire) Receive(ctx context.Context) ([]byte, error) {
 		return nil, err
 	}
 	size := int(binary.BigEndian.Uint16(w.readBuffer[:2]))
-	if size < 1 || size > session.MaxFrame {
+	if size < 1 || size > w.frameLimit() {
 		return nil, errors.New("carrier frame size out of bounds")
 	}
 	b := w.readBuffer[:size]
@@ -142,7 +162,7 @@ func listenHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 		if e = controller.Flush(); e != nil {
 			return
 		}
-		w := &httpWire{reader: r.Body, writer: rw, beforeWrite: func() error { return controller.SetWriteDeadline(time.Now().Add(c.Timeout())) }, flush: controller.Flush, cancel: func() {
+		w := &httpWire{reader: r.Body, writer: rw, packetMode: c.StreamPackets, beforeWrite: func() error { return controller.SetWriteDeadline(time.Now().Add(c.Timeout())) }, flush: controller.Flush, cancel: func() {
 			_ = controller.SetReadDeadline(time.Now().Add(-time.Second))
 			_ = controller.SetWriteDeadline(time.Now().Add(-time.Second))
 		}}
@@ -197,5 +217,5 @@ func dialHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 		closeAll()
 		return nil, 0, errors.New("HTTPS session rejected")
 	}
-	return &httpWire{reader: resp.Body, writer: pw, cancel: closeAll}, other, nil
+	return &httpWire{reader: resp.Body, writer: pw, packetMode: c.StreamPackets, cancel: closeAll}, other, nil
 }

@@ -31,6 +31,9 @@ const MaxBatchFrames = 256
 type Accept func(context.Context, Wire, uint64) error
 
 func Listen(ctx context.Context, c config.Config, p config.Carrier, epoch uint64, accept Accept) (net.Addr, func(), error) {
+	if c.StreamPackets && (!c.Redundant || (p.Kind != "https" && p.Kind != "quic-stream")) {
+		return nil, nil, errors.New("complete packets require acknowledged reliable carriers")
+	}
 	if p.Kind == "https" {
 		return listenHTTP(ctx, c, p, epoch, accept)
 	}
@@ -40,6 +43,9 @@ func Listen(ctx context.Context, c config.Config, p config.Carrier, epoch uint64
 	return nil, nil, errors.New("unsupported carrier")
 }
 func Dial(ctx context.Context, c config.Config, p config.Carrier, epoch uint64) (Wire, uint64, error) {
+	if c.StreamPackets && (!c.Redundant || (p.Kind != "https" && p.Kind != "quic-stream")) {
+		return nil, 0, errors.New("complete packets require acknowledged reliable carriers")
+	}
 	if p.Kind == "https" {
 		return dialHTTP(ctx, c, p, epoch)
 	}
