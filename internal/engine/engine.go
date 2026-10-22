@@ -41,6 +41,7 @@ type Engine struct {
 	ackPending                bool
 	admissionSpace            chan struct{}
 	sessionRTT, sessionJitter time.Duration
+	pacer                     applicationPacer // owned by the sole application writer
 }
 
 func New(c config.Config) (*Engine, error) {

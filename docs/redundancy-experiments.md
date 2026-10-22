@@ -25,6 +25,11 @@ receiver is authoritative; live /proc I/O deltas are advisory and can differ.
 | Fast repair limited to oldest missing span, DATAGRAM | 300s | 210.35 | Steady failed; 180s single-path passed at 332.66 minimum |
 | Same binary, QUIC-stream | 300s | 276.95 | Steady failed; 180s single-path passed at 323.25 minimum |
 | Shared sender log, reliable carriers, 350 Mbps offered | 300s | 298.51 | Steady failed: one full one-second interval below 300; no TG input drops |
+| Same full-copy shared log, 400 Mbps offered | 300s | 271.14 | Steady failed; single-path minimum 216.61; edge app socket dropped 1298 packets during steady load |
+| 10ms deferred backup copies, 400 Mbps offered | 300s | 315.00 | Steady short pass; 180s single-path phase failed at 220.40 minimum |
+| Same binary/load, GOMAXPROCS=8 | 300s | 215.42 | Steady failed (6 bad seconds); 180s single-path phase minimum 286.84, one bad second |
+| 10ms backup grace, GOMAXPROCS=4, 16 KiB TCP writes | 300s | 280.05 | One bad steady second; 180s single-path phase passed at 389.21 minimum |
+| Local UDP cap 500 Mbps, original 128 KiB writes, 400 Mbps offered | 300s | 271.84 | One bad steady second; 180s single-path phase passed at 353.56 minimum |
 
 The last DATAGRAM control also completed 180s mixed cuts and recovered after all
 three cycles; its all-path speed minimum was zero and remains a failed speed
@@ -32,6 +37,33 @@ verdict. It is not an accepted overall result. The stream control also recovered
 after all-path cuts, with ten below-target seconds in that deliberately blocked
 phase. A subsequent candidate uses the [shared sender log](shared-sender-log.md)
 instead of independent per-carrier packet queues and timed packet replay.
+The latest controlled variable is a 10ms deferred backup-copy grace, preserving
+the same 400 Mbps offered load and unchanged receiver acceptance floor.
+That control's seven below-target fault-phase seconds occurred at seconds 60..67,
+between planned carrier cuts, with exit's completed-output queue full, sender ACK
+turnaround about 300ms and 795 kernel receive drops by the end. Other timed cuts
+had no below-target full seconds. A WireGuard handshake changed near the event;
+temporal proximity does not prove rekeying caused it. The next comparison changes
+only GOMAXPROCS from 4 to 8 per TG, on the same 12-logical-CPU VM, and also records
+namespace WireGuard device errors, CPU pressure and cgroup CPU statistics.
+The 8-processor comparison also failed. The steady bad samples coincided with
+CPU `some` pressure rising from about 13% to 44%, sender retention pressure and
+7763 kernel receive drops by the late bad event; cgroup CPU throttling and WG
+device errors remained zero. This does not prove which host/kernel/runtime
+component caused the scheduling pressure. The next comparison keeps GOMAXPROCS=4
+and 400 Mbps, changing only iperf TCP write size from 128 KiB to 16 KiB to test
+burst sensitivity. No accepted floor is lowered, and the larger-write failures
+must remain visible even if this smoother workload passes.
+The smaller-write control still failed overall. A new candidate adds optional
+local application output shaping and restores the original 128 KiB generator
+writes, with a 500 Mbps UDP output cap and 400 Mbps offered application rate.
+Its receiver speed verdict is pending; the cap is not a lowered acceptance floor.
+That capped control also failed overall. Its loaded single-path phase passed;
+the next complete 30-minute capacity measurement retains the cap and original
+write size but uses ordinary unpaced bulk TCP. This is a distinct workload, not a
+retroactive pass for the paced controls. All original one-second receiver gates,
+loaded fault gates and full memory criteria remain unchanged. The complete run
+must finish memory/recovery collection even if speed fails.
 
 Deterministic regression tests separately established and repaired:
 

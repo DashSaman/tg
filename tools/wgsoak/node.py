@@ -13,7 +13,7 @@ def command(*args, **kwargs):
     return subprocess.run(args, check=True, capture_output=True, text=True, **kwargs).stdout.strip()
 
 
-def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0'):
+def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0', pacing='0'):
     os.umask(0o077)
     command('/tg', 'init', '--dir', '/private/pki', '--server-name', 'localhost', *(['--redundant'] if redundant=='1' else []))
     public = {}
@@ -23,6 +23,7 @@ def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordere
         config['metrics'] = '127.0.0.1:19090'
         config['queue_frames'] = int(queue)
         config['ordered_output'] = ordered=='1'
+        config['app_pacing_mbps'] = int(pacing)
         if udp_mode!='auto':
             for path in config['carriers']:
                 if path['kind'] in ('quic','quic-stream'):path['kind']=udp_mode
@@ -36,7 +37,7 @@ def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordere
             port = 8443 if path['kind'] == 'https' else 8444
             path['address'] = f'{exit_name if role == "edge" else "0.0.0.0"}:{port}'
         p.write_text(json.dumps(config))
-        public[role] = {k:config.get(k) for k in ('auto_upgrade','redundant','ordered_output','queue_frames','max_packet_bytes','probe_interval_ms','probe_timeout_ms','hold_down_ms')}
+        public[role] = {k:config.get(k) for k in ('auto_upgrade','redundant','ordered_output','replica_delay_ms','app_pacing_mbps','queue_frames','max_packet_bytes','probe_interval_ms','probe_timeout_ms','hold_down_ms')}
         public[role]['carriers'] = [{k:c[k] for k in ('name','kind')} for c in config['carriers']]
         key = command('wg', 'genkey')
         Path('/private/'+role+'.key').write_text(key+'\n')
@@ -97,6 +98,10 @@ def run(role, mtu):
                 row['status_error'] = type(exc).__name__
             row['wg_rx_bytes'] = int(Path('/sys/class/net/wg-tg/statistics/rx_bytes').read_text())
             row['wg_tx_bytes'] = int(Path('/sys/class/net/wg-tg/statistics/tx_bytes').read_text())
+            row['wg_device_errors'] = {k:int(Path('/sys/class/net/wg-tg/statistics/'+k).read_text())
+                                       for k in ('rx_dropped','tx_dropped','rx_errors','tx_errors')}
+            row['cpu_pressure'] = Path('/proc/pressure/cpu').read_text().strip()
+            row['cgroup_cpu_stat'] = Path('/sys/fs/cgroup/cpu.stat').read_text().strip()
             if sample_number % 12 == 0:
                 row['wg_latest_handshake'] = int(command('wg', 'show', 'wg-tg', 'latest-handshakes').split()[-1])
                 transfer = command('wg', 'show', 'wg-tg', 'transfer').split()

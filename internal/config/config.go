@@ -43,12 +43,14 @@ type Config struct {
 	AutoUpgrade     bool      `json:"auto_upgrade"`
 	Redundant       bool      `json:"redundant"`
 	OrderedOutput   bool      `json:"ordered_output"`
+	ReplicaDelayMS  int       `json:"replica_delay_ms"`
+	AppPacingMbps   int       `json:"app_pacing_mbps"`
 	QueueFrames     int       `json:"queue_frames"`
 	MaxPacketBytes  int       `json:"max_packet_bytes"`
 }
 
 func Defaults() Config {
-	return Config{AppAddress: "127.0.0.1:31820", Metrics: "127.0.0.1:19090", TLS: TLS{CA: "ca.crt", Cert: "edge.crt", Key: "edge.key", ServerName: "localhost", PeerName: "tg-edge"}, TokenFile: "web.token", ProbeIntervalMS: 1000, ProbeTimeoutMS: 4000, HoldDownMS: 5000, QueueFrames: 1024, MaxPacketBytes: 2048, Carriers: []Carrier{{Name: "web", Kind: "https", Address: "127.0.0.1:8443", Path: "/private-channel", CostMS: 20}, {Name: "udp", Kind: "quic-stream", Address: "127.0.0.1:8444"}}}
+	return Config{AppAddress: "127.0.0.1:31820", Metrics: "127.0.0.1:19090", TLS: TLS{CA: "ca.crt", Cert: "edge.crt", Key: "edge.key", ServerName: "localhost", PeerName: "tg-edge"}, TokenFile: "web.token", ProbeIntervalMS: 1000, ProbeTimeoutMS: 4000, HoldDownMS: 5000, ReplicaDelayMS: 10, QueueFrames: 1024, MaxPacketBytes: 2048, Carriers: []Carrier{{Name: "web", Kind: "https", Address: "127.0.0.1:8443", Path: "/private-channel", CostMS: 20}, {Name: "udp", Kind: "quic-stream", Address: "127.0.0.1:8444"}}}
 }
 
 func validAddress(address string, loopback bool) bool {
@@ -68,6 +70,12 @@ func validAddress(address string, loopback bool) bool {
 }
 
 func (c Config) Validate() error {
+	if c.AppPacingMbps < 0 || c.AppPacingMbps > 100000 {
+		return errors.New("application pacing must be 0 (disabled) or 1..100000 Mbps")
+	}
+	if c.ReplicaDelayMS < 0 || c.ReplicaDelayMS > 50 {
+		return errors.New("replica delay must be between 0 and 50 milliseconds")
+	}
 	if c.Role != "edge" && c.Role != "exit" {
 		return errors.New("role must be edge or exit")
 	}

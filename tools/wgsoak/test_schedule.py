@@ -3,6 +3,11 @@ from run import fault_schedule,check_redundant_setup
 
 
 class ScheduleTests(unittest.TestCase):
+    def test_pacing_must_match_both_peer_configurations(self):
+        c={r:dict(redundant=True,app_pacing_mbps=500) for r in ('edge','exit')}
+        check_redundant_setup(c,True,pacing=500)
+        c['exit']['app_pacing_mbps']=0
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,pacing=500)
     def test_ordering_control_cannot_silently_change(self):
         c={r:dict(redundant=True,ordered_output=True) for r in ('edge','exit')}
         with self.assertRaises(ValueError):check_redundant_setup(c,True)

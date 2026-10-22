@@ -57,12 +57,32 @@ func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers *[transp
 	e.mu.Lock()
 	defer e.mu.Unlock()
 	l.logNext = max(l.logNext, e.acked+1)
+	l.logDelay = 0
+	// Fixed operator priority avoids RTT-driven leader oscillation. The grace
+	// bounds failover even when a primary blackhole has not timed out yet.
+	grace := time.Duration(0)
+	if e.cfg.ReplicaDelayMS > 0 {
+		for _, c := range e.cfg.Carriers {
+			if c.CostMS > l.carrier.CostMS || (c.CostMS == l.carrier.CostMS && c.Name >= l.carrier.Name) {
+				continue
+			}
+			other := e.links[c.Name]
+			if other != nil && other.path().Healthy(time.Now(), e.cfg.Timeout()) {
+				grace = time.Duration(e.cfg.ReplicaDelayMS) * time.Millisecond
+				break
+			}
+		}
+	}
 	size := 0
 	for l.logNext <= e.sequence.Load() {
 		p := e.retained[l.logNext]
 		if p == nil || p.received {
 			l.logNext++
 			continue
+		}
+		if remaining := grace - time.Since(p.born); remaining > 0 {
+			l.logDelay = remaining
+			break
 		}
 		needed := (len(p.packet) + session.Chunk - 1) / session.Chunk
 		if len(batch)-count < needed {
@@ -95,6 +115,9 @@ func (l *link) transmitLog() {
 	var batch [transport.MaxBatchFrames][]byte
 	var buffers [transport.MaxBatchFrames][session.MaxFrame]byte
 	batchWire, canBatch := l.wire.(transport.BatchWire)
+	timer := time.NewTimer(time.Hour)
+	timer.Stop()
+	defer timer.Stop()
 	for l.ctx.Err() == nil {
 		count, size := 0, 0
 		add := func(f session.Frame) bool {
@@ -129,18 +152,39 @@ func (l *link) transmitLog() {
 		count = n
 		size += dataBytes
 		if count == 0 {
-			select {
-			case <-l.ctx.Done():
-				return
-			case <-l.logWake:
-				continue
-			case f := <-l.control:
-				if !add(f) {
+			if l.logDelay > 0 {
+				// New admissions cannot interrupt the age grace on its oldest
+				// packet. Otherwise an idle backup busy-spins at ingress rate.
+				timer.Reset(l.logDelay)
+				select {
+				case <-l.ctx.Done():
 					return
+				case <-timer.C:
+					continue
+				case f := <-l.control:
+					if !add(f) {
+						return
+					}
+				case f := <-l.ack:
+					if !add(f) {
+						return
+					}
 				}
-			case f := <-l.ack:
-				if !add(f) {
+				timer.Stop()
+			} else {
+				select {
+				case <-l.ctx.Done():
 					return
+				case <-l.logWake:
+					continue
+				case f := <-l.control:
+					if !add(f) {
+						return
+					}
+				case f := <-l.ack:
+					if !add(f) {
+						return
+					}
 				}
 			}
 		}

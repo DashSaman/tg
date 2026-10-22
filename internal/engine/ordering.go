@@ -78,7 +78,7 @@ func (e *Engine) writeOrderedApplication(ctx context.Context) {
 			count++
 		}
 		if count > 0 {
-			e.flushDeliveries(batch[:count], packets[:count])
+			e.flushDeliveries(ctx, batch[:count], packets[:count])
 			continue
 		}
 		select {

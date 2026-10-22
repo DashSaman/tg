@@ -15,6 +15,8 @@ type delivery struct {
 // No batching delay: drain only packets already available, at most 32 at once.
 // Receive queues can keep draining while a previous batch enters WireGuard.
 func (e *Engine) writeApplication(ctx context.Context) {
+	e.pacer.mbps = e.cfg.AppPacingMbps
+	defer e.pacer.close()
 	if e.cfg.Redundant && e.cfg.OrderedOutput {
 		e.writeOrderedApplication(ctx)
 		return
@@ -37,15 +39,21 @@ func (e *Engine) writeApplication(ctx context.Context) {
 				break drain
 			}
 		}
-		e.flushDeliveries(pending[:count], packets[:count])
+		e.flushDeliveries(ctx, pending[:count], packets[:count])
 	}
 }
 
-func (e *Engine) flushDeliveries(pending []delivery, packets [][]byte) {
+func (e *Engine) flushDeliveries(ctx context.Context, pending []delivery, packets [][]byte) {
+	bytes := 0
 	for i := range pending {
 		packets[i] = pending[i].packet
+		bytes += len(packets[i])
 	}
-	sent, err := e.app.writeBatch(packets, e.cfg.Timeout())
+	err := e.pacer.wait(ctx, bytes)
+	sent := 0
+	if err == nil {
+		sent, err = e.app.writeBatch(packets, e.cfg.Timeout())
+	}
 	for i := range pending {
 		if i < sent {
 			e.counters.outputBytes.Add(uint64(len(packets[i])))
@@ -54,7 +62,7 @@ func (e *Engine) flushDeliveries(pending []delivery, packets [][]byte) {
 		pending[i] = delivery{}
 		packets[i] = nil
 	}
-	if err != nil {
+	if err != nil && ctx.Err() == nil {
 		e.counters.appErrors.Add(uint64(len(pending) - sent))
 	}
 }

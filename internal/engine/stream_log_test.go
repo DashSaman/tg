@@ -9,7 +9,42 @@ import (
 
 	"github.com/DashSaman/tg/internal/config"
 	"github.com/DashSaman/tg/internal/session"
+	"github.com/DashSaman/tg/internal/transport"
 )
+
+func TestBackupLogDefersFreshCopyButSendsUnacknowledgedOrFailedPrimary(t *testing.T) {
+	c := config.Defaults()
+	c.Redundant = true
+	e := &Engine{cfg: c, links: make(map[string]*link)}
+	for _, carrier := range c.Carriers {
+		l := newLink(e, context.Background(), carrier, nil)
+		defer l.cancel()
+		l.lastPong = time.Now()
+		e.links[carrier.Name] = l
+	}
+	if !e.admitRedundantLocked([]byte("hedged"), time.Now()) {
+		t.Fatal("admission failed")
+	}
+	var batch [transport.MaxBatchFrames][]byte
+	var storage [transport.MaxBatchFrames][session.MaxFrame]byte
+	backup := e.links["web"]
+	if n, _ := backup.fillLog(&batch, &storage, 0); n != 0 {
+		t.Fatal("backup immediately duplicated fresh traffic instead of awaiting short ACK grace")
+	}
+	// No ACK: even an apparently healthy blackholed primary must not suppress
+	// backup delivery until the multi-second health timeout.
+	e.retained[1].born = time.Now().Add(-time.Second)
+	if n, _ := backup.fillLog(&batch, &storage, 0); n != 1 {
+		t.Fatal("backup stranded unacknowledged packet")
+	}
+	if !e.admitRedundantLocked([]byte("failed-primary"), time.Now()) {
+		t.Fatal("second admission failed")
+	}
+	e.links["udp"].closed.Store(true)
+	if n, _ := backup.fillLog(&batch, &storage, 0); n != 1 {
+		t.Fatal("known primary failure still delayed backup")
+	}
+}
 
 type logBatchWire struct{ *logCaptureWire }
 

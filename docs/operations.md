@@ -155,6 +155,18 @@ per-path `repair_queued_frames`. Sender retention is at most 8192 packets. Relia
 redundant carriers read this shared log in sequence, with a separate cursor per
 connection; their old data/repair queues are unused. Default UDP output has no
 global missing-ID barrier; `ordered_output: true` enables the strict-order control.
+`replica_delay_ms` defaults to 10 (valid 0..50). The lowest-cost healthy carrier
+sends immediately; backups skip ACKed packets or send after this short age grace.
+Zero enables the immediate full-copy comparison. A blackholed primary need not
+time out before backup data starts. The grace adds backup latency and may not
+suppress copies on a higher-RTT WAN; choose it again on the actual path.
+Optional `app_pacing_mbps` (default 0, disabled) bounds the local UDP output rate
+before delivery to WireGuard, with at most 256 KiB burst credit. It includes
+WireGuard UDP packet overhead; do not set it to the desired TCP goodput without
+headroom. The development control uses 500 Mbps cap for 400 Mbps offered TCP
+traffic, but this profile still needs receiver acceptance. The wait is bounded
+and cancellation releases current packet owners. It does not replace WAN
+congestion control or certify a WAN capacity.
 ACK denotes receiver reassembly ownership,
 not UDP application delivery. All-path outage can exhaust admission; restoration
 permits repair, but traffic cannot be delivered while every path is blocked. A peer

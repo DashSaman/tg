@@ -31,6 +31,7 @@ type link struct {
 	challenge      uint64
 	logNext        uint64 // guarded by engine.mu
 	logWake        chan struct{}
+	logDelay       time.Duration // transmitter-owned next eligibility delay
 }
 
 func newLink(e *Engine, ctx context.Context, p config.Carrier, w transport.Wire) *link {
