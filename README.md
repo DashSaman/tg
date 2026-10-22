@@ -13,36 +13,34 @@ in [the performance report](docs/performance.md); real-host acceptance is pendin
 through kernel WireGuard and TG received 199.76 Mbps, with a minimum rolling
 10-second rate of 74.19 Mbps. TG process memory remained bounded during that run.
 See the [WireGuard results and reproduction](docs/wireguard-validation.md).
-The repaired default `quic-stream` completed a new local 30-minute test:
+An earlier repaired default `quic-stream` completed a local 30-minute test:
 **350.00 Mbps average / 303.59 Mbps minimum 10s**,
 with bounded TG RSS/PSS and three loaded outage recoveries.
-[Final local evidence and profile](docs/wireguard-fixed-validation.md). [Diagnosis and failed intermediate controls](docs/wireguard-fix.md) are retained.
+[Historical ten-second-window evidence](docs/wireguard-fixed-validation.md). [Diagnosis and failed intermediate controls](docs/wireguard-fix.md) are retained.
 
 An explicit `tg init --redundant` mode combines both reliable carriers using a
 shared bounded sender log, per-carrier replay cursors and selective acknowledgements.
 Unique completed UDP packets are delivered independently; strict output ordering
 is optional. Both endpoints must upgrade and opt in. Earlier short passes were
 followed by failed longer controls; the first attempted soak was interrupted at
-207s. The new shared-log candidate still needs full acceptance. The older 10s-window
-result does not establish the stricter one-second target.
+207s. The current shared-log runtime passed the complete local profile below.
+The older 10s-window result does not establish the stricter one-second target.
 [Current design and scope](docs/shared-sender-log.md),
-[later failed controls and current investigation](docs/redundancy-experiments.md).
+[retained failed controls](docs/redundancy-experiments.md).
 
-An optional [pre-encryption queue-control profile](docs/wg-qos-profile.md) now
-combines HTB/FQ-CoDel on the intended WireGuard interface with TG's shared log,
-deferred backup copies and local output pacing. Its short real-WireGuard control
-passed the unchanged 300 Mbps floor: minimum full 1s 316.01 Mbps steady and
-335.75 Mbps during repeated single-path cuts. Sixty loaded pings averaged 1.11 ms
-(p95 1.43 ms, zero loss). The [complete clean-build control](docs/wireguard-qos-control.md) subsequently
-failed the speed floor (minimum126.95Mbps,36 bad seconds), while loaded latency
-and memory passed. The short pass is not full acceptance.
-The [complete prior bulk control](docs/wireguard-c9-control.md) failed speed and
-had about 209 ms loaded RTT despite passing memory checks; it remains visible.
-
-The [later full GSO/HTTPS control](docs/wireguard-hybrid-control.md) also failed
-the every-second floor with350Mbps offered load (minimum206.03Mbps,nine bad
-seconds) and lost2/1500ICMP probes. Memory and loaded single-path cuts passed.
-A ten-minute native WG bypass control passed,min345.14Mbps; investigation continues.
+The [pre-encryption queue-control profile](docs/wg-qos-profile.md) passed a fresh
+**30-minute local kernel-WireGuard test**: **350.00 Mbps average /
+324.33 Mbps minimum full 1s**, followed by three minutes of
+repeated single-path cuts (minimum **340.39 Mbps**). Every full and
+weighted one-second window stayed above 300 Mbps in those phases. TG RSS/PSS
+remained bounded. All 1500 loaded pings returned: median 1.27ms,
+p95 6.93ms. Three all-path outages caused expected delivery gaps and recovered.
+[Complete result, exact profile and limits](docs/wireguard-qos-validation.md).
+The runtime includes the [reproduced duplex-lock fix](docs/application-duplex-lock.md).
+Load condition: 350Mbps aggregate TCP offered rate. The retained unpaced saturation controls failed;
+this result does not establish the same floor under unrestricted load.
+The [failed prior bulk control](docs/wireguard-c9-control.md) and the
+[earlier full GSO/HTTPS paced failure](docs/wireguard-hybrid-control.md) remain visible.
 
 TG forwards one application's opaque UDP packets. WireGuard is the intended inner
 IP tunnel, configured separately. TG keeps the exit UDP socket across carrier
