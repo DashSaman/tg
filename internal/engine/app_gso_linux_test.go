@@ -13,6 +13,50 @@ import (
 	"golang.org/x/sys/unix"
 )
 
+func TestApplicationBatchPreservesThirtyTwoJumboCiphertextDatagrams(t *testing.T) {
+	for _, address := range []string{"127.0.0.1:0", "[::1]:0"} {
+		t.Run(address, func(t *testing.T) {
+			receiver, err := net.ListenUDP("udp", mustUDPAddress(t, address))
+			if err != nil {
+				t.Skip(err)
+			}
+			defer receiver.Close()
+			_ = receiver.SetReadBuffer(4 << 20)
+			c := config.Defaults()
+			c.Role, c.AppAddress, c.MaxPacketBytes = "exit", receiver.LocalAddr().String(), 8192
+			a, err := openApplication(c)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer a.close()
+			packets := make([][]byte, 32)
+			for i := range packets {
+				packets[i] = bytes.Repeat([]byte{byte(i + 1)}, 7200)
+			}
+			if n, err := a.writeBatch(packets, time.Second); err != nil || n != 32 {
+				t.Fatal("jumbo batch failed", n, err)
+			}
+			_ = receiver.SetReadDeadline(time.Now().Add(time.Second))
+			buffer := make([]byte, 8193)
+			for i, want := range packets {
+				n, _, err := receiver.ReadFromUDP(buffer)
+				if err != nil || !bytes.Equal(buffer[:n], want) {
+					t.Fatal("jumbo datagram boundary/payload changed", i, n, err)
+				}
+			}
+		})
+	}
+}
+
+func mustUDPAddress(t *testing.T, address string) *net.UDPAddr {
+	t.Helper()
+	a, err := net.ResolveUDPAddr("udp", address)
+	if err != nil {
+		t.Fatal(err)
+	}
+	return a
+}
+
 // Verify the actual socket offload, rather than only a constructed control buffer.
 func TestApplicationBatchReachesKernelAsGSOSegments(t *testing.T) {
 	receiver, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})

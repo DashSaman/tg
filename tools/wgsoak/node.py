@@ -13,7 +13,7 @@ def command(*args, **kwargs):
     return subprocess.run(args, check=True, capture_output=True, text=True, **kwargs).stdout.strip()
 
 
-def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0', pacing='0', preferred='auto',replica_delay='10',udp_gro='0'):
+def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0', pacing='0', preferred='auto',replica_delay='10',udp_gro='0',max_packet='2048'):
     os.umask(0o077)
     command('/tg', 'init', '--dir', '/private/pki', '--server-name', 'localhost', *(['--redundant'] if redundant=='1' else []))
     public = {}
@@ -25,6 +25,7 @@ def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordere
         config['ordered_output'] = ordered=='1'
         config['app_pacing_mbps'] = int(pacing)
         config['replica_delay_ms'] = int(replica_delay)
+        config['max_packet_bytes'] = int(max_packet)
         if udp_gro=='1':config['app_udp_gro']=True
         if udp_mode!='auto':
             for path in config['carriers']:
@@ -90,6 +91,10 @@ def run(role, mtu, qos='0'):
             fields = Path(f'/proc/{process.pid}/stat').read_text().rsplit(')', 1)[1].split()
             row = dict(time=time.time(), pid=process.pid, start_ticks=int(fields[19]),
                        cpu_ticks=int(fields[11])+int(fields[12]), threads=int(fields[17]), **status)
+            # Shared-VM totals include kernel workers and unrelated workloads;
+            # never sum these duplicate host counters across the two roles.
+            row['host_cpu_ticks']=list(map(int,Path('/proc/stat').read_text().splitlines()[0].split()[1:9]))
+            row['cpu_tick_hz']=os.sysconf('SC_CLK_TCK')
             snmp = Path('/proc/net/snmp').read_text().splitlines()
             row['udp'] = next((dict(zip(a.split()[1:], map(int, b.split()[1:])))
                                for a, b in zip(snmp[::2], snmp[1::2]) if a.startswith('Udp:')), {})

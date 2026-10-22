@@ -70,12 +70,37 @@ currently available bytes; it does not wait to fill the buffer or add a timer.
 The regression checks at most two underlying reads for the same 64 frames;
 additional tests cover immediate small frames and shutdown of a blocked read.
 Frame validation, borrowed-buffer lifetime and underlying close behavior remain.
-End-to-end CPU results for this change are pending.
+The completed four-run ABBA comparison at 800 Mbps measured **4.5673 old vs
+3.7409 buffered TG CPU seconds/Gbit**, an **18.10% reduction** in this local
+diagnostic. Both buffered runs were below both old runs. Average goodputs were
+794.32/800.00/800.01/800.01 Mbps in old/new/new/old order; all four complete
+receiver speed checks passed 300 Mbps. The new full-one-second minima were
+796.88 and 458.11 Mbps; these dips are retained. GRO was off in all four runs.
+This measures TG processes, not all kernel WireGuard or physical-host CPU;
+two runs per binary on one shared VM are not a universal efficiency guarantee.
 
 The lab also exposes the existing bounded `replica_delay_ms` as an explicit
 `--replica-delay-ms` parameter, with both actual peers checked. This permits a
 separate 10ms/50ms comparison; a larger grace can reduce duplicate work but
 delays backup copies when a primary path blackholes. It is not a speed limit.
+
+## Separate jumbo-inner-packet experiment
+
+The lab now exposes `--max-packet-bytes` and validates that inner WG MTU plus
+padding/authentication overhead fits it, before creating lab resources. Both
+actual TG peers and kernel WG MTUs are checked. The existing data path supports
+8192-byte original packets; a 7168-byte inner MTU produces at most 7200-byte WG
+ciphertext datagrams, still fragmented over ordinary outer reliable streams.
+An actual IPv4/IPv6 socket test preserves all 32 such jumbo datagrams through
+the bounded GSO writer. This does not require increasing the physical WAN MTU.
+
+This experiment targets TCP sessions terminated at the two WG/proxy endpoints.
+Forwarded public-IP flows can retain roughly 1500-byte end-to-end packet sizes,
+so an improvement here cannot be generalized to arbitrary user traffic. It is
+not a recommendation to send jumbo native WireGuard UDP packets over an ordinary
+WAN. Explicit capacity tests and further performance results remain pending.
+New lab monitoring also records shared-VM CPU ticks (once per host in analysis),
+including kernel work and unrelated workloads, separately from each TG process.
 
 Raising caps or allocating more memory is not itself an efficiency improvement.
 Independent sessions,

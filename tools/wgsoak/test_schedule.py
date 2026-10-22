@@ -3,6 +3,16 @@ from run import fault_schedule,check_redundant_setup,check_qos_setup,check_qos_a
 
 
 class ScheduleTests(unittest.TestCase):
+    def test_maximum_packet_budget_must_match_both_peers(self):
+        c={r:dict(redundant=True,max_packet_bytes=2048) for r in ('edge','exit')}
+        import inspect
+        self.assertIn('max_packet',inspect.signature(check_redundant_setup).parameters)
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,max_packet=8192)
+        c['edge']['max_packet_bytes']=8192
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,max_packet=8192)
+        c['exit']['max_packet_bytes']=8192
+        check_redundant_setup(c,True,max_packet=8192)
+
     def test_backup_delay_and_gro_must_match_both_peers(self):
         c={r:dict(redundant=True,replica_delay_ms=10) for r in ('edge','exit')}
         with self.assertRaises(ValueError):check_redundant_setup(c,True,replica_delay=50)
