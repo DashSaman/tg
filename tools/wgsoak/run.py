@@ -6,6 +6,7 @@ routes, interfaces or firewall rules are changed. Private volume is deleted on e
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import subprocess
@@ -78,6 +79,16 @@ def check_qos_activity(reports,required):
                for role in ('edge','exit') for handle in ('7a00:','7a10:'))
 
 
+def analyze_trial(document, seconds, window, target, health=None):
+    result = analyze(document, duration=seconds, window=window, target=target)
+    result['target_mbps'] = target
+    if health is not None:
+        direct = document.get('intervals', [])
+        receiver = document if direct and direct[0].get('sum', {}).get('sender') is False else document['server_output_json']
+        result.update(assess_recovery(receiver['intervals'], result, seconds, health, target=target))
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary', type=Path, required=True)
@@ -94,6 +105,7 @@ def main():
     parser.add_argument('--udp-mode',choices=['auto','quic','quic-stream'],default='auto')
     parser.add_argument('--mtu', type=int, default=1280)
     parser.add_argument('--mbps', type=float, default=350, help='aggregate TCP pacing target; 0 uses unpaced bulk TCP')
+    parser.add_argument('--target-mbps', type=float, default=300, help='required receiver floor for steady traffic and recovery; distinct from offered --mbps')
     parser.add_argument('--redundant',action='store_true')
     parser.add_argument('--ordered-output',action='store_true',help='sequence barrier control; default preserves independent UDP delivery')
     parser.add_argument('--app-pacing-mbps',type=int,default=0,help='optional TG local UDP output cap; 0 disables; distinct from TCP offered rate')
@@ -105,6 +117,8 @@ def main():
     args = parser.parse_args()
     if args.seconds < 30 or args.fault_seconds < 90:
         raise ValueError('use >=30 steady seconds and >=90 fault seconds; only >=1800 qualifies as a soak')
+    if not math.isfinite(args.target_mbps) or not 0 < args.target_mbps <= 100000:
+        raise ValueError('receiver target must be finite and in 0..100000 Mbps, excluding zero')
     if args.ordered_output and not args.redundant:raise ValueError('ordered output requires redundancy')
     if not 0<=args.wg_qos_mbps<=100000:raise ValueError('WG QoS must be 0 or 1..100000 Mbps')
     if args.preferred_carrier!='auto' and (args.carrier!='both' or not args.redundant):raise ValueError('explicit carrier preference requires both redundant carriers')
@@ -125,6 +139,7 @@ def main():
                     seconds=args.seconds, fault_seconds=args.fault_seconds, streams=8,
                     gomaxprocs=args.gomaxprocs or None, live_receiver_telemetry=True,
                     offered_aggregate_mbps=args.mbps if args.mbps else None, tcp_pacing=bool(args.mbps), mtu=args.mtu, carrier=args.carrier, started_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                    target_mbps=args.target_mbps,
                     queue_frames=args.queue_frames, block_size=args.block_size,
                     redundant=args.redundant, window_seconds=args.window, fault_plan=args.fault_plan, extra_mixed_faults=args.extra_mixed_faults,
                     requested_udp_mode=args.udp_mode,
@@ -210,14 +225,10 @@ def main():
         if client.returncode or server.returncode:
             raise RuntimeError(case+' iperf exit '+str((client.returncode, server.returncode)))
         document = json.loads((out/(case+'-client.json')).read_text())
-        if faults:
-            # Retain ordinary acceptance verdict even when deliberate all-path cuts fail it.
-            result = analyze(document, duration=seconds, window=args.window)
-            receiver = document if reverse else document['server_output_json']
-            health = {role: rows(role)[-1].get('tg', {}).get('healthy_carriers') for role in names}
-            result.update(assess_recovery(receiver['intervals'], result, seconds, health))
-        else:
-            result = analyze(document, duration=seconds, window=args.window)
+        # Retain ordinary speed failures during all-path cuts; the same selected
+        # receiver target also governs recovery instead of a hidden 300 Mbps gate.
+        health = {role: rows(role)[-1].get('tg', {}).get('healthy_carriers') for role in names} if faults else None
+        result = analyze_trial(document, seconds, args.window, args.target_mbps, health)
         result.update(start=before, end=after, case=case, reverse=reverse)
         (out/(case+'-acceptance.json')).write_text(json.dumps(result, indent=2))
         print('RESULT '+json.dumps(result), flush=True)

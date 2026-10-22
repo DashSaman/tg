@@ -5,8 +5,10 @@ authenticated reliable QUIC and full-duplex HTTPS/2 carriers.
 
 **Status: v0.1 development prototype, locally tested. Real Iran-path performance
 and censorship resistance are unverified.** Initial acceptance target: **300 Mbps
-aggregate receiver goodput**. Future 10 Gbps aggregate requires separate profiling
-and capacity validation. Local load results and their limited scope are recorded
+aggregate receiver goodput**. **10 Gbps aggregate remains a required, unachieved
+goal**, with separate profiling and capacity validation still needed.
+See [actual capacity probes and remaining work](docs/capacity-10g.md).
+Local load results and their limited scope are recorded
 in [the performance report](docs/performance.md); real-host acceptance is pending.
 
 **The earlier DATAGRAM baseline failed:** a 30-minute, eight-stream TCP test

@@ -1,0 +1,144 @@
+{
+  "required_aggregate_mbps": 10000,
+  "achieved": false,
+  "scope": "Short local kernel WireGuard probes; no WAN, no physical hardware ceiling proof, not 30-minute acceptance",
+  "runtime_commit": "bba3467e17a1ff29e37ae1214de8073b886fe614",
+  "controls": [
+    {
+      "directory": "wg-capacity-native10g",
+      "case": "direct-probe",
+      "target_mbps": 10000,
+      "offered_mbps": 10000.0,
+      "seconds": 60,
+      "original_harness_target": 300,
+      "binary_sha256": "8c616a6b44e44d2c54b192b853fd38529ee87b57ce028a105ce3456c81fbe130",
+      "harness_sources": {
+        "wgsoak/run.py": "53ceae5a12bef6b13f94a44eace7211eddf9334023dab11fa7529428822e77ba",
+        "wgsoak/node.py": "12128fb72061fe851a4a2dfd34160865326471a97496ab5c0ec218b44296f50a",
+        "qos.py": "77ad52872760879a93f5a91359da7a78857d4798ddce919a3fd929a017b0e7a1"
+      },
+      "capacity_verdict": {
+        "passed": false,
+        "received_mbps": 649.2103691781998,
+        "minimum_window_mbps": 390.3651772596512,
+        "minimum_complete_one_second_mbps": 390.3155780583279,
+        "complete_one_second_below_target": 60,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "aggregate receiver bitrate below target",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "cleanup_passed": true,
+      "receipt_sha256": {
+        "manifest.json": "c7519d171a066a607bbefa4091042e5ed183982bbbfe719fec23bd47cc903a8d",
+        "direct-probe-server.json": "2eb44e7e9f7aa7bc478b752bb55fd1a60733c31779493629883bc6b06ed211ee",
+        "direct-probe-client.json": "69d8dadb2a2b046a1267901a8ae5c12800dc0c8bcd8527ea1d1562c4b4a2566b",
+        "direct-probe-acceptance.json": "08dcdda6fbc019f83ec86664945ecea1e8f92c825a77927716a8cf193c95e559",
+        "cleanup.json": "28181ade358841d0ff61662efda3fa80d8f36822b36146075693863344f15fe4"
+      }
+    },
+    {
+      "directory": "wg-capacity-tg10g",
+      "case": "both-probe",
+      "target_mbps": 10000,
+      "offered_mbps": 10000.0,
+      "seconds": 60,
+      "original_harness_target": 300,
+      "binary_sha256": "8c616a6b44e44d2c54b192b853fd38529ee87b57ce028a105ce3456c81fbe130",
+      "harness_sources": {
+        "wgsoak/run.py": "53ceae5a12bef6b13f94a44eace7211eddf9334023dab11fa7529428822e77ba",
+        "wgsoak/node.py": "12128fb72061fe851a4a2dfd34160865326471a97496ab5c0ec218b44296f50a",
+        "qos.py": "77ad52872760879a93f5a91359da7a78857d4798ddce919a3fd929a017b0e7a1"
+      },
+      "capacity_verdict": {
+        "passed": false,
+        "received_mbps": 949.0404187565863,
+        "minimum_window_mbps": 187.89543382564545,
+        "minimum_complete_one_second_mbps": 187.8854491269472,
+        "complete_one_second_below_target": 60,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "aggregate receiver bitrate below target",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "cleanup_passed": true,
+      "receipt_sha256": {
+        "manifest.json": "25d3d77224b4fad6689a022057bd5d2c0ac16ae2703b6818f6143f43ff5b2b1c",
+        "both-probe-server.json": "0d25bc6105fd8f37b3797ed8c69d1a4ffd3cf431ad525ef9569fa18168d222b0",
+        "both-probe-client.json": "ec228f815a3aea50a15d9f11270556d9aa89eb23eeb61ec409f1580a8d0bedfb",
+        "both-probe-acceptance.json": "411abcaa0aa0482624655660790f9e4ea60348251478a31c40336010f0a676d3",
+        "cleanup.json": "3dac08ec8b0e717ae98cd81ea26cb1f79e33d895a1c74b513c55affff98f73c9"
+      }
+    },
+    {
+      "directory": "wg-capacity-native-unpaced",
+      "case": "direct-probe",
+      "target_mbps": 10000,
+      "offered_mbps": null,
+      "seconds": 60,
+      "original_harness_target": 300,
+      "binary_sha256": "8c616a6b44e44d2c54b192b853fd38529ee87b57ce028a105ce3456c81fbe130",
+      "harness_sources": {
+        "wgsoak/run.py": "53ceae5a12bef6b13f94a44eace7211eddf9334023dab11fa7529428822e77ba",
+        "wgsoak/node.py": "12128fb72061fe851a4a2dfd34160865326471a97496ab5c0ec218b44296f50a",
+        "qos.py": "77ad52872760879a93f5a91359da7a78857d4798ddce919a3fd929a017b0e7a1"
+      },
+      "capacity_verdict": {
+        "passed": false,
+        "received_mbps": 623.5805715160204,
+        "minimum_window_mbps": 350.2165038346939,
+        "minimum_complete_one_second_mbps": 350.2122377629375,
+        "complete_one_second_below_target": 60,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "aggregate receiver bitrate below target",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "cleanup_passed": true,
+      "receipt_sha256": {
+        "manifest.json": "119be971061c581bf7ac2dbc5414cd1b1a30e9d39ad48c01e0dc55f346481e20",
+        "direct-probe-server.json": "8e48ac59b7eb335a99dc589d31a9a0c356c53a865c03073ddf5311154c50c02c",
+        "direct-probe-client.json": "d62787f43a7e82104fa86f0a91ccffc2646a17c93e18aa54be8481c4095ccbac",
+        "direct-probe-acceptance.json": "874846bda621f7c2bae5b8ef7e8a26a2e5fc972118ca20b83ef8c532866ab187",
+        "cleanup.json": "67572f649dd111cafe2009b31a19ace097d94c0091ca931094cf05befbef3778"
+      }
+    },
+    {
+      "directory": "wg-capacity-explicit10g",
+      "case": "both-probe",
+      "target_mbps": 10000,
+      "offered_mbps": 10000.0,
+      "seconds": 30,
+      "original_harness_target": 10000.0,
+      "binary_sha256": "8c616a6b44e44d2c54b192b853fd38529ee87b57ce028a105ce3456c81fbe130",
+      "harness_sources": {
+        "wgsoak/run.py": "87f04f6eee3c524d7e772ab96e3421ee8e8cde1ae71b3ccb51c3e89f7d12f436",
+        "wgsoak/node.py": "12128fb72061fe851a4a2dfd34160865326471a97496ab5c0ec218b44296f50a",
+        "qos.py": "77ad52872760879a93f5a91359da7a78857d4798ddce919a3fd929a017b0e7a1"
+      },
+      "capacity_verdict": {
+        "passed": false,
+        "received_mbps": 1267.1394283617085,
+        "minimum_window_mbps": 1036.8848136023025,
+        "minimum_complete_one_second_mbps": 1036.8848136023023,
+        "complete_one_second_below_target": 30,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "aggregate receiver bitrate below target",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "cleanup_passed": true,
+      "receipt_sha256": {
+        "manifest.json": "1c6a6d59c629ba317745a3578274c0a5e113a819e2f43a80b6af6ed2a8b0ff58",
+        "both-probe-server.json": "e969e393b44bb5d696fc3e4138382aefbd1c93214de8135253d9cda8043f5878",
+        "both-probe-client.json": "367000a6639bdf2a0a4329252face6ea732eefc0d2a98bd355e852274633ccf9",
+        "both-probe-acceptance.json": "0f51771fdffc9fd7200aae05906dc4284455ed34f93c58d2f8e60823a01598fa",
+        "cleanup.json": "2767d193873838ee22cda867d1b7dbddd3051a19d832d45faad1d972e35c70a6"
+      }
+    }
+  ]
+}
