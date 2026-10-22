@@ -58,6 +58,13 @@ the diagnostic removal of caps is not a production tuning recommendation.
 
 ## Engineering still required
 
+The subsequent [CPU/packet-size/window experiments](low-cpu-capacity.md)
+include an18.10% local TG CPU-cost reduction from stream read-ahead, retained
+negative jumbo/window/copy-delay probes, and ordinary-MTU/two-session tests.
+They still do not achieve10Gbps. [Independent pair initialization](independent-workers.md)
+is now implemented; it does not perform user assignment, routing or automatic
+bonding. See those reports for current source identities and measured limits.
+
 1. Establish a direct kernel-WireGuard and traffic-generator baseline above the
    intended rate with CPU, socket, NIC and offload observations. Separate
    generator limitations from tunnel limitations before sizing workers.
@@ -71,7 +78,8 @@ the diagnostic removal of caps is not a production tuning recommendation.
 4. Compare a larger bounded pipeline against independent session/flow shards.
    Independent WG/TG pairs can spread crypto and session work, but need explicit
    user/flow assignment, routing, resource budgets and failure recovery. Such
-   sharding is **not implemented** by the current single-session prototype.
+   pair initialization is implemented, while automatic sharding/routing remains
+   unimplemented and capacity must be measured rather than inferred from count.
 5. Validate aggregate receiver goodput, memory and loaded latency for 30 minutes,
    then repeated single-path cuts. Every surviving path must have the required
    measured capacity. All-path blocking necessarily interrupts delivery.

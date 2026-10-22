@@ -1,6 +1,9 @@
 """Capacity targets must reach both steady and post-outage receiver gates."""
 import unittest
 import run
+from pathlib import Path
+import tempfile
+from unittest.mock import patch
 
 
 def receiver(mbps):
@@ -11,6 +14,23 @@ def receiver(mbps):
 
 
 class CapacityTests(unittest.TestCase):
+    def test_replay_count_and_byte_budgets_match_runtime_bounds(self):
+        self.assertTrue(hasattr(run,'check_replay_profile'),'missing bounded replay preflight')
+        for count,packet,ordered in ((8192,2048,False),(131072,2048,False),(32768,8192,False),(16384,8192,True)):
+            run.check_replay_profile(count,packet,ordered)
+        for count,packet,ordered in ((127,2048,False),(131073,2048,False),(32769,8192,False),(16385,2048,True),(8192,0,False)):
+            with self.subTest(count=count,packet=packet,ordered=ordered),self.assertRaises(ValueError):
+                run.check_replay_profile(count,packet,ordered)
+
+    def test_oversized_replay_is_rejected_before_lab_mutation(self):
+        with tempfile.TemporaryDirectory() as directory:
+            out=Path(directory)/'must-not-exist'
+            args=['run.py','--binary','unused','--out',str(out),'--retained-packets','32769','--max-packet-bytes','8192']
+            with patch('sys.argv',args),patch.object(run,'docker',side_effect=AssertionError('Docker called before budget validation')):
+                with self.assertRaisesRegex(ValueError,'replay'):
+                    run.main()
+            self.assertFalse(out.exists())
+
     def test_inner_mtu_must_fit_ciphertext_packet_budget(self):
         self.assertTrue(hasattr(run, 'check_packet_profile'))
         run.check_packet_profile(1280,2048)

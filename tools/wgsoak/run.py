@@ -104,6 +104,12 @@ def check_packet_profile(mtu,max_packet):
         raise ValueError('inner MTU plus WireGuard padding/overhead must fit a 512..8192-byte TG packet budget')
 
 
+def check_replay_profile(packets,max_packet,ordered=False):
+    if (not 512<=max_packet<=8192 or not 128<=packets<=131072
+            or packets*max_packet>(256<<20) or (ordered and packets>16384)):
+        raise ValueError('replay budget must be128..131072 packets, at most256MiB payload and16384 packets for ordered output')
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--binary', type=Path, required=True)
@@ -120,7 +126,7 @@ def main():
     parser.add_argument('--udp-mode',choices=['auto','quic','quic-stream'],default='auto')
     parser.add_argument('--mtu', type=int, default=1280)
     parser.add_argument('--max-packet-bytes',type=int,default=2048,help='TG original packet budget; must include inner MTU plus WireGuard overhead')
-    parser.add_argument('--retained-packets',type=int,default=8192,help='bounded acknowledged sender log;128..32768 packets')
+    parser.add_argument('--retained-packets',type=int,default=8192,help='bounded sender log;128..131072 packets within256MiB payload budget')
     parser.add_argument('--stream-window-bytes',type=int,default=0,help='0 keeps native HTTP2/QUIC windows; explicit1..256MiB per stream')
     parser.add_argument('--mbps', type=float, default=350, help='aggregate TCP pacing target; 0 uses unpaced bulk TCP')
     parser.add_argument('--target-mbps', type=float, default=300, help='required receiver floor for steady traffic and recovery; distinct from offered --mbps')
@@ -141,7 +147,7 @@ def main():
         raise ValueError('receiver target must be finite and in 0..100000 Mbps, excluding zero')
     if not 0<=args.replica_delay_ms<=50:raise ValueError('backup delay must be 0..50ms')
     check_packet_profile(args.mtu,args.max_packet_bytes)
-    if not 128<=args.retained_packets<=32768 or (args.ordered_output and args.retained_packets>16384):raise ValueError('replay budget exceeds configured bounds')
+    check_replay_profile(args.retained_packets,args.max_packet_bytes,args.ordered_output)
     if args.stream_window_bytes!=0 and not 1<<20<=args.stream_window_bytes<=256<<20:raise ValueError('stream window must be0 or1..256MiB')
     if args.ordered_output and not args.redundant:raise ValueError('ordered output requires redundancy')
     if not 0<=args.wg_qos_mbps<=100000:raise ValueError('WG QoS must be 0 or 1..100000 Mbps')

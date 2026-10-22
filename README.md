@@ -8,6 +8,12 @@ and censorship resistance are unverified.** Initial acceptance target: **300 Mbp
 aggregate receiver goodput**. **10 Gbps aggregate remains a required, unachieved
 goal**, with separate profiling and capacity validation still needed.
 See [actual capacity probes and remaining work](docs/capacity-10g.md).
+The [CPU work](docs/low-cpu-capacity.md) measured an 18.10% reduction in TG
+process CPU seconds per delivered gigabit in a local 800 Mbps comparison.
+[Independent-worker initialization](docs/independent-workers.md) is available;
+the measured two-session capacity still fell far short of 10 Gbps. Both ordinary
+IP packet sizes and larger proxy-endpoint packets require separate validation.
+Fresh 30-minute **speed/memory/recovery: PASS** at 350 Mbps offered load with ordinary 1500-byte inner MTU. **A later short control failed the 300 Mbps speed floor**, so repeated stability is unproven. The first 1500-ping timing guard failed; covered 120-ping latency targets passed separately. [All results, dips and coverage issue](docs/low-cpu-stability.md).
 Local load results and their limited scope are recorded
 in [the performance report](docs/performance.md); real-host acceptance is pending.
 
@@ -30,7 +36,7 @@ The older 10s-window result does not establish the stricter one-second target.
 [Current design and scope](docs/shared-sender-log.md),
 [retained failed controls](docs/redundancy-experiments.md).
 
-The [pre-encryption queue-control profile](docs/wg-qos-profile.md) passed a fresh
+The earlier accepted [pre-encryption queue-control profile](docs/wg-qos-profile.md) passed a fresh
 **30-minute local kernel-WireGuard test**: **350.00 Mbps average /
 324.33 Mbps minimum full 1s**, followed by three minutes of
 repeated single-path cuts (minimum **340.39 Mbps**). Every full and
@@ -72,6 +78,10 @@ refuses an existing directory. Edge accepts UDP on 31820; exit forwards it to UD
 open Internet exit. Keep ca.key offline and provision each host only its own
 identity, config, CA certificate and web token. Never commit generated credentials.
 Linux modes are 0700/0600; protect Windows directories with appropriate ACLs.
+For independently assigned users/subnets, `tg init --dir private-workers
+--server-name exit.example.net --redundant --instances 4` generates separate
+pairs with unique ports and credentials. See the worker guide before deployment;
+TG does not configure flow assignment or the separate inner WireGuard peers.
 
 Read the [operator guide](docs/operations.md) before configuring two hosts. Health
 means carrier round trip, not application Internet access. Native QUIC is

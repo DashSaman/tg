@@ -4,6 +4,8 @@ The required final capacity remains **10 Gbps aggregate**, not yet achieved.
 The existing 300 Mbps acceptance is a first milestone. This work measures CPU
 seconds per delivered gigabit rather than treating a configured rate or the
 addition of worker counts as delivered capacity.
+[Source-identified CPU and failed capacity records](low-cpu-results.json)
+include binary identities and hashes of raw receiver/monitor evidence.
 
 ## First bounded change: Linux application UDP GRO
 
@@ -184,4 +186,4 @@ These observations do not prove a physical hardware ceiling or WAN capacity.
 More workers did not improve measured capacity here. High-RTT tests, actual
 forwarding/NAT, UDP user-load acceptance and10Gbps real-host/path validation remain
 unfinished. The prior300Mbps30-minute success belongs to its recorded older
-runtime/profile; fresh acceptance of this CPU-optimized build is still pending.
+runtime/profile; [Fresh CPU-optimized runtime acceptance](low-cpu-stability.md) records its actual speed, cuts, CPU, memory and latency verdict separately.
