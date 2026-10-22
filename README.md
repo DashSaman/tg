@@ -1,5 +1,7 @@
 # TG
 
+The [new packet/TLS measurements](docs/stream-packets-validation.md) show **19.80% lower TG CPU per Gbit** in a proxy/HTTPS comparison. A fresh 30-minute ordinary-IP run offered 1 Gbps: receiver mean **1000.00 Mbps**, minimum full 1 s **457.71 Mbps**. Original 300 Mbps milestone: **PASS**; 800 Mbps floor: **FAIL**. **8 Gbps and 10 Gbps remain unachieved.**
+
 Personal Iran-to-overseas tunnel with an original bounded session layer over
 authenticated reliable QUIC and full-duplex HTTPS/2 carriers.
 
@@ -13,7 +15,7 @@ process CPU seconds per delivered gigabit in a local 800 Mbps comparison.
 [Independent-worker initialization](docs/independent-workers.md) is available;
 the measured two-session capacity still fell far short of 10 Gbps. Both ordinary
 IP packet sizes and larger proxy-endpoint packets require separate validation.
-Fresh 30-minute **speed/memory/recovery: PASS** at 350 Mbps offered load with ordinary 1500-byte inner MTU. **A later short control failed the 300 Mbps speed floor**, so repeated stability is unproven. The first 1500-ping timing guard failed; covered 120-ping latency targets passed separately. [All results, dips and coverage issue](docs/low-cpu-stability.md).
+An earlier b772 runtime had 30-minute **speed/memory/recovery: PASS** at 350 Mbps offered load with ordinary 1500-byte inner MTU. **A later short control failed the 300 Mbps speed floor**, so that profile's repeated stability was unproven. Its first 1500-ping timing guard failed; covered 120-ping latency targets passed separately. [Historical results, dips and coverage issue](docs/low-cpu-stability.md).
 Local load results and their limited scope are recorded
 in [the performance report](docs/performance.md); real-host acceptance is pending.
 
@@ -31,7 +33,7 @@ shared bounded sender log, per-carrier replay cursors and selective acknowledgem
 Unique completed UDP packets are delivered independently; strict output ordering
 is optional. Both endpoints must upgrade and opt in. Earlier short passes were
 followed by failed longer controls; the first attempted soak was interrupted at
-207s. The current shared-log runtime passed the complete local profile below.
+207s. An earlier shared-log runtime passed the complete local profile below.
 The older 10s-window result does not establish the stricter one-second target.
 [Current design and scope](docs/shared-sender-log.md),
 [retained failed controls](docs/redundancy-experiments.md).
