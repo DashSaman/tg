@@ -20,6 +20,10 @@ import (
 // Both peers must upgrade together; v1 peers fail ALPN negotiation.
 const alpn = "tg-dgram-v2"
 
+// The DATAGRAM wire protocol keeps its original 16-frame bundle limit even
+// when one internal application batch spans several complete datagrams.
+const maxDatagramBundleFrames = 16
+
 func quicALPN(kind string, redundant bool) string {
 	if kind == "quic-stream" {
 		if redundant {
@@ -137,7 +141,7 @@ func (w *quicWire) SendBatch(frames [][]byte) error {
 	}
 	for first := 0; first < len(frames); {
 		n, last := 0, first
-		for last < len(frames) && n+2+len(frames[last]) <= w.limit {
+		for last < len(frames) && last-first < maxDatagramBundleFrames && n+2+len(frames[last]) <= w.limit {
 			b := frames[last]
 			binary.BigEndian.PutUint16(w.sendBuffer[n:n+2], uint16(len(b)))
 			n += 2
@@ -191,7 +195,7 @@ func (w *quicWire) Receive(ctx context.Context) ([]byte, error) {
 			size := int(binary.BigEndian.Uint16(b[at : at+2]))
 			at += 2
 			count++
-			if size == 0 || size > session.MaxFrame || size > len(b)-at || count > MaxBatchFrames {
+			if size == 0 || size > session.MaxFrame || size > len(b)-at || count > maxDatagramBundleFrames {
 				return nil, errors.New("invalid QUIC bundled frame")
 			}
 			at += size

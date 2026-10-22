@@ -133,6 +133,29 @@ func TestQUICRejectsMalformedBundleBeforeDeliveringPrefix(t *testing.T) {
 	}
 }
 
+func TestQUICLargeInternalBatchKeepsOriginalDatagramWireLimit(t *testing.T) {
+	f := &datagramFixture{incoming: make(chan []byte, 128), limit: 1400}
+	w := &quicWire{conn: f}
+	defer w.Close()
+	frames := make([][]byte, 64)
+	for i := range frames {
+		frames[i] = []byte{byte(i + 1)}
+	}
+	if err := w.SendBatch(frames); err != nil {
+		t.Fatal(err)
+	}
+	if len(f.packets) != 4 {
+		t.Fatalf("64 frames require four compatible 16-frame bundles, got %d", len(f.packets))
+	}
+	f.queueSent()
+	for _, want := range frames {
+		got, err := w.Receive(context.Background())
+		if err != nil || !bytes.Equal(got, want) {
+			t.Fatal("large vector changed datagram framing", err)
+		}
+	}
+}
+
 func TestQUICDrainsNativeQueueWhileFrameConsumerPauses(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

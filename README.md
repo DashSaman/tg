@@ -39,6 +39,11 @@ and memory passed. The short pass is not full acceptance.
 The [complete prior bulk control](docs/wireguard-c9-control.md) failed speed and
 had about 209 ms loaded RTT despite passing memory checks; it remains visible.
 
+The [later full GSO/HTTPS control](docs/wireguard-hybrid-control.md) also failed
+the every-second floor with350Mbps offered load (minimum206.03Mbps,nine bad
+seconds) and lost2/1500ICMP probes. Memory and loaded single-path cuts passed.
+A ten-minute native WG bypass control passed,min345.14Mbps; investigation continues.
+
 TG forwards one application's opaque UDP packets. WireGuard is the intended inner
 IP tunnel, configured separately. TG keeps the exit UDP socket across carrier
 changes and probes both carriers. Default selection retains a healthy active path

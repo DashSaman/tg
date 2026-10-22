@@ -42,6 +42,42 @@ func TestHTTPBatchPreservesFramingWithOneWriteAndFlush(t *testing.T) {
 	}
 }
 
+func TestCarrierBatchCanCarryFullApplicationUDPSegmentVector(t *testing.T) {
+	var output countedWriter
+	flushes := 0
+	w := &httpWire{writer: &output, flush: func() error { flushes++; return nil }}
+	// WG MTU 1280 yields 1312-byte UDP payloads, each needing two TG fragments.
+	frames := make([][]byte, 0, 64)
+	for i := range 32 {
+		fragments, err := session.Fragment(bytes.Repeat([]byte{byte(i + 1)}, 1312), uint64(i+1))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, f := range fragments {
+			b, err := session.Encode(f)
+			if err != nil {
+				t.Fatal(err)
+			}
+			frames = append(frames, b)
+		}
+	}
+	if err := w.SendBatch(frames); err != nil {
+		t.Fatalf("full 32-datagram vector was split into small carrier batches: %v", err)
+	}
+	if output.calls != 1 || flushes != 1 {
+		t.Fatalf("writes=%d flushes=%d", output.calls, flushes)
+	}
+	for _, want := range frames {
+		got, err := recvStream(&output)
+		if err != nil || !bytes.Equal(got, want) {
+			t.Fatal("large batch changed frame boundaries", err)
+		}
+	}
+	if output.Len() != 0 {
+		t.Fatal("trailing batch bytes")
+	}
+}
+
 func TestHTTPReceiveBufferValidUntilNextReceive(t *testing.T) {
 	var encoded bytes.Buffer
 	_ = sendStream(&encoded, []byte("one"))
