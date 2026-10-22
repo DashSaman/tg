@@ -46,13 +46,14 @@ func command(ctx context.Context, args []string, out io.Writer) error {
 		dir := flags.String("dir", "", "new private directory for configs and test identities")
 		name := flags.String("server-name", "localhost", "verified server DNS name or IP")
 		redundant := flags.Bool("redundant", false, "enable acknowledged packet redundancy across reliable carriers; extra bandwidth required")
+		instances := flags.Int("instances", 1, "independent pairs (1..32); assign user flows or subnets separately")
 		if err := flags.Parse(args[1:]); err != nil {
 			return err
 		}
 		if *dir == "" || flags.NArg() != 0 {
 			return errors.New("init requires --dir and no positional arguments")
 		}
-		return initialize(*dir, *name, *redundant, out)
+		return initializeWorkers(*dir, *name, *redundant, *instances, out)
 	case "check", "run":
 		path := flags.String("config", "", "JSON configuration path")
 		if err := flags.Parse(args[1:]); err != nil {
@@ -83,6 +84,10 @@ func command(ctx context.Context, args []string, out io.Writer) error {
 	}
 }
 func initialize(dir, name string, redundant bool, out io.Writer) error {
+	return initializeWorker(dir, name, redundant, 0, out)
+}
+
+func initializeWorker(dir, name string, redundant bool, index int, out io.Writer) error {
 	sessionID := make([]byte, 16)
 	path := make([]byte, 16)
 	if _, err := rand.Read(sessionID); err != nil {
@@ -95,6 +100,10 @@ func initialize(dir, name string, redundant bool, out io.Writer) error {
 		return err
 	}
 	c := config.Defaults()
+	c.AppAddress = fmt.Sprintf("127.0.0.1:%d", 31820+index)
+	c.Metrics = fmt.Sprintf("127.0.0.1:%d", 19090+2*index)
+	c.Carriers[0].Address = fmt.Sprintf("127.0.0.1:%d", 8443+2*index)
+	c.Carriers[1].Address = fmt.Sprintf("127.0.0.1:%d", 8444+2*index)
 	c.Redundant = redundant
 	c.SessionID = hex.EncodeToString(sessionID)
 	c.TLS.ServerName = name
@@ -102,8 +111,8 @@ func initialize(dir, name string, redundant bool, out io.Writer) error {
 	for _, role := range []string{"edge", "exit"} {
 		c.Role = role
 		if role == "exit" {
-			c.AppAddress = "127.0.0.1:51820"
-			c.Metrics = "127.0.0.1:19091"
+			c.AppAddress = fmt.Sprintf("127.0.0.1:%d", 51820+index)
+			c.Metrics = fmt.Sprintf("127.0.0.1:%d", 19091+2*index)
 			c.TLS.Cert = "server.crt"
 			c.TLS.Key = "server.key"
 		}

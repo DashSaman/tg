@@ -138,10 +138,12 @@ These tests catch silently ignored settings rather than merely checking a struct
 The exact pinned Go implementation was inspected and tested; do not infer
 acceptance of a large setting from a configuration value alone on other runtimes.
 
-`retained_packets` defaults to8192 and is bounded128..32768. Ordered output
+`retained_packets` defaults to8192 and is bounded128..131072, with a separate
+256MiB bound on retained_packets*max_packet_bytes. Ordered output
 additionally limits it to16384 to fit its reorder budget. A smaller value can
 keep jumbo retained payload bounded:2048*8192bytes is16MiB; the maximum supported
-configuration32768*8192bytes permits256MiB of retained payload. Existing dedupe
+jumbo configuration32768*8192bytes permits256MiB of retained payload; an ordinary
+2048-byte budget instead permits131072 packets within the same byte bound. Existing dedupe
 history remains larger than every allowed sender budget. An ACK-driven admission
 test checks the actual configured limit and release behavior.
 
@@ -150,8 +152,36 @@ buffer unread data, in addition to the retained log and Go GC overhead. Explicit
 large-window profiles therefore require an intentional memory budget; defaults
 stay unchanged. High RTT/10Gbps still requires a measured bandwidth-delay-product
 budget and capacity acceptance. The lab records and checks both actual peers'
-window and replay settings. Performance of these overrides is pending.
+window and replay settings. A same-binary60s pair received2309.25Mbps with native
+windows and1795.85Mbps with32MiB windows, respectively2.0084 and2.3463 TG CPU
+seconds/Gbit. Both failed10000Mbps in every full interval. No performance win is
+attributed to larger windows; native defaults remain selected.
 
 Raising caps or allocating more memory is not itself an efficiency improvement.
-Independent sessions,
-high-RTT window sizing and 10 Gbps hardware/path validation remain unfinished.
+[Independent-session initialization](independent-workers.md) is implemented;
+flow/subnet assignment remains an explicit operator task. Three90s diagnostics
+used the same clean9b2690d binary, with isolated WG/TG pairs,12000Mbps offered per
+instance, no pacing/QoS caps and4 Go processors per process:
+
+| Profile | Common-span receiver Mbps | Minimum weighted1s Mbps | TG CPU s/Gbit | Shared VM busy cores |
+|---|---:|---:|---:|---:|
+| Ordinary MTU1500, one pair |1288.66|558.05|3.018|8.75|
+| Proxy MTU7168, two pairs |2483.85|1966.36|2.615|8.98|
+| Ordinary MTU1500, two pairs |1033.93|407.10|4.005|9.25|
+
+Each row uses the fully covered common interior receiver span, rather than a sum
+of configured rates or mismatched phase averages. Launch timestamp offsets are
+not corrected, so these are capacity diagnostics, not exact synchronized10G
+acceptance. Every common second failed10000Mbps. In the last case, each individual
+instance also failed its300Mbps one-second gate under unrestricted overload;
+those negative verdicts are retained. All private lab resources were cleaned up.
+The ordinary-packet tests terminate TCP at WG endpoints and isolate packet-size
+effects; they do not certify routed public-IP/NAT performance. Shared VM counters
+are counted once and include kernel/iperf/foreign work. Inspected own-container
+CPU quotas were unlimited,0..11 CPUs visible, and no cgroup throttling recorded.
+These observations do not prove a physical hardware ceiling or WAN capacity.
+
+More workers did not improve measured capacity here. High-RTT tests, actual
+forwarding/NAT, UDP user-load acceptance and10Gbps real-host/path validation remain
+unfinished. The prior300Mbps30-minute success belongs to its recorded older
+runtime/profile; fresh acceptance of this CPU-optimized build is still pending.

@@ -73,8 +73,8 @@ func validAddress(address string, loopback bool) bool {
 }
 
 func (c Config) Validate() error {
-	if c.RetainedPackets < 128 || c.RetainedPackets > 32768 || (c.OrderedOutput && c.RetainedPackets > 16384) {
-		return errors.New("retained packet budget must be 128..32768, at most 16384 with ordered output")
+	if c.RetainedPackets < 128 || c.RetainedPackets > 131072 || (c.OrderedOutput && c.RetainedPackets > 16384) {
+		return errors.New("retained packet budget must be 128..131072, at most 16384 with ordered output")
 	}
 	if c.StreamWindowBytes != 0 && (c.StreamWindowBytes < 1<<20 || c.StreamWindowBytes > 256<<20) {
 		return errors.New("stream window must be 0 (native defaults) or 1..256 MiB")
@@ -100,6 +100,9 @@ func (c Config) Validate() error {
 	}
 	if c.QueueFrames < 8 || c.QueueFrames > 4096 || c.MaxPacketBytes < 512 || c.MaxPacketBytes > 8192 {
 		return errors.New("packet/queue limits out of range")
+	}
+	if c.RetainedPackets > (256<<20)/c.MaxPacketBytes {
+		return errors.New("retained packet payload budget must not exceed 256 MiB")
 	}
 	if c.ProbeIntervalMS < 20 || c.ProbeIntervalMS > 60000 || c.ProbeTimeoutMS < 3*c.ProbeIntervalMS || c.ProbeTimeoutMS > 15*c.ProbeIntervalMS || c.ProbeTimeoutMS > 300000 || c.HoldDownMS < 0 || c.HoldDownMS > 600000 {
 		return errors.New("probe timing out of range")

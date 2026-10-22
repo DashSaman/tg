@@ -16,7 +16,7 @@ func valid() Config {
 }
 
 func TestCapacityWindowsAreBoundedBeforeUse(t *testing.T) {
-	for key, values := range map[string][]int{"retained_packets": {0, 127, 32769}, "stream_window_bytes": {-1, 1, (256 << 20) + 1}} {
+	for key, values := range map[string][]int{"retained_packets": {0, 127, 131073}, "stream_window_bytes": {-1, 1, (256 << 20) + 1}} {
 		for _, value := range values {
 			c := valid()
 			b, _ := json.Marshal(c)
@@ -29,6 +29,23 @@ func TestCapacityWindowsAreBoundedBeforeUse(t *testing.T) {
 				t.Fatalf("invalid %s=%d capacity accepted", key, value)
 			}
 		}
+	}
+}
+
+func TestReplayBudgetSupportsSmallPacketsWithoutUnboundedJumboMemory(t *testing.T) {
+	c := valid()
+	c.RetainedPackets = 131072
+	c.MaxPacketBytes = 2048
+	if err := c.Validate(); err != nil {
+		t.Fatal("bounded ordinary-packet high-BDP budget rejected", err)
+	}
+	c.MaxPacketBytes = 8192
+	if c.Validate() == nil {
+		t.Fatal("replay payload budget above 256 MiB accepted")
+	}
+	c.RetainedPackets = 32768
+	if err := c.Validate(); err != nil {
+		t.Fatal("256 MiB jumbo boundary rejected", err)
 	}
 }
 
