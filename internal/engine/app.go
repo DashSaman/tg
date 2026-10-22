@@ -8,6 +8,7 @@ import (
 	"net/netip"
 	"runtime"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -17,7 +18,7 @@ type application struct {
 	mu                  sync.Mutex
 	peer                netip.AddrPort
 	readBuffer          []byte
-	batch               *ipv4.PacketConn
+	batch               applicationBatchConn
 	writeMessages       [32]ipv4.Message
 	writeBuffers        [32][1][]byte
 	readMessages        [32]ipv4.Message
@@ -25,6 +26,22 @@ type application struct {
 	readStorage         []byte
 	readNext, readCount int
 	readError           error
+	offload             applicationOffload
+	gsoBatches          atomic.Uint64
+	gsoPackets          atomic.Uint64
+	gsoFallbacks        atomic.Uint64
+}
+
+type applicationBatchConn interface {
+	ReadBatch([]ipv4.Message, int) (int, error)
+	WriteBatch([]ipv4.Message, int) (int, error)
+}
+
+type applicationOffload struct {
+	disabled bool // writer-owned; unsupported kernels permanently use sendmmsg
+	storage  []byte
+	control  [32][64]byte
+	ends     [32]int // exclusive original-packet index for each syscall message
 }
 
 func openApplication(c config.Config) (*application, error) {
@@ -89,32 +106,64 @@ func (a *application) writeBatch(packets [][]byte, timeout time.Duration) (int, 
 		peer = net.UDPAddrFromAddrPort(a.peer)
 	}
 	_ = a.conn.SetWriteDeadline(time.Now().Add(timeout))
-	for i, p := range packets {
-		a.writeBuffers[i][0] = p
-		a.writeMessages[i].Addr = peer
-	}
 	defer func() {
-		for i := range packets {
+		for i := range a.writeMessages {
 			a.writeBuffers[i][0] = nil
 			a.writeMessages[i].Addr = nil
+			a.writeMessages[i].OOB = nil
 		}
 	}()
 	sent := 0
 	for sent < len(packets) {
-		n, err := a.batch.WriteBatch(a.writeMessages[sent:len(packets)], 0)
-		// x/net forwards the raw Linux syscall's -1 on an error. It must
-		// not subtract a previously consumed prefix from our result.
-		if n > 0 {
-			sent += n
-		}
-		if err != nil {
-			return sent, err
-		}
-		if n == 0 {
-			return sent, errors.New("empty application batch write")
+		count := a.prepareWriteBatch(packets[sent:], peer)
+		base := sent
+		for group := 0; group < count; {
+			n, err := a.batch.WriteBatch(a.writeMessages[group:count], 0)
+			// x/net can return -1 on failure. Count only consumed messages,
+			// translating GSO groups back to original datagrams.
+			if n > 0 {
+				for j := group; j < group+n; j++ {
+					begin := 0
+					if j > 0 {
+						begin = a.offload.ends[j-1]
+					}
+					if len(a.writeMessages[j].OOB) > 0 {
+						a.gsoBatches.Add(1)
+						a.gsoPackets.Add(uint64(a.offload.ends[j] - begin))
+					}
+				}
+				group += n
+				sent = base + a.offload.ends[group-1]
+			}
+			if err != nil {
+				if !a.offload.disabled && unsupportedApplicationGSO(err) {
+					a.offload.disabled = true
+					a.gsoFallbacks.Add(1)
+					break // retry only the unsent suffix, without offload
+				}
+				return sent, err
+			}
+			if n == 0 {
+				return sent, errors.New("empty application batch write")
+			}
 		}
 	}
 	return sent, nil
+}
+
+func (a *application) prepareWriteBatch(packets [][]byte, peer net.Addr) int {
+	if !a.offload.disabled {
+		if n := a.prepareOffloadedWrite(packets, peer); n > 0 {
+			return n
+		}
+	}
+	for i, p := range packets {
+		a.writeBuffers[i][0] = p
+		a.writeMessages[i].Addr = peer
+		a.writeMessages[i].OOB = nil
+		a.offload.ends[i] = i + 1
+	}
+	return len(packets)
 }
 func (a *application) read(limit int) ([]byte, error) {
 	b := a.readBuffer[:limit+1]

@@ -33,7 +33,9 @@ combines HTB/FQ-CoDel on the intended WireGuard interface with TG's shared log,
 deferred backup copies and local output pacing. Its short real-WireGuard control
 passed the unchanged 300 Mbps floor: minimum full 1s 316.01 Mbps steady and
 335.75 Mbps during repeated single-path cuts. Sixty loaded pings averaged 1.11 ms
-(p95 1.43 ms, zero loss). Full clean-build acceptance is still pending.
+(p95 1.43 ms, zero loss). The [complete clean-build control](docs/wireguard-qos-control.md) subsequently
+failed the speed floor (minimum126.95Mbps,36 bad seconds), while loaded latency
+and memory passed. The short pass is not full acceptance.
 The [complete prior bulk control](docs/wireguard-c9-control.md) failed speed and
 had about 209 ms loaded RTT despite passing memory checks; it remains visible.
 

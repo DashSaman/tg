@@ -1,0 +1,129 @@
+{
+  "passed": false,
+  "runtime_commit": "05ffdaed112eb0c2fcbfc5509cdd19278d2d8514",
+  "memory": {
+    "edge": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 357,
+      "rss_early_median_mib": 21.69921875,
+      "rss_late_median_mib": 21.890625,
+      "pss_early_median_mib": 17.7734375,
+      "pss_late_median_mib": 17.9375,
+      "rss_peak_mib": 25.8828125,
+      "pss_peak_mib": 21.9453125,
+      "rss_growth_mib": 0.19140625,
+      "pss_growth_mib": 0.1640625,
+      "pss_slope_mib_per_minute": 0.005727534284722141,
+      "rss_slope_mib_per_minute": 0.007389505017969921,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    },
+    "exit": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 357,
+      "rss_early_median_mib": 22.140625,
+      "rss_late_median_mib": 22.296875,
+      "pss_early_median_mib": 18.21484375,
+      "pss_late_median_mib": 18.33203125,
+      "rss_peak_mib": 30.83203125,
+      "pss_peak_mib": 26.89453125,
+      "rss_growth_mib": 0.15625,
+      "pss_growth_mib": 0.1171875,
+      "pss_slope_mib_per_minute": 0.007894174811796757,
+      "rss_slope_mib_per_minute": 0.009555955269458764,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    }
+  },
+  "continuity": {
+    "edge": {
+      "process_stable": true,
+      "app_socket_stable": true,
+      "observed_wireguard_handshakes": 19
+    },
+    "exit": {
+      "process_stable": true,
+      "app_socket_stable": true,
+      "observed_wireguard_handshakes": 19
+    }
+  },
+  "fault_memory": {
+    "edge": {
+      "growth_mib": {
+        "rss_kib": -0.36328125,
+        "pss_kib": -0.37109375
+      },
+      "passed": true,
+      "peak_rss_mib": 25.8828125
+    },
+    "exit": {
+      "growth_mib": {
+        "rss_kib": 0.029296875,
+        "pss_kib": 0.021484375
+      },
+      "passed": true,
+      "peak_rss_mib": 30.83203125
+    }
+  },
+  "loaded_latency": {
+    "scope": "1500 ICMP probes at 1Hz through the actual kernel WireGuard/TG path during bulk TCP; secondary latency observation, not WAN/DPI evidence",
+    "samples": 1500,
+    "transmitted": 1500,
+    "received": 1500,
+    "loss_percent": 0.0,
+    "minimum_ms": 0.506,
+    "mean_ms": 2.540102666666667,
+    "median_ms": 1.04,
+    "maximum_ms": 107.0,
+    "p95_ms": 9.48,
+    "percentile_method": "nearest rank of 1500 rounded reply RTT samples",
+    "target_median_ms": 20,
+    "target_p95_ms": 30,
+    "raw_log_sha256": "db4aaa54d942de974243bf066f2cd765b22af3c6f94f54615421b3a86e9ac083",
+    "metadata_sha256": "59e4279b93ded90694e806f68900c45abcfdd43a9788687c84f5b072d5074bf1",
+    "start": 1792638824.7590308,
+    "end": 1792640340.3756092,
+    "low_latency_target_passed": true,
+    "within_steady_load": true,
+    "passed": true,
+    "conservative_steady_coverage": true
+  },
+  "phases": {
+    "steady": {
+      "passed": false,
+      "seconds": 1800.000865,
+      "received_mbps": 378.73601941852405,
+      "minimum_complete_one_second_mbps": 126.95339379229654,
+      "minimum_window_mbps": 126.95339379229736,
+      "complete_one_second_below_target": 36,
+      "failures": [
+        "complete one-second receiver interval below target or absent",
+        "rolling receiver window below target or absent"
+      ]
+    },
+    "faults": {
+      "passed": false,
+      "seconds": 180.010771,
+      "received_mbps": 377.25089914758485,
+      "minimum_complete_one_second_mbps": 276.9536667689441,
+      "minimum_window_mbps": 276.9536667689438,
+      "complete_one_second_below_target": 2,
+      "failures": [
+        "complete one-second receiver interval below target or absent",
+        "rolling receiver window below target or absent"
+      ]
+    },
+    "all-path-faults": {
+      "passed": false,
+      "seconds": 180.001064,
+      "received_mbps": 362.0850872303732,
+      "minimum_complete_one_second_mbps": 0.0,
+      "minimum_window_mbps": 0.0,
+      "complete_one_second_below_target": 12,
+      "failures": [
+        "complete one-second receiver interval below target or absent",
+        "rolling receiver window below target or absent"
+      ]
+    }
+  }
+}

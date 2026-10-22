@@ -1,6 +1,7 @@
 # Optional pre-encryption queue control
 
-**Development profile: short pass, full acceptance pending.** The shared-log
+**Development profile: full speed acceptance FAILED; memory and latency passed.**
+See the [complete control](wireguard-qos-control.md). The shared-log
 control's bounded queues still caused about209ms local loaded RTT and failed
 the complete one-second speed floor. The new profile moves rate/queue control
 to the WireGuard IP interface, before users' packets become opaque ciphertext.
@@ -24,8 +25,8 @@ bulk control, eight unpaced TCP streams and128KiB writes.300s steady averaged
 382.58Mbps with minimum full1s316.01;180s repeated single-path cuts had minimum
 335.75. No full1s interval was below300.60 loaded ICMP probes had no loss,
 mean1.111ms, median0.914ms, p951.43ms, max9.6ms. TG RSS was about20–22MiB.
-Both kernel qdiscs were verified to actually process packets. This does not yet
-establish30-minute memory/speed acceptance; full clean-build testing is next.
+Both kernel qdiscs were verified to actually process packets. The complete clean-build control subsequently failed the every-second speed
+floor; the linked full result supersedes this short speed pass.
 
 For the next complete profile, retain the unchanged hard300Mbps receiver floor
 for steady/single-path phases, recovery after all-path blocking, full RSS/PSS

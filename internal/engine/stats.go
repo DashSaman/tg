@@ -50,6 +50,9 @@ type Snapshot struct {
 	InputBytes        uint64            `json:"app_input_bytes"`
 	QueuedBytes       uint64            `json:"app_queued_bytes"`
 	OutputBytes       uint64            `json:"app_output_bytes"`
+	GSOBatches        uint64            `json:"app_gso_batches"`
+	GSOPackets        uint64            `json:"app_gso_packets"`
+	GSOFallbacks      uint64            `json:"app_gso_fallbacks"`
 	WireSent          uint64            `json:"frame_sent_bytes"`
 	WireReceived      uint64            `json:"frame_received_bytes"`
 	Dropped           uint64            `json:"dropped_packets"`
@@ -68,6 +71,9 @@ func (e *Engine) Snapshot() Snapshot {
 	}
 	if e.app != nil {
 		s.AppAddress = e.app.conn.LocalAddr().String()
+		s.GSOBatches = e.app.gsoBatches.Load()
+		s.GSOPackets = e.app.gsoPackets.Load()
+		s.GSOFallbacks = e.app.gsoFallbacks.Load()
 	}
 	now := time.Now()
 	for _, p := range e.paths(now) {
@@ -153,6 +159,7 @@ func (e *Engine) serveMetrics(ctx context.Context) (func(), error) {
 			_, _ = fmt.Fprintf(w, "tg_carrier_healthy{carrier=%q} %d\ntg_carrier_rtt_seconds{carrier=%q} %g\ntg_carrier_rtt_variation_seconds{carrier=%q} %g\ntg_carrier_queued_frames{carrier=%q} %d\n", p.Name, h, p.Name, p.RTTMilliseconds/1000, p.Name, p.JitterMilliseconds/1000, p.Name, p.QueuedFrames)
 		}
 		_, _ = fmt.Fprintf(w, "tg_retained_packets %d\ntg_replayed_packets_total %d\ntg_acknowledged_packet_id %d\n", s.Retained, s.Replayed, s.Acked)
+		_, _ = fmt.Fprintf(w, "tg_app_gso_batches_total %d\ntg_app_gso_packets_total %d\ntg_app_gso_fallbacks_total %d\n", s.GSOBatches, s.GSOPackets, s.GSOFallbacks)
 	})
 	srv := &http.Server{Handler: mux, ReadHeaderTimeout: 2 * time.Second, WriteTimeout: 2 * time.Second, IdleTimeout: 10 * time.Second, MaxHeaderBytes: 8192}
 	var once sync.Once
