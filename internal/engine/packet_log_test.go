@@ -5,9 +5,43 @@ import (
 	"context"
 	"github.com/DashSaman/tg/internal/config"
 	"github.com/DashSaman/tg/internal/session"
+	"github.com/DashSaman/tg/internal/transport"
 	"testing"
 	"time"
 )
+
+func TestCompletePacketLogBoundsEncodedBytesWithoutSkippingIDs(t *testing.T) {
+	c := config.Defaults()
+	c.Redundant, c.StreamPackets = true, true
+	c.MaxPacketBytes = session.MaxPacket
+	e := &Engine{cfg: c, links: make(map[string]*link)}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	l := newLink(e, ctx, c.Carriers[0], nil)
+	l.lastPong = time.Now()
+	e.links[l.carrier.Name] = l
+	for range 128 {
+		if !e.admitRedundantLocked(bytes.Repeat([]byte{31}, 7200), time.Now()) {
+			t.Fatal("admission failed")
+		}
+	}
+	var batch [transport.MaxBatchFrames][]byte
+	storage := logBuffers(true)
+	var expected uint64 = 1
+	for expected <= 128 {
+		n, size := l.fillLog(&batch, storage, 0)
+		if n == 0 || size > 256<<10 {
+			t.Fatalf("complete packet batch bytes=%d frames=%d, need1..256KiB", size, n)
+		}
+		for _, b := range batch[:n] {
+			f, err := session.DecodePacketStream(b)
+			if err != nil || f.ID != expected || len(f.Payload) != 7200 {
+				t.Fatalf("bad batch cursor id=%d expected=%d error=%v", f.ID, expected, err)
+			}
+			expected++
+		}
+	}
+}
 
 type packetAckWire struct {
 	e        *Engine

@@ -84,6 +84,12 @@ func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers *[transp
 			l.logDelay = remaining
 			break
 		}
+		// A frame count alone would make packet-mode writes up to eight times
+		// larger than legacy writes. Bound bytes too, so control/ACK processing
+		// can interleave with bulk without waiting for a multi-MiB batch.
+		if e.cfg.StreamPackets && size+session.Header+len(p.packet) > 256<<10 {
+			break
+		}
 		needed := (len(p.packet) + session.Chunk - 1) / session.Chunk
 		if e.cfg.StreamPackets {
 			needed = 1
