@@ -27,6 +27,12 @@ type application struct {
 	readStorage         []byte
 	readNext, readCount int
 	readError           error
+	readOffset          int
+	readSegment         int
+	readControl         [32][64]byte
+	groEnabled          bool // immutable after socket setup
+	groBatches          atomic.Uint64
+	groPackets          atomic.Uint64
 	offload             applicationOffload
 	gsoBatches          atomic.Uint64
 	gsoPackets          atomic.Uint64
@@ -66,13 +72,7 @@ func openApplication(c config.Config) (*application, error) {
 	for i := range a.writeMessages {
 		a.writeMessages[i].Buffers = a.writeBuffers[i][:]
 	}
-	if runtime.GOOS == "linux" {
-		a.readStorage = make([]byte, len(a.readMessages)*(c.MaxPacketBytes+1))
-		for i := range a.readMessages {
-			a.readBuffers[i][0] = a.readStorage[i*(c.MaxPacketBytes+1) : (i+1)*(c.MaxPacketBytes+1)]
-			a.readMessages[i].Buffers = a.readBuffers[i][:]
-		}
-	}
+	a.setupReadBatch(c.MaxPacketBytes)
 	return a, nil
 }
 
@@ -175,32 +175,8 @@ func (a *application) read(limit int) ([]byte, error) {
 	var peer netip.AddrPort
 	var err error
 	if runtime.GOOS == "linux" {
-		if a.readNext == a.readCount {
-			if a.readError != nil {
-				err = a.readError
-				a.readError = nil
-				return nil, err
-			}
-			a.readNext = 0
-			a.readCount, a.readError = a.batch.ReadBatch(a.readMessages[:], 0)
-			if a.readCount <= 0 {
-				err = a.readError
-				a.readError = nil
-				a.readCount = 0
-				if err == nil {
-					err = errors.New("empty application read batch")
-				}
-				return nil, err
-			}
-		}
-		m := &a.readMessages[a.readNext]
-		a.readNext++
-		n = m.N
-		b = m.Buffers[0]
-		if addr, ok := m.Addr.(*net.UDPAddr); ok {
-			peer = addr.AddrPort()
-		}
-		m.Addr = nil
+		b, peer, err = a.readBatchPacket(limit)
+		n = len(b)
 	} else {
 		n, peer, err = a.conn.ReadFromUDPAddrPort(b)
 	}

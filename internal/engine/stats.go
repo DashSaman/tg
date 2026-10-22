@@ -53,6 +53,9 @@ type Snapshot struct {
 	GSOBatches        uint64            `json:"app_gso_batches"`
 	GSOPackets        uint64            `json:"app_gso_packets"`
 	GSOFallbacks      uint64            `json:"app_gso_fallbacks"`
+	GROEnabled        bool              `json:"app_gro_enabled"`
+	GROBatches        uint64            `json:"app_gro_batches"`
+	GROPackets        uint64            `json:"app_gro_packets"`
 	WireSent          uint64            `json:"frame_sent_bytes"`
 	WireReceived      uint64            `json:"frame_received_bytes"`
 	Dropped           uint64            `json:"dropped_packets"`
@@ -74,6 +77,9 @@ func (e *Engine) Snapshot() Snapshot {
 		s.GSOBatches = e.app.gsoBatches.Load()
 		s.GSOPackets = e.app.gsoPackets.Load()
 		s.GSOFallbacks = e.app.gsoFallbacks.Load()
+		s.GROEnabled = e.app.groEnabled
+		s.GROBatches = e.app.groBatches.Load()
+		s.GROPackets = e.app.groPackets.Load()
 	}
 	now := time.Now()
 	for _, p := range e.paths(now) {
@@ -160,6 +166,7 @@ func (e *Engine) serveMetrics(ctx context.Context) (func(), error) {
 		}
 		_, _ = fmt.Fprintf(w, "tg_retained_packets %d\ntg_replayed_packets_total %d\ntg_acknowledged_packet_id %d\n", s.Retained, s.Replayed, s.Acked)
 		_, _ = fmt.Fprintf(w, "tg_app_gso_batches_total %d\ntg_app_gso_packets_total %d\ntg_app_gso_fallbacks_total %d\n", s.GSOBatches, s.GSOPackets, s.GSOFallbacks)
+		_, _ = fmt.Fprintf(w, "tg_app_gro_batches_total %d\ntg_app_gro_packets_total %d\n", s.GROBatches, s.GROPackets)
 	})
 	srv := &http.Server{Handler: mux, ReadHeaderTimeout: 2 * time.Second, WriteTimeout: 2 * time.Second, IdleTimeout: 10 * time.Second, MaxHeaderBytes: 8192}
 	var once sync.Once
