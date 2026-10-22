@@ -25,6 +25,19 @@ func groTestControl(kind, size int) []byte {
 	return b
 }
 
+func TestApplicationGROIsOptIn(t *testing.T) {
+	c := config.Defaults()
+	c.Role, c.AppAddress = "edge", "127.0.0.1:0"
+	a, err := openApplication(c)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer a.close()
+	if a.groEnabled || len(a.readStorage) != 32*(c.MaxPacketBytes+1) {
+		t.Fatal("default allocates large GRO storage without measured coalesced traffic")
+	}
+}
+
 func TestApplicationGROPreservesSegmentsAndOwnedCopies(t *testing.T) {
 	for _, address := range []string{"127.0.0.1:0", "[::1]:0"} {
 		t.Run(address, func(t *testing.T) { testApplicationGROSegments(t, address) })
@@ -33,6 +46,7 @@ func TestApplicationGROPreservesSegmentsAndOwnedCopies(t *testing.T) {
 
 func testApplicationGROSegments(t *testing.T, address string) {
 	c := config.Defaults()
+	c.AppUDPGRO = true
 	c.Role, c.AppAddress = "edge", address
 	a, err := openApplication(c)
 	if err != nil {
@@ -178,7 +192,7 @@ func TestApplicationGROSetupFailureKeepsBoundedOrdinaryBuffers(t *testing.T) {
 		t.Fatal(err)
 	}
 	a.close() // Force socket control failure without changing host policy.
-	a.setupReadBatch(512)
+	a.setupReadBatch(512, true)
 	if a.groEnabled || len(a.readStorage) != 32*513 {
 		t.Fatal("unsupported socket did not retain bounded ordinary receive layout")
 	}

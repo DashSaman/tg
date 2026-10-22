@@ -13,8 +13,8 @@ import (
 
 const applicationGROBuffer = 65535
 
-func (a *application) setupReadBatch(maxPacket int) {
-	if raw, err := a.conn.SyscallConn(); err == nil {
+func (a *application) setupReadBatch(maxPacket int, gro bool) {
+	if raw, err := a.conn.SyscallConn(); gro && err == nil {
 		var optionErr error
 		controlErr := raw.Control(func(fd uintptr) {
 			optionErr = unix.SetsockoptInt(int(fd), unix.IPPROTO_UDP, unix.UDP_GRO, 1)

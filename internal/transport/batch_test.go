@@ -15,6 +15,80 @@ type countedWriter struct {
 	calls int
 }
 
+type countedReader struct {
+	*bytes.Reader
+	calls int
+}
+
+func (r *countedReader) Read(b []byte) (int, error) { r.calls++; return r.Reader.Read(b) }
+func (r *countedReader) Close() error               { return nil }
+
+func TestStreamReceiveAmortizesUnderlyingReadsWithoutChangingFrames(t *testing.T) {
+	var encoded bytes.Buffer
+	want := bytes.Repeat([]byte{29}, session.MaxFrame)
+	for range 64 {
+		if err := sendStream(&encoded, want); err != nil {
+			t.Fatal(err)
+		}
+	}
+	input := &countedReader{Reader: bytes.NewReader(encoded.Bytes())}
+	w := &httpWire{reader: input}
+	for range 64 {
+		got, err := w.Receive(context.Background())
+		if err != nil || !bytes.Equal(got, want) {
+			t.Fatal("buffering changed original frame", err)
+		}
+	}
+	if input.calls > 2 {
+		t.Fatalf("64 adjacent frames triggered %d underlying stream reads; expected at most two bounded refills", input.calls)
+	}
+}
+
+func TestBufferedStreamReceiveDoesNotWaitForFullBuffer(t *testing.T) {
+	reader, writer := io.Pipe()
+	defer reader.Close()
+	defer writer.Close()
+	w := &httpWire{reader: reader}
+	done := make(chan error, 1)
+	go func() { done <- sendStream(writer, []byte("small-control")) }()
+	type result struct {
+		data []byte
+		err  error
+	}
+	received := make(chan result, 1)
+	go func() { data, err := w.Receive(context.Background()); received <- result{data, err} }()
+	select {
+	case got := <-received:
+		if got.err != nil || string(got.data) != "small-control" {
+			t.Fatal("small frame changed", got.err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("read-ahead waited for data beyond the available small frame")
+	}
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestBufferedStreamCloseInterruptsPendingRead(t *testing.T) {
+	reader, writer := io.Pipe()
+	defer writer.Close()
+	w := &httpWire{reader: reader, cancel: func() { _ = writer.CloseWithError(context.Canceled) }}
+	done := make(chan error, 1)
+	go func() { _, err := w.Receive(context.Background()); done <- err }()
+	if err := w.Close(); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case err := <-done:
+		if err == nil {
+			t.Fatal("closed reader returned a valid frame")
+		}
+	case <-time.After(time.Second):
+		t.Fatal("read-ahead blocked shutdown")
+	}
+}
+
 func (w *countedWriter) Write(b []byte) (int, error) { w.calls++; return w.Buffer.Write(b) }
 
 func TestHTTPBatchPreservesFramingWithOneWriteAndFlush(t *testing.T) {

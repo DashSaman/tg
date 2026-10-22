@@ -45,6 +45,7 @@ type Config struct {
 	OrderedOutput   bool      `json:"ordered_output"`
 	ReplicaDelayMS  int       `json:"replica_delay_ms"`
 	AppPacingMbps   int       `json:"app_pacing_mbps"`
+	AppUDPGRO       bool      `json:"app_udp_gro"`
 	QueueFrames     int       `json:"queue_frames"`
 	MaxPacketBytes  int       `json:"max_packet_bytes"`
 }

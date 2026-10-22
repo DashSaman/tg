@@ -8,13 +8,13 @@ addition of worker counts as delivered capacity.
 ## First bounded change: Linux application UDP GRO
 
 The current application output already uses UDP GSO. The input socket now also
-tries `UDP_GRO`, allowing the kernel to deliver multiple original datagrams in
+supports opt-in `app_udp_gro:true`, allowing the kernel to deliver multiple original datagrams in
 one receive buffer. TG splits only using validated native GRO control metadata;
 each original packet still gets an owned copy before asynchronous admission.
 Protocol framing, TLS authentication, replay IDs and delivery ACK semantics do
 not change. No kernel-bypass transport, host sysctl or privileged TG hook is added.
 
-The Linux batch has 32 fixed 65535-byte buffers (about 2 MiB per application),
+When opted in, the Linux batch has 32 fixed 65535-byte buffers (about 2 MiB per application),
 plus fixed control storage. Unsupported socket setup keeps the ordinary
 32*(max_packet_bytes+1) layout. There is no coalescing timer or busy polling.
 Packet/control truncation, malformed/duplicate control and oversized segment
@@ -50,7 +50,33 @@ Kernel contracts: [UDP manual](https://man7.org/linux/man-pages/man7/udp.7.html)
    bounded-memory observations explicit. Short tests are not 30-minute or WAN
    acceptance and cannot establish the required 10 Gbps result.
 
-Performance results are pending. Raising caps or allocating more memory is not
-yet an efficiency improvement; retain the change only with measured benefit or
-clear capability evidence and document any regression. Independent sessions,
+The first four 120s order-balanced runs at 800 Mbps delivered about 800 Mbps each.
+Combined CPU seconds/Gbit were 4.5682 for the old binary and 4.4803 for the GRO
+candidate, a 1.92% difference. **Actual GRO bundle/packet counters were zero on
+both kernel-WG roles.** This is not an attributed GRO CPU benefit: replica counts
+and the two old-binary runs also varied. GRO is consequently off by default;
+the synthetic socket capability remains available for paths that really coalesce.
+Full receiver minima, including 314.67 and 404.56 Mbps dips, remain recorded.
+
+## Second bounded change: stream read-ahead
+
+The old stream receiver made 128 underlying reads to decode 64 adjacent frames
+(a two-byte length read followed by a payload read for each). In HTTP/2 these
+small body reads also notify the connection's flow-control/serve loop. CPU
+profiles showed substantial cost in these read and server-loop paths.
+The receiver now uses one bounded 64 KiB read-ahead buffer per reliable carrier,
+shared by HTTPS and native QUIC-stream framing. A real reader is asked only for
+currently available bytes; it does not wait to fill the buffer or add a timer.
+The regression checks at most two underlying reads for the same 64 frames;
+additional tests cover immediate small frames and shutdown of a blocked read.
+Frame validation, borrowed-buffer lifetime and underlying close behavior remain.
+End-to-end CPU results for this change are pending.
+
+The lab also exposes the existing bounded `replica_delay_ms` as an explicit
+`--replica-delay-ms` parameter, with both actual peers checked. This permits a
+separate 10ms/50ms comparison; a larger grace can reduce duplicate work but
+delays backup copies when a primary path blackholes. It is not a speed limit.
+
+Raising caps or allocating more memory is not itself an efficiency improvement.
+Independent sessions,
 high-RTT window sizing and 10 Gbps hardware/path validation remain unfinished.

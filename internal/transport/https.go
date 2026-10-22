@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"bufio"
 	"context"
 	"crypto/sha256"
 	"crypto/subtle"
@@ -28,6 +29,7 @@ type httpWire struct {
 	beforeWrite func() error
 	sendBuffer  [MaxBatchFrames * (session.MaxFrame + 2)]byte
 	readBuffer  [session.MaxFrame]byte
+	buffered    *bufio.Reader // sole receive worker; bounded, no fill delay
 }
 
 func sessionMode(c config.Config) string {
@@ -70,7 +72,10 @@ func (w *httpWire) SendBatch(frames [][]byte) error {
 	return nil
 }
 func (w *httpWire) Receive(ctx context.Context) ([]byte, error) {
-	if _, err := io.ReadFull(w.reader, w.readBuffer[:2]); err != nil {
+	if w.buffered == nil {
+		w.buffered = bufio.NewReaderSize(w.reader, 64<<10)
+	}
+	if _, err := io.ReadFull(w.buffered, w.readBuffer[:2]); err != nil {
 		return nil, err
 	}
 	size := int(binary.BigEndian.Uint16(w.readBuffer[:2]))
@@ -78,7 +83,7 @@ func (w *httpWire) Receive(ctx context.Context) ([]byte, error) {
 		return nil, errors.New("carrier frame size out of bounds")
 	}
 	b := w.readBuffer[:size]
-	_, err := io.ReadFull(w.reader, b)
+	_, err := io.ReadFull(w.buffered, b)
 	return b, err
 }
 func (w *httpWire) Close() error { w.once.Do(func() { w.cancel(); _ = w.reader.Close() }); return nil }

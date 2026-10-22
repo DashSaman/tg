@@ -3,6 +3,19 @@ from run import fault_schedule,check_redundant_setup,check_qos_setup,check_qos_a
 
 
 class ScheduleTests(unittest.TestCase):
+    def test_backup_delay_and_gro_must_match_both_peers(self):
+        c={r:dict(redundant=True,replica_delay_ms=10) for r in ('edge','exit')}
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,replica_delay=50)
+        c['edge']['replica_delay_ms']=50
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,replica_delay=50)
+        c['exit']['replica_delay_ms']=50
+        check_redundant_setup(c,True,replica_delay=50)
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,udp_gro=True)
+        c['edge']['app_udp_gro']=True
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,udp_gro=True)
+        c['exit']['app_udp_gro']=True
+        check_redundant_setup(c,True,replica_delay=50,udp_gro=True)
+
     def test_preferred_carrier_costs_must_match_both_peers(self):
         c={r:dict(redundant=True,carriers=[dict(kind='quic-stream',cost_ms=0),dict(kind='https',cost_ms=20)]) for r in ('edge','exit')}
         with self.assertRaises(ValueError):check_redundant_setup(c,True,preferred='https')

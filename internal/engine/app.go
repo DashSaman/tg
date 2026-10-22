@@ -72,7 +72,7 @@ func openApplication(c config.Config) (*application, error) {
 	for i := range a.writeMessages {
 		a.writeMessages[i].Buffers = a.writeBuffers[i][:]
 	}
-	a.setupReadBatch(c.MaxPacketBytes)
+	a.setupReadBatch(c.MaxPacketBytes, c.AppUDPGRO)
 	return a, nil
 }
 
