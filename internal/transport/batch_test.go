@@ -152,6 +152,41 @@ func TestCarrierBatchCanCarryFullApplicationUDPSegmentVector(t *testing.T) {
 	}
 }
 
+func TestCarrierBatchCanCarryThirtyTwoJumboWireGuardPackets(t *testing.T) {
+	var output countedWriter
+	flushes := 0
+	w := &httpWire{writer: &output, flush: func() error { flushes++; return nil }}
+	var frames [][]byte
+	for i := range 32 {
+		fragments, err := session.Fragment(bytes.Repeat([]byte{byte(i + 1)}, 7200), uint64(i+1))
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, f := range fragments {
+			b, err := session.Encode(f)
+			if err != nil {
+				t.Fatal(err)
+			}
+			frames = append(frames, b)
+		}
+	}
+	if err := w.SendBatch(frames); err != nil {
+		t.Fatalf("32-packet jumbo vector split into small stream batches: %v", err)
+	}
+	if output.calls != 1 || flushes != 1 {
+		t.Fatal("jumbo vector was not one bounded write/flush", output.calls, flushes)
+	}
+	for _, want := range frames {
+		got, err := recvStream(&output)
+		if err != nil || !bytes.Equal(got, want) {
+			t.Fatal("jumbo vector changed framing", err)
+		}
+	}
+	if output.Len() != 0 {
+		t.Fatal("extra bytes after jumbo vector")
+	}
+}
+
 func TestHTTPReceiveBufferValidUntilNextReceive(t *testing.T) {
 	var encoded bytes.Buffer
 	_ = sendStream(&encoded, []byte("one"))

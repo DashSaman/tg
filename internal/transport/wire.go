@@ -22,10 +22,11 @@ type Wire interface {
 // Implementations consume every input slice before returning, including on failure.
 type BatchWire interface{ SendBatch([][]byte) error }
 
-// A 32-datagram application vector needs 64 frames for 1312-byte WireGuard
-// payloads. Drain only already available frames: no extra batching delay.
-// Framing storage remains bounded to about 65KiB per carrier writer.
-const MaxBatchFrames = 64
+// A 32-datagram application vector needs 256 frames for 7200-byte WireGuard
+// ciphertext. Drain only already available frames: no extra batching delay.
+// Framing storage stays bounded to about 261KiB per carrier writer. The
+// DATAGRAM wire bundle remains limited to its original 16-frame format.
+const MaxBatchFrames = 256
 
 type Accept func(context.Context, Wire, uint64) error
 

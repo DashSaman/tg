@@ -102,6 +102,20 @@ WAN. Explicit capacity tests and further performance results remain pending.
 New lab monitoring also records shared-VM CPU ticks (once per host in analysis),
 including kernel work and unrelated workloads, separately from each TG process.
 
+The first 60s jumbo probe with 12000 Mbps offered load and an explicit 10000 Mbps
+receiver floor received **2452.65 Mbps average / 1954.73 Mbps minimum full 1s**.
+It failed the 10 Gbps target in all 60 intervals. TG CPU averaged about 2.62/2.65
+cores in an interior monitor span; shared-VM busy CPU was about 7.94 cores total
+(not the sum of two identical host observations). This is a short capacity probe,
+not a causal comparison against the different earlier MTU/load/duration controls.
+
+The internal stream batch now admits up to 256 existing frames, enough for a
+32-datagram jumbo vector (eight fragments per 7200-byte packet). A test rejected
+this vector at the old 64-frame bound and now verifies one bounded write/flush
+with unchanged frame boundaries. Carrier encode/write storage is about 261 KiB
+per buffer; no extra batching timer is added and the DATAGRAM wire bundle stays
+at 16 frames. Performance for this additional change is pending.
+
 Raising caps or allocating more memory is not itself an efficiency improvement.
 Independent sessions,
 high-RTT window sizing and 10 Gbps hardware/path validation remain unfinished.
