@@ -15,7 +15,8 @@ import (
 type application struct {
 	conn                *net.UDPConn
 	exit                bool
-	mu                  sync.Mutex
+	mu                  sync.Mutex // peer only; never held across socket I/O
+	writeMu             sync.Mutex
 	peer                netip.AddrPort
 	readBuffer          []byte
 	batch               applicationBatchConn
@@ -96,14 +97,17 @@ func (a *application) writeBatch(packets [][]byte, timeout time.Duration) (int, 
 		}
 		return len(packets), nil
 	}
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	a.writeMu.Lock()
+	defer a.writeMu.Unlock()
 	var peer net.Addr
 	if !a.exit {
-		if !a.peer.IsValid() {
+		a.mu.Lock()
+		address := a.peer
+		a.mu.Unlock()
+		if !address.IsValid() {
 			return 0, errors.New("no application peer yet")
 		}
-		peer = net.UDPAddrFromAddrPort(a.peer)
+		peer = net.UDPAddrFromAddrPort(address)
 	}
 	_ = a.conn.SetWriteDeadline(time.Now().Add(timeout))
 	defer func() {
@@ -216,18 +220,22 @@ func (a *application) read(limit int) ([]byte, error) {
 	return append([]byte(nil), b[:n]...), nil
 }
 func (a *application) write(b []byte, timeout time.Duration) error {
-	// Serialize the write deadline and peer snapshot, independent of carrier locks.
-	a.mu.Lock()
-	defer a.mu.Unlock()
+	// Serialize writers and their deadlines, while peer updates remain independent
+	// of a potentially backpressured socket write in the opposite direction.
+	a.writeMu.Lock()
+	defer a.writeMu.Unlock()
 	_ = a.conn.SetWriteDeadline(time.Now().Add(timeout))
 	if a.exit {
 		_, err := a.conn.Write(b)
 		return err
 	}
-	if !a.peer.IsValid() {
+	a.mu.Lock()
+	peer := a.peer
+	a.mu.Unlock()
+	if !peer.IsValid() {
 		return errors.New("no application peer yet")
 	}
-	_, err := a.conn.WriteToUDPAddrPort(b, a.peer)
+	_, err := a.conn.WriteToUDPAddrPort(b, peer)
 	return err
 }
 func (a *application) close() { _ = a.conn.Close() }
