@@ -3,6 +3,19 @@ from run import fault_schedule,check_redundant_setup
 
 
 class ScheduleTests(unittest.TestCase):
+    def test_ordering_control_cannot_silently_change(self):
+        c={r:dict(redundant=True,ordered_output=True) for r in ('edge','exit')}
+        with self.assertRaises(ValueError):check_redundant_setup(c,True)
+        check_redundant_setup(c,True,ordered=True)
+        c['exit']['ordered_output']=False
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,ordered=True)
+    def test_udp_mode_override_is_verified_on_both_peers(self):
+        c={r:dict(redundant=True,carriers=[dict(kind='quic-stream'),dict(kind='https')]) for r in ('edge','exit')}
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,'quic')
+        c['edge']['carriers'][0]['kind']='quic'
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,'quic')
+        c['exit']['carriers'][0]['kind']='quic'
+        check_redundant_setup(c,True,'quic')
     def test_requested_mode_cannot_silently_disappear_at_container_boundary(self):
         c={role:{'redundant':False} for role in ('edge','exit')}
         with self.assertRaises(ValueError):check_redundant_setup(c,True)

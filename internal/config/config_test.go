@@ -74,7 +74,7 @@ func TestNativeQUICModesCannotShareUDPListenerEndpoint(t *testing.T) {
 	}
 }
 
-func TestRedundancyRequiresMultipleReliableCarriers(t *testing.T) {
+func TestRedundancyRequiresMultipleCarriersAndCanRepairDatagrams(t *testing.T) {
 	c := valid()
 	c.Redundant = true
 	if err := c.Validate(); err != nil {
@@ -87,7 +87,19 @@ func TestRedundancyRequiresMultipleReliableCarriers(t *testing.T) {
 	c = valid()
 	c.Redundant = true
 	c.Carriers[1].Kind = "quic"
+	if err := c.Validate(); err != nil {
+		t.Fatal("session repair must allow the unordered DATAGRAM carrier", err)
+	}
+}
+
+func TestOrderedOutputNeedsSessionRepair(t *testing.T) {
+	c := valid()
+	c.OrderedOutput = true
 	if err := c.Validate(); err == nil {
-		t.Fatal("unordered DATAGRAM accepted for ordered redundant mode")
+		t.Fatal("ordered barrier accepted without repair")
+	}
+	c.Redundant = true
+	if err := c.Validate(); err != nil {
+		t.Fatal(err)
 	}
 }

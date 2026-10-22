@@ -17,28 +17,30 @@ import (
 )
 
 type Engine struct {
-	cfg               config.Config
-	epoch             uint64
-	mu                sync.Mutex
-	deliveryMu        sync.Mutex
-	started, closing  bool
-	ctx               context.Context
-	links             map[string]*link
-	addresses         map[string]string
-	app               *application
-	peerEpoch         uint64
-	receive           *session.Reassembler
-	selector          session.Selector
-	active            string
-	workers           sync.WaitGroup
-	sequence          atomic.Uint64
-	counters          counters
-	output            chan delivery
-	retained          map[uint64]*retainedPacket
-	acked, ackHighest uint64
-	repairWake        chan struct{}
-	lastAck           time.Time
-	ackPending        bool
+	cfg                       config.Config
+	epoch                     uint64
+	mu                        sync.Mutex
+	deliveryMu                sync.Mutex
+	started, closing          bool
+	ctx                       context.Context
+	links                     map[string]*link
+	addresses                 map[string]string
+	app                       *application
+	peerEpoch                 uint64
+	receive                   *session.Reassembler
+	selector                  session.Selector
+	active                    string
+	workers                   sync.WaitGroup
+	sequence                  atomic.Uint64
+	counters                  counters
+	output                    chan delivery
+	retained                  map[uint64]*retainedPacket
+	acked, ackHighest         uint64
+	repairWake                chan struct{}
+	lastAck                   time.Time
+	ackPending                bool
+	admissionSpace            chan struct{}
+	sessionRTT, sessionJitter time.Duration
 }
 
 func New(c config.Config) (*Engine, error) {
@@ -112,6 +114,7 @@ func (e *Engine) Run(ctx context.Context) error {
 	e.app = a
 	e.output = make(chan delivery, 256)
 	e.repairWake = make(chan struct{}, 1)
+	e.admissionSpace = make(chan struct{}, 1)
 	e.mu.Unlock()
 	if e.cfg.Redundant {
 		e.workers.Add(1)
@@ -168,6 +171,7 @@ func (e *Engine) attach(ctx context.Context, p config.Carrier, w transport.Wire,
 			e.acked, e.ackHighest = 0, 0
 			e.lastAck = time.Time{}
 			e.ackPending = false
+			e.sessionRTT, e.sessionJitter = 0, 0
 		}
 		e.peerEpoch = peer
 		e.receive = newReceiver(e.cfg)
@@ -245,7 +249,7 @@ func (e *Engine) readApplication(ctx context.Context) {
 		e.counters.inputBytes.Add(uint64(len(packet)))
 		if e.cfg.Redundant {
 			e.mu.Lock()
-			if e.admitRedundantLocked(packet, time.Now()) {
+			if e.admitRedundantWaitLocked(ctx, packet) {
 				e.active = "redundant"
 				e.counters.queuedBytes.Add(uint64(len(packet)))
 			} else {

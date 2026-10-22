@@ -15,7 +15,7 @@ type delivery struct {
 // No batching delay: drain only packets already available, at most 32 at once.
 // Receive queues can keep draining while a previous batch enters WireGuard.
 func (e *Engine) writeApplication(ctx context.Context) {
-	if e.cfg.Redundant {
+	if e.cfg.Redundant && e.cfg.OrderedOutput {
 		e.writeOrderedApplication(ctx)
 		return
 	}

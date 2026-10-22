@@ -27,6 +27,9 @@ func quicALPN(kind string, redundant bool) string {
 		}
 		return "tg-stream-v1"
 	}
+	if redundant {
+		return "tg-repair-dgram-v1"
+	}
 	return alpn
 }
 

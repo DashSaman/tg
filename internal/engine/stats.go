@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-type counters struct{ inputBytes, queuedBytes, outputBytes, wireSent, wireReceived, dropped, appErrors, malformed, reconnects, switches, extraCopies, replicaSkips, reorderAhead, reorderLate, reorderGaps, reorderPeak, replayed atomic.Uint64 }
+type counters struct{ inputBytes, queuedBytes, outputBytes, wireSent, wireReceived, dropped, appErrors, malformed, reconnects, switches, extraCopies, replicaSkips, reorderAhead, reorderLate, reorderGaps, reorderPeak, replayed, deferred atomic.Uint64 }
 type PathStatus struct {
 	Name               string  `json:"name"`
 	Healthy            bool    `json:"healthy"`
@@ -22,6 +22,10 @@ type PathStatus struct {
 	RepairQueuedFrames int     `json:"repair_queued_frames"`
 }
 type Snapshot struct {
+	OrderedOutput     bool              `json:"ordered_output"`
+	Deferred          uint64            `json:"deferred_first_sends"`
+	SessionRTTMS      float64           `json:"session_ack_rtt_ms"`
+	SessionJitterMS   float64           `json:"session_ack_rtt_variation_ms"`
 	ReceivePrefix     uint64            `json:"received_contiguous_id"`
 	ReceiveHighest    uint64            `json:"received_highest_id"`
 	OldestPendingMS   float64           `json:"oldest_unacknowledged_ms"`
@@ -76,6 +80,9 @@ func (e *Engine) Snapshot() Snapshot {
 	}
 	sort.Slice(s.Paths, func(i, j int) bool { return s.Paths[i].Name < s.Paths[j].Name })
 	c := &e.counters
+	s.Deferred = c.deferred.Load()
+	s.SessionRTTMS = float64(e.sessionRTT) / float64(time.Millisecond)
+	s.SessionJitterMS = float64(e.sessionJitter) / float64(time.Millisecond)
 	if e.receive != nil {
 		s.ReceivePrefix, s.ReceiveHighest = e.receive.AckState()
 	}
@@ -92,6 +99,7 @@ func (e *Engine) Snapshot() Snapshot {
 	s.Replayed = c.replayed.Load()
 	s.Acked = e.acked
 	s.Redundant = e.cfg.Redundant
+	s.OrderedOutput = e.cfg.OrderedOutput
 	s.ExtraCopies = c.extraCopies.Load()
 	s.ReplicaSkips = c.replicaSkips.Load()
 	s.ReorderAhead = c.reorderAhead.Load()

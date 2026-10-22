@@ -53,7 +53,7 @@ func TestRetainedAdmissionBoundAndAckValidation(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 	e := &Engine{cfg: c, ctx: ctx, links: make(map[string]*link)}
-	l := &link{carrier: config.Carrier{Name: "web"}}
+	l := &link{carrier: config.Carrier{Name: "web"}, data: make(chan session.Frame, retainedCapacity+1), lastPong: time.Now()}
 	e.links["web"] = l
 	for i := 0; i < retainedCapacity; i++ {
 		if !e.admitRedundantLocked([]byte("bounded"), time.Now()) {
@@ -115,7 +115,7 @@ func TestRepairDoesNotAmplifyWholeUnacknowledgedWindow(t *testing.T) {
 	if len(l.repair) != 0 {
 		t.Fatal("repair skipped the in-flight prefix and replayed later received packets")
 	}
-	e.repairLocked(now.Add(6 * time.Millisecond))
+	e.repairLocked(now.Add(21 * time.Millisecond))
 	if len(l.repair) != 128 {
 		t.Fatal("repair burst bound changed", len(l.repair))
 	}
@@ -178,6 +178,7 @@ func TestReceiverSelectiveAckDescribesHoleAndCompletion(t *testing.T) {
 
 func TestRepairBypassesFullOrdinaryQueue(t *testing.T) {
 	c := config.Defaults()
+	c.Carriers[1].Kind = "quic"
 	c.Redundant = true
 	c.QueueFrames = 4
 	e := &Engine{cfg: c, links: make(map[string]*link)}
@@ -185,10 +186,14 @@ func TestRepairBypassesFullOrdinaryQueue(t *testing.T) {
 	defer l.cancel()
 	l.lastPong = time.Now()
 	e.links[l.carrier.Name] = l
+	if !e.admitRedundantLocked([]byte("missing"), time.Now()) {
+		t.Fatal("original copy not admitted")
+	}
+	<-l.data
 	for i := 0; i < cap(l.data); i++ {
 		l.data <- session.Frame{Kind: session.Data, ID: 99}
 	}
-	e.admitRedundantLocked([]byte("missing"), time.Now())
+	e.retained[1].lastSent = time.Now().Add(-time.Second) // previously admitted on a failed carrier
 	e.repairLocked(time.Now().Add(time.Second))
 	select {
 	case f := <-l.repair:
@@ -255,5 +260,108 @@ func TestCoalescedAckFlushesEvenAfterTrafficStops(t *testing.T) {
 	case <-done:
 	case <-time.After(time.Second):
 		t.Fatal("repair worker failed to cancel")
+	}
+}
+
+func TestRepeatedRepairBacksOffWhileAckIsDelayed(t *testing.T) {
+	c := config.Defaults()
+	c.Redundant = true
+	now := time.Now()
+	e := &Engine{cfg: c, links: make(map[string]*link), retained: map[uint64]*retainedPacket{1: {packet: []byte("data"), lastSent: now.Add(-time.Second)}}, ackHighest: 1}
+	l := &link{carrier: c.Carriers[0], repair: make(chan session.Frame, 512), lastPong: now, rtt: time.Millisecond}
+	e.links[l.carrier.Name] = l
+	e.sequence.Store(1)
+	for _, step := range []struct {
+		ms   time.Duration
+		want int
+	}{{0, 1}, {6, 1}, {20, 2}, {26, 2}, {60, 3}} {
+		e.repairLocked(now.Add(step.ms * time.Millisecond))
+		if len(l.repair) != step.want {
+			t.Fatalf("repair did not back off at %dms: %d copies", step.ms, len(l.repair))
+		}
+	}
+}
+
+func TestSessionAckRoundTripIncludesDataQueueDelay(t *testing.T) {
+	c := config.Defaults()
+	c.Redundant = true
+	now := time.Now()
+	e := &Engine{cfg: c, links: make(map[string]*link), retained: map[uint64]*retainedPacket{1: {packet: []byte("first"), born: now.Add(-100 * time.Millisecond)}, 2: {packet: []byte("second"), lastSent: now.Add(-50 * time.Millisecond)}}}
+	l := &link{carrier: c.Carriers[0], repair: make(chan session.Frame, 512), lastPong: now, rtt: time.Millisecond}
+	e.links[l.carrier.Name] = l
+	e.sequence.Store(2)
+	e.onAck(l, ackFrame(1, 1))
+	e.repairLocked(time.Now())
+	if len(l.repair) != 0 {
+		t.Fatal("health-probe RTT caused premature replay of queued data")
+	}
+}
+
+func TestSelectiveGapHintDoesNotFastReplayPastFirstReceivedPacket(t *testing.T) {
+	c := config.Defaults()
+	c.Redundant = true
+	now := time.Now()
+	e := &Engine{cfg: c, links: make(map[string]*link), retained: map[uint64]*retainedPacket{1: {packet: []byte("head"), lastSent: now}, 2: {received: true}, 3: {packet: []byte("later-hole"), lastSent: now.Add(-6 * time.Millisecond)}}, ackHighest: 4}
+	l := &link{carrier: c.Carriers[0], repair: make(chan session.Frame, 512), lastPong: now, rtt: time.Millisecond}
+	e.links[l.carrier.Name] = l
+	e.sequence.Store(4)
+	e.repairLocked(now)
+	if len(l.repair) != 0 {
+		t.Fatal("selective gap hint bypassed data RTO and replayed an in-flight packet")
+	}
+	e.repairLocked(now.Add(20 * time.Millisecond))
+	if len(l.repair) != 2 {
+		t.Fatal("missing packet was not repaired after RTO")
+	}
+}
+
+func TestFastRepairCoversOnlyOldestContiguousMissingSpan(t *testing.T) {
+	c := config.Defaults()
+	c.Redundant = true
+	now := time.Now()
+	e := &Engine{cfg: c, links: make(map[string]*link), retained: map[uint64]*retainedPacket{1: {packet: []byte("head"), lastSent: now.Add(-6 * time.Millisecond)}, 2: {received: true}, 3: {packet: []byte("later-hole"), lastSent: now.Add(-6 * time.Millisecond)}}, ackHighest: 4}
+	l := &link{carrier: c.Carriers[0], repair: make(chan session.Frame, 512), lastPong: now, rtt: time.Millisecond}
+	e.links[l.carrier.Name] = l
+	e.sequence.Store(4)
+	e.repairLocked(now)
+	if len(l.repair) != 1 {
+		t.Fatal("oldest missing packet did not get bounded fast repair", len(l.repair))
+	}
+	if f := <-l.repair; f.ID != 1 {
+		t.Fatal("fast repair escaped the first hole", f.ID)
+	}
+}
+
+func TestInitialAdmissionCannotManufactureIDGapWhenEveryQueueFull(t *testing.T) {
+	c := config.Defaults()
+	c.Carriers[1].Kind = "quic"
+	c.Redundant = true
+	c.QueueFrames = 4
+	e := &Engine{cfg: c, links: make(map[string]*link)}
+	l := newLink(e, context.Background(), c.Carriers[0], nil)
+	defer l.cancel()
+	l.lastPong = time.Now()
+	e.links[l.carrier.Name] = l
+	for i := 0; i < 4; i++ {
+		l.data <- session.Frame{ID: 99}
+	}
+	if e.admitRedundantLocked([]byte("never-sent"), time.Now()) || e.sequence.Load() != 0 || len(e.retained) != 0 {
+		t.Fatal("packet accepted and numbered without any carrier copy")
+	}
+	e.repairLocked(time.Now().Add(time.Second))
+	if len(l.repair) != 0 {
+		t.Fatal("a first admission overtook older ordinary packets and manufactured receive gaps")
+	}
+	for len(l.data) > 0 {
+		<-l.data
+	}
+	if !e.admitRedundantLocked([]byte("never-sent"), time.Now()) {
+		t.Fatal("first copy not admitted after capacity returned")
+	}
+	if len(l.data) != 1 || len(l.repair) != 0 {
+		t.Fatal("deferred first admission did not use ordinary queue")
+	}
+	if f := <-l.data; f.ID != 1 || string(f.Payload) != "never-sent" {
+		t.Fatal("deferred packet identity changed")
 	}
 }

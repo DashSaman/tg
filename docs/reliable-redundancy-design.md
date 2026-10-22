@@ -1,5 +1,14 @@
 # Reliable redundant TG session — 2026-10-22
 
+The current reliable-carrier candidate is described in
+[shared sender log](shared-sender-log.md). The packet repair design below remains
+the experimental DATAGRAM backend and records the development controls.
+
+**Development evidence, not final acceptance.** The first clean redundant build
+`b2683aa` later failed during an attempted soak, interrupted at 207s: minimum full
+one-second receiver goodput 174.69 Mbps. Its earlier 90s pass was insufficient.
+The implementation has since evolved; a fresh complete soak is still required.
+
 ## Problem established by measurements
 
 Mirroring alone passed a 60-second steady one-second gate (minimum 344.95 Mbps),
@@ -33,8 +42,11 @@ batched UDP input/output and stable exit socket. In explicit redundant mode:
   input drops; its 180s single-path minimum was 108.71 Mbps and failed. This failed
   control is preserved separately from any later acceptance.
   Coalesced ACK notifications wake repair; a two-ms tick also covers lost ACK/tail
-  packets. Retransmission spacing is bounded, with a minimum 20-ms tail RTO adapted
-  to measured carrier RTT/variation and capped at one second.
+  packets. Only the oldest contiguous missing span (at most 128 IDs, ending at
+  the first selectively received ID) may get a first repair after five ms. Other
+  holes respect a minimum 20-ms data RTO, adapted to carrier RTT/variation and
+  actual packet ACK turnaround, capped at one second. Repeated repairs back off
+  exponentially. Retransmitted samples do not update the session RTT estimate.
 - Coalesce completion notifications to at most one bitmap per millisecond; the
   two-ms repair worker flushes the last pending ACK even when input stops. Keep
   one replaceable ACK slot per carrier, separate from the eight probe/pong slots.
@@ -46,15 +58,22 @@ batched UDP input/output and stable exit socket. In explicit redundant mode:
   their priority, reserving at most one batch slot for ACK. Priority cannot bypass
   bytes already accepted by the native encrypted transport. Ordinary queue default
   remains 1024; a larger queue increased transition latency in the controls.
-- The output worker holds packet IDs in order until repaired. Remove the prototype's
-  50-ms hole-skipping behavior: accepting then discarding a missing packet defeats
-  reliability. Bound the receiver to 16384 held packets; valid send-window traffic
-  has a smaller hole range. Native flow control and completed-packet queues also
-  provide bounded backpressure. Cancellation/peer epoch changes release old owners.
+- Default output delivers each completed unique UDP packet independently. A global
+  sequence barrier made one missing encrypted packet delay all inner TCP flows.
+  Explicit `ordered_output: true` retains the strict 16384-packet reorder control
+  for comparison; it requires redundancy. No timeout silently discards the repaired
+  older packet. Cancellation/epoch changes release held owners. Tests record the
+  actual output mode on both peers.
+- Reserve a sequence ID only after at least one complete copy enters a carrier
+  queue. If every queue or the retained window is full, wait up to 50ms with the
+  engine lock released; persistent pressure rejects the packet before numbering.
+  Previously numbering zero-copy records let later IDs overtake them. Priority
+  repair must not perform ordinary first admission; both errors have regressions.
 
 The replay/completion ID history in redundant mode remains 262144 IDs (2 MiB).
 At default max packet size 2048, sender retained payload is at most 16 MiB; receiver
-held exact-size payload is at most 32 MiB, plus bounded descriptors, application/
+held exact-size payload is at most 32 MiB in the optional strict-order control;
+default independent output does not allocate that map. Add bounded descriptors, application/
 transport queues and native transport memory. This is a resident-memory measurement
 target, not a formal bound on all kernel/QUIC allocations. Warmup/soak must establish
 that resident memory settles rather than grows with traffic volume.
@@ -66,6 +85,9 @@ Specifically, `tg-repair-v1` and `X-Tg-Mode: repair-v1`; ordinary stream mode ke
 `tg-stream-v1` and no mode header. The carrier-mismatch tests cover both directions.
 Both endpoints must upgrade and opt in; reject a mode mismatch before data mode.
 Single-carrier legacy framing/behavior remains available with redundancy disabled.
+The default native carrier stays reliable QUIC-stream. Experimental redundant
+DATAGRAM uses `tg-repair-dgram-v1`; its failed steady controls do not establish a
+stable deployment profile.
 ACK metadata is protected by existing authenticated transport encryption; no new
 cryptography or IP spoofing is introduced.
 
@@ -125,3 +147,4 @@ The final short control had 30s steady +90s loaded single-path cuts, no complete
 one-second interval below 300 Mbps, zero TG packet drops, and zero retained
 packets at its end. It is not 30-minute/memory acceptance. Earlier long-run and
 failed-control records remain separate. The new complete soak is still required.
+See [the later experiment record](redundancy-experiments.md).

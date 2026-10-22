@@ -45,10 +45,16 @@ def fault_schedule(kind,seconds):
     return result[:last_clear]
 
 
-def check_redundant_setup(configuration,required):
+def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False):
     for role in ('edge','exit'):
         if bool(configuration[role].get('redundant',False))!=required:
             raise ValueError('requested redundancy differs from actual '+role+' configuration')
+        if bool(configuration[role].get('ordered_output',False))!=ordered:
+            raise ValueError('requested output ordering differs from actual '+role+' configuration')
+        if udp_mode!='auto':
+            native=[p['kind'] for p in configuration[role]['carriers'] if p['kind'] in ('quic','quic-stream')]
+            if not native or any(kind!=udp_mode for kind in native):
+                raise ValueError('requested UDP mode differs from actual '+role+' configuration')
 
 
 def main():
@@ -64,15 +70,18 @@ def main():
     parser.add_argument('--profile', action='store_true', help='set lab-only profiling wrapper environment')
     parser.add_argument('--gomaxprocs', type=int, default=0, help='diagnostic scheduler control; 0 keeps runtime default')
     parser.add_argument('--carrier', choices=['both', 'quic', 'quic-stream', 'https'], default='both')
+    parser.add_argument('--udp-mode',choices=['auto','quic','quic-stream'],default='auto')
     parser.add_argument('--mtu', type=int, default=1280)
     parser.add_argument('--mbps', type=float, default=350, help='aggregate TCP pacing target; 0 uses unpaced bulk TCP')
     parser.add_argument('--redundant',action='store_true')
+    parser.add_argument('--ordered-output',action='store_true',help='sequence barrier control; default preserves independent UDP delivery')
     parser.add_argument('--window',type=float,default=10,help='receiver rolling window in seconds; 1 is stricter than original acceptance')
     parser.add_argument('--fault-plan',choices=['mixed','single-path'],default='mixed')
     parser.add_argument('--extra-mixed-faults',action='store_true',help='also repeat mixed/all-path cuts after the main fault phase')
     args = parser.parse_args()
     if args.seconds < 30 or args.fault_seconds < 90:
         raise ValueError('use >=30 steady seconds and >=90 fault seconds; only >=1800 qualifies as a soak')
+    if args.ordered_output and not args.redundant:raise ValueError('ordered output requires redundancy')
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     binary = args.binary.resolve()
@@ -91,6 +100,8 @@ def main():
                     offered_aggregate_mbps=args.mbps if args.mbps else None, tcp_pacing=bool(args.mbps), mtu=args.mtu, carrier=args.carrier, started_utc=time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
                     queue_frames=args.queue_frames, block_size=args.block_size,
                     redundant=args.redundant, window_seconds=args.window, fault_plan=args.fault_plan, extra_mixed_faults=args.extra_mixed_faults,
+                    requested_udp_mode=args.udp_mode,
+                    ordered_output=args.ordered_output,
                     scope='two isolated network namespaces on one Linux Docker VM; kernel WireGuard and TG; no WAN or DPI')
     (out/'manifest.json').write_text(json.dumps(manifest, indent=2))
     created = []
@@ -188,7 +199,7 @@ def main():
     try:
         docker('network', 'create', '--internal', '--label', 'tg.wgsoak='+prefix, network)
         docker('volume', 'create', '--label', 'tg.wgsoak='+prefix, volume)
-        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier, '1' if args.redundant else '0')
+        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier, '1' if args.redundant else '0',args.udp_mode,'1' if args.ordered_output else '0')
         for role in ('exit', 'edge'):
             docker('run', '-d', '--name', names[role], '--network', network, '--cap-add', 'NET_ADMIN',
                    *(['-e', 'TG_DIAGNOSTIC_PROFILE=/out/'+role] if args.profile else []),
@@ -204,7 +215,7 @@ def main():
             raise RuntimeError('WireGuard handshake/connectivity failed; inspect node logs')
         manifest['versions'] = execute('edge', 'sh', '-c', 'uname -r; wg --version; iperf3 --version; ip -details link show wg-tg; ip route get 10.77.0.2')
         manifest['lab_configuration'] = json.loads((out/'lab-config-summary.json').read_text())
-        check_redundant_setup(manifest['lab_configuration'],args.redundant)
+        check_redundant_setup(manifest['lab_configuration'],args.redundant,args.udp_mode,args.ordered_output)
         (out/'manifest.json').write_text(json.dumps(manifest, indent=2))
         for role in names:
             (out/(role+'-udp-socket-memory.txt')).write_text(execute(role,'ss','-u','-a','-n','-m'))

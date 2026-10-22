@@ -42,6 +42,7 @@ type Config struct {
 	HoldDownMS      int       `json:"hold_down_ms"`
 	AutoUpgrade     bool      `json:"auto_upgrade"`
 	Redundant       bool      `json:"redundant"`
+	OrderedOutput   bool      `json:"ordered_output"`
 	QueueFrames     int       `json:"queue_frames"`
 	MaxPacketBytes  int       `json:"max_packet_bytes"`
 }
@@ -95,12 +96,12 @@ func (c Config) Validate() error {
 	if c.Redundant && len(c.Carriers) < 2 {
 		return errors.New("redundant mode needs at least two configured carriers")
 	}
+	if c.OrderedOutput && !c.Redundant {
+		return errors.New("ordered output requires acknowledged redundant mode")
+	}
 	names := map[string]bool{}
 	addresses := map[string]bool{}
 	for _, p := range c.Carriers {
-		if c.Redundant && p.Kind == "quic" {
-			return errors.New("redundant mode requires reliable quic-stream or https carriers")
-		}
 		if p.Name == "" || len(p.Name) > 32 || names[p.Name] || !safeName(p.Name) {
 			return errors.New("invalid or duplicate carrier name")
 		}

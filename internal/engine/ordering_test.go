@@ -10,6 +10,10 @@ import (
 )
 
 func orderedWriter(t *testing.T) (*Engine, net.PacketConn, *link) {
+	return applicationWriter(t, true)
+}
+
+func applicationWriter(t *testing.T, ordered bool) (*Engine, net.PacketConn, *link) {
 	t.Helper()
 	receiver, err := net.ListenPacket("udp", "127.0.0.1:0")
 	if err != nil {
@@ -19,6 +23,7 @@ func orderedWriter(t *testing.T) (*Engine, net.PacketConn, *link) {
 	c.Role = "exit"
 	c.AppAddress = receiver.LocalAddr().String()
 	c.Redundant = true
+	c.OrderedOutput = ordered
 	app, err := openApplication(c)
 	if err != nil {
 		receiver.Close()
@@ -45,6 +50,24 @@ func orderedWriter(t *testing.T) (*Engine, net.PacketConn, *link) {
 		}
 	})
 	return e, receiver, l
+}
+
+func TestRedundantDefaultOutputDoesNotBlockIndependentDatagramBehindGap(t *testing.T) {
+	e, receiver, l := applicationWriter(t, false)
+	second, _ := session.Fragment([]byte("second"), 2)
+	first, _ := session.Fragment([]byte("first"), 1)
+	e.onData(l, second[0])
+	receiver.SetReadDeadline(time.Now().Add(time.Second))
+	buf := make([]byte, 100)
+	n, _, err := receiver.ReadFrom(buf)
+	if err != nil || string(buf[:n]) != "second" {
+		t.Fatal("independent datagram blocked behind another flow's missing packet", err)
+	}
+	e.onData(l, first[0])
+	n, _, err = receiver.ReadFrom(buf)
+	if err != nil || string(buf[:n]) != "first" {
+		t.Fatal("late repaired datagram was lost", err)
+	}
 }
 
 func TestRedundantOutputWaitsBrieflyForEarlierPacketAcrossCarriers(t *testing.T) {

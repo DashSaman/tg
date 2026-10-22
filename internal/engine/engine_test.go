@@ -53,7 +53,13 @@ func (w *blockedWire) Close() error {
 }
 
 func TestCancellationInterruptsBlockedCarrierWrite(t *testing.T) {
+	for _, redundant := range []bool{false, true} {
+		t.Run(fmt.Sprint(redundant), func(t *testing.T) { cancellationInterruptsBlockedCarrierWrite(t, redundant) })
+	}
+}
+func cancellationInterruptsBlockedCarrierWrite(t *testing.T, redundant bool) {
 	c := config.Defaults()
+	c.Redundant = redundant
 	e := &Engine{cfg: c}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

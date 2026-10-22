@@ -14,6 +14,8 @@ type retainedPacket struct {
 	lastSent time.Time
 	received bool
 	born     time.Time
+	repairs  uint8
+	copies   uint32
 }
 
 // Admission, numbering, ACK release and repair share e.mu. Application packets
@@ -22,21 +24,79 @@ func (e *Engine) admitRedundantLocked(packet []byte, now time.Time) bool {
 	if len(packet) == 0 || len(packet) > e.cfg.MaxPacketBytes || len(e.retained) >= retainedCapacity {
 		return false
 	}
-	if e.retained == nil {
-		e.retained = make(map[uint64]*retainedPacket, retainedCapacity)
+	if e.streamLog() {
+		return e.admitLogLocked(packet, now)
 	}
-	id := e.sequence.Add(1)
-	frames, err := session.Fragment(packet, id)
+	id := e.sequence.Load() + 1
+	var storage [session.MaxPacket / session.Chunk]session.Frame
+	frames, err := session.FragmentInto(storage[:0], packet, id)
 	if err != nil {
 		return false
 	}
-	p := &retainedPacket{packet: packet, born: now}
-	e.retained[id] = p
-	if copies := e.mirrorLocked(frames, now); copies > 0 {
-		p.lastSent = now
-		e.counters.extraCopies.Add(uint64(copies - 1))
+	copies := e.mirrorLocked(frames, now)
+	if copies == 0 {
+		return false
 	}
+	if e.retained == nil {
+		e.retained = make(map[uint64]*retainedPacket, retainedCapacity)
+	}
+	e.sequence.Store(id)
+	e.retained[id] = &retainedPacket{packet: packet, born: now, lastSent: now}
+	e.counters.extraCopies.Add(uint64(copies - 1))
 	return true
+}
+
+// Called and returned with e.mu held. Backpressure the UDP reader before it
+// creates a train of unsent IDs when every ordinary carrier queue is full.
+// ACK/repair and carrier workers keep running while the bounded wait unlocks mu.
+func (e *Engine) admitRedundantWaitLocked(ctx context.Context, packet []byte) bool {
+	var timer *time.Timer
+	defer func() {
+		if timer != nil {
+			timer.Stop()
+		}
+	}()
+	for ctx.Err() == nil {
+		if e.admitRedundantLocked(packet, time.Now()) {
+			return true
+		}
+		var spaces [4]<-chan struct{}
+		available := 0
+		for _, carrier := range e.cfg.Carriers {
+			if l := e.links[carrier.Name]; l != nil && !l.closed.Load() {
+				spaces[available] = l.space
+				available++
+			}
+		}
+		if timer == nil {
+			timer = time.NewTimer(50 * time.Millisecond)
+		}
+		e.mu.Unlock()
+		ready := true
+		select {
+		case <-ctx.Done():
+			ready = false
+		case <-timer.C:
+			ready = false
+		case <-e.admissionSpace:
+		case <-spaces[0]:
+		case <-spaces[1]:
+		case <-spaces[2]:
+		case <-spaces[3]:
+		}
+		e.mu.Lock()
+		if !ready {
+			return false
+		}
+	}
+	return false
+}
+
+func (e *Engine) notifyAdmission() {
+	select {
+	case e.admissionSpace <- struct{}{}:
+	default:
+	}
 }
 
 // Never wait for one congested replica while another can carry the packet.
@@ -73,10 +133,26 @@ func (e *Engine) onAck(l *link, f session.Frame) {
 	if e.links[l.carrier.Name] != l || high < f.ID || high > e.sequence.Load() || f.ID < e.acked {
 		return
 	}
+	// Probe priority can hide ordinary data-queue delay. Measure actual session
+	// feedback too, excluding ambiguous retransmitted samples (Karn's rule).
+	if p := e.retained[f.ID]; p != nil && p.repairs == 0 && !p.born.IsZero() {
+		sample := time.Since(p.born)
+		if e.sessionRTT == 0 {
+			e.sessionRTT = sample
+		} else {
+			delta := sample - e.sessionRTT
+			if delta < 0 {
+				delta = -delta
+			}
+			e.sessionJitter = (7*e.sessionJitter + delta) / 8
+			e.sessionRTT = (7*e.sessionRTT + sample) / 8
+		}
+	}
 	for id := e.acked + 1; id <= f.ID; id++ {
 		delete(e.retained, id)
 	}
 	e.acked = f.ID
+	e.notifyAdmission()
 	e.ackHighest = max(e.ackHighest, high)
 	for bit := 0; bit < session.AckBits; bit++ {
 		if f.Payload[8+bit/8]&(byte(1)<<uint(bit%8)) == 0 {
@@ -110,32 +186,56 @@ func (e *Engine) repairLocked(now time.Time) {
 			rto = min(rto, max(20*time.Millisecond, 4*p.RTT+4*p.Jitter))
 		}
 	}
+	rto = min(time.Second, max(rto, 4*e.sessionRTT+4*e.sessionJitter))
 	var storage [session.MaxPacket / session.Chunk]session.Frame
 	sent := 0
 	// A stalled cumulative prefix does not imply the entire later window is
 	// missing. Replaying beyond the selectively reported range amplifies congestion while
 	// the first repair is still in flight, delaying its ACK even further.
 	last := min(e.sequence.Load(), e.acked+session.AckBits)
+	fastLast := e.acked
+	for id := e.acked + 1; id <= min(e.ackHighest, e.acked+128); id++ {
+		p := e.retained[id]
+		if p == nil || p.received {
+			break
+		}
+		fastLast = id
+	}
 	for id := e.acked + 1; id <= last && sent < 128; id++ {
 		p := e.retained[id]
 		if p == nil || p.received {
 			continue
 		}
 		delay := rto
-		if id <= e.ackHighest {
+		if id <= fastLast && p.repairs == 0 {
 			delay = 5 * time.Millisecond
+		}
+		if p.repairs > 0 {
+			delay = min(time.Second, rto<<min(p.repairs-1, 5))
 		}
 		if !p.lastSent.IsZero() && now.Sub(p.lastSent) < delay {
 			continue
 		}
 		frames, _ := session.FragmentInto(storage[:0], p.packet, id)
-		copies := e.offerCopiesLocked(frames, now, true)
+		first := p.lastSent.IsZero()
+		// Deferred first admissions must stay behind older ordinary data. Putting
+		// them on the repair priority queue manufactures receive gaps, then the
+		// resulting repair traffic starves the very originals needed to fill them.
+		copies := e.offerCopiesLocked(frames, now, !first)
 		if copies == 0 {
 			break
 		}
 		p.lastSent = now
+		e.notifyAdmission()
+		if !first {
+			p.repairs = min(p.repairs+1, 32)
+		}
 		sent++
-		e.counters.replayed.Add(1)
+		if !first {
+			e.counters.replayed.Add(1)
+		} else {
+			e.counters.deferred.Add(1)
+		}
 		if copies > 1 {
 			e.counters.extraCopies.Add(uint64(copies - 1))
 		}
@@ -156,7 +256,9 @@ func (e *Engine) repairSession(ctx context.Context) {
 		if e.ackPending {
 			e.acknowledgeLocked(e.receive)
 		}
-		e.repairLocked(time.Now())
+		if !e.streamLog() {
+			e.repairLocked(time.Now())
+		}
 		e.mu.Unlock()
 	}
 }

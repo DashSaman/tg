@@ -29,11 +29,13 @@ type link struct {
 	rtt, jitter    time.Duration
 	pending        map[uint64]time.Time
 	challenge      uint64
+	logNext        uint64 // guarded by engine.mu
+	logWake        chan struct{}
 }
 
 func newLink(e *Engine, ctx context.Context, p config.Carrier, w transport.Wire) *link {
 	local, cancel := context.WithCancel(ctx)
-	return &link{engine: e, carrier: p, wire: w, ctx: local, cancel: cancel, data: make(chan session.Frame, e.cfg.QueueFrames), repair: make(chan session.Frame, 1024), control: make(chan session.Frame, 8), ack: make(chan session.Frame, 1), space: make(chan struct{}, 1), born: time.Now(), pending: make(map[uint64]time.Time)}
+	return &link{engine: e, carrier: p, wire: w, ctx: local, cancel: cancel, data: make(chan session.Frame, e.cfg.QueueFrames), repair: make(chan session.Frame, 1024), control: make(chan session.Frame, 8), ack: make(chan session.Frame, 1), space: make(chan struct{}, 1), born: time.Now(), pending: make(map[uint64]time.Time), logNext: e.acked + 1, logWake: make(chan struct{}, 1)}
 }
 func (l *link) stop() {
 	l.once.Do(func() { l.closed.Store(true); l.cancel(); l.notifySpace(); _ = l.wire.Close() })
@@ -138,6 +140,10 @@ func (l *link) queuedFrame() (session.Frame, bool) {
 	}
 }
 func (l *link) transmit() {
+	if l.engine.streamLog() {
+		l.transmitLog()
+		return
+	}
 	batchWire, canBatch := l.wire.(transport.BatchWire)
 	var batch [transport.MaxBatchFrames][]byte
 	var buffers [transport.MaxBatchFrames][session.MaxFrame]byte
@@ -255,6 +261,7 @@ func (l *link) receive() {
 					l.rtt = (l.rtt*7 + sample) / 8
 				}
 				l.lastPong = time.Now()
+				l.engine.notifyAdmission()
 				delete(l.pending, f.ID)
 			}
 			l.mu.Unlock()

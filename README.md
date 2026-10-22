@@ -18,11 +18,15 @@ The repaired default `quic-stream` completed a new local 30-minute test:
 with bounded TG RSS/PSS and three loaded outage recoveries.
 [Final local evidence and profile](docs/wireguard-fixed-validation.md). [Diagnosis and failed intermediate controls](docs/wireguard-fix.md) are retained.
 
-An explicit `tg init --redundant` mode now combines both reliable carriers with
-bounded session retention, selective acknowledgements, priority repair and ordered
-delivery. Both endpoints must upgrade and opt in. Its latest short kernel-WireGuard
-control passed the stricter one-second target during single-path cuts; a new full
-soak is pending. [Design, failed controls and scope](docs/reliable-redundancy-design.md).
+An explicit `tg init --redundant` mode combines both reliable carriers using a
+shared bounded sender log, per-carrier replay cursors and selective acknowledgements.
+Unique completed UDP packets are delivered independently; strict output ordering
+is optional. Both endpoints must upgrade and opt in. Earlier short passes were
+followed by failed longer controls; the first attempted soak was interrupted at
+207s. The new shared-log candidate still needs full acceptance. The older 10s-window
+result does not establish the stricter one-second target.
+[Current design and scope](docs/shared-sender-log.md),
+[later failed controls and current investigation](docs/redundancy-experiments.md).
 
 TG forwards one application's opaque UDP packets. WireGuard is the intended inner
 IP tunnel, configured separately. TG keeps the exit UDP socket across carrier

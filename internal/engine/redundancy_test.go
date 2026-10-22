@@ -16,6 +16,7 @@ import (
 func redundantReader(t *testing.T, full string) (*Engine, net.Conn) {
 	t.Helper()
 	c := config.Defaults()
+	c.Carriers[1].Kind = "quic" // exercise experimental per-link DATAGRAM queues
 	c.Role = "edge"
 	c.AppAddress = "127.0.0.1:0"
 	if err := json.Unmarshal([]byte(`{"redundant":true}`), &c); err != nil {
@@ -169,5 +170,30 @@ func TestConcurrentCarriersDeduplicateBeforeApplicationDelivery(t *testing.T) {
 	defer d.owner.Release(d.packet)
 	if !bytes.Equal(d.packet, bytes.Repeat([]byte{61}, 2048)) {
 		t.Fatal("cross-carrier reassembly corrupted data")
+	}
+}
+
+func TestRedundantReaderBackpressuresWhenEveryOrdinaryQueueIsFull(t *testing.T) {
+	e, sender := redundantReader(t, "web")
+	for i := 0; i < cap(e.links["udp"].data); i++ {
+		e.links["udp"].data <- session.Frame{ID: 99}
+	}
+	for i := 0; i < 3; i++ {
+		if _, err := sender.Write(make([]byte, 200)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	until(t, func() bool { return e.counters.inputBytes.Load() > 0 })
+	time.Sleep(5 * time.Millisecond)
+	if e.sequence.Load() != 0 {
+		t.Fatal("reader consumed new packets while both carriers were backpressured", e.sequence.Load())
+	}
+	for len(e.links["udp"].data) > 0 {
+		<-e.links["udp"].data
+	}
+	e.links["udp"].notifySpace()
+	until(t, func() bool { return e.counters.queuedBytes.Load() == 600 })
+	if e.counters.dropped.Load() != 0 || len(e.links["udp"].data) != 3 {
+		t.Fatal("backpressure lost an accepted whole packet")
 	}
 }
