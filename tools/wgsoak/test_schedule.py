@@ -1,8 +1,17 @@
 import unittest
-from run import fault_schedule,check_redundant_setup
+from run import fault_schedule,check_redundant_setup,check_qos_setup,check_qos_activity
 
 
 class ScheduleTests(unittest.TestCase):
+    def test_requested_qos_cannot_be_missing_on_either_peer(self):
+        report=dict(interface='wg-tg',requested_mbps=0,qdiscs=[],classes_text='')
+        with self.assertRaises(ValueError):check_qos_setup(dict(edge=report,exit=report),400)
+    def test_installed_qdisc_must_actually_process_packets(self):
+        reports={r:dict(qdiscs=[dict(handle=h,packets=10) for h in ('7a00:','7a10:')]) for r in ('edge','exit')}
+        self.assertTrue(check_qos_activity(reports,400))
+        reports['exit']['qdiscs'][1]['packets']=0
+        self.assertFalse(check_qos_activity(reports,400))
+        self.assertTrue(check_qos_activity({},0))
     def test_pacing_must_match_both_peer_configurations(self):
         c={r:dict(redundant=True,app_pacing_mbps=500) for r in ('edge','exit')}
         check_redundant_setup(c,True,pacing=500)

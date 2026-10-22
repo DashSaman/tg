@@ -28,6 +28,15 @@ result does not establish the stricter one-second target.
 [Current design and scope](docs/shared-sender-log.md),
 [later failed controls and current investigation](docs/redundancy-experiments.md).
 
+An optional [pre-encryption queue-control profile](docs/wg-qos-profile.md) now
+combines HTB/FQ-CoDel on the intended WireGuard interface with TG's shared log,
+deferred backup copies and local output pacing. Its short real-WireGuard control
+passed the unchanged 300 Mbps floor: minimum full 1s 316.01 Mbps steady and
+335.75 Mbps during repeated single-path cuts. Sixty loaded pings averaged 1.11 ms
+(p95 1.43 ms, zero loss). Full clean-build acceptance is still pending.
+The [complete prior bulk control](docs/wireguard-c9-control.md) failed speed and
+had about 209 ms loaded RTT despite passing memory checks; it remains visible.
+
 TG forwards one application's opaque UDP packets. WireGuard is the intended inner
 IP tunnel, configured separately. TG keeps the exit UDP socket across carrier
 changes and probes both carriers. Default selection retains a healthy active path

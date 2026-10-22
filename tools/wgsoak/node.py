@@ -46,7 +46,7 @@ def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordere
     print('temporary credentials generated; no keys exported', flush=True)
 
 
-def run(role, mtu):
+def run(role, mtu, qos='0'):
     other = 'exit' if role == 'edge' else 'edge'
     address, peer = ('10.77.0.1', '10.77.0.2') if role == 'edge' else ('10.77.0.2', '10.77.0.1')
     command('ip', 'link', 'add', 'dev', 'wg-tg', 'type', 'wireguard')
@@ -56,7 +56,11 @@ def run(role, mtu):
     if role == 'edge':
         args += ['endpoint', '127.0.0.1:31820', 'persistent-keepalive', '5']
     command(*args)
-    command('ip', 'link', 'set', 'dev', 'wg-tg', 'mtu', mtu, 'up')
+    command('ip', 'link', 'set', 'dev', 'wg-tg', 'mtu', mtu)
+    if int(qos)>0:
+        profile=command('python3','/qos.py','apply','--interface','wg-tg','--mbps',qos)
+        Path('/out/'+role+'-qos-start.json').write_text(profile)
+    command('ip', 'link', 'set', 'dev', 'wg-tg', 'up')
     log = open('/out/'+role+'-tg.log', 'w', buffering=1)
     process = subprocess.Popen(['/tg', 'run', '--config', '/private/pki/'+role+'.json'], stdout=log, stderr=log)
     stopped = False
@@ -102,6 +106,8 @@ def run(role, mtu):
                                        for k in ('rx_dropped','tx_dropped','rx_errors','tx_errors')}
             row['cpu_pressure'] = Path('/proc/pressure/cpu').read_text().strip()
             row['cgroup_cpu_stat'] = Path('/sys/fs/cgroup/cpu.stat').read_text().strip()
+            if int(qos)>0:
+                row['wg_qdisc']=json.loads(command('tc','-s','-j','qdisc','show','dev','wg-tg'))
             if sample_number % 12 == 0:
                 row['wg_latest_handshake'] = int(command('wg', 'show', 'wg-tg', 'latest-handshakes').split()[-1])
                 transfer = command('wg', 'show', 'wg-tg', 'transfer').split()
@@ -131,4 +137,4 @@ if __name__ == '__main__':
     elif sys.argv[1] == 'direct':
         command('wg', 'set', 'wg-tg', 'peer', Path('/private/exit.pub').read_text().strip(), 'endpoint', sys.argv[2]+':51820')
     else:
-        run(sys.argv[1], sys.argv[2])
+        run(*sys.argv[1:])

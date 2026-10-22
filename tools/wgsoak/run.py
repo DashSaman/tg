@@ -17,6 +17,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from acceptance import analyze
 from memory import analyze_memory
 from recovery import assess_recovery
+from qos import verify_profile
 
 
 def docker(*args, check=True):
@@ -58,6 +59,19 @@ def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,p
             if not native or any(kind!=udp_mode for kind in native):
                 raise ValueError('requested UDP mode differs from actual '+role+' configuration')
 
+def check_qos_setup(reports,required):
+    if not required:return
+    for role in ('edge','exit'):
+        report=reports[role]
+        if report.get('interface')!='wg-tg' or report.get('requested_mbps')!=required:
+            raise ValueError('requested WireGuard QoS differs from actual '+role+' setup')
+        verify_profile(report['qdiscs'],report['classes_text'],required)
+
+def check_qos_activity(reports,required):
+    if not required:return True
+    return all(any(q.get('handle')==handle and q.get('packets',0)>0 for q in reports[role]['qdiscs'])
+               for role in ('edge','exit') for handle in ('7a00:','7a10:'))
+
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -78,6 +92,7 @@ def main():
     parser.add_argument('--redundant',action='store_true')
     parser.add_argument('--ordered-output',action='store_true',help='sequence barrier control; default preserves independent UDP delivery')
     parser.add_argument('--app-pacing-mbps',type=int,default=0,help='optional TG local UDP output cap; 0 disables; distinct from TCP offered rate')
+    parser.add_argument('--wg-qos-mbps',type=int,default=0,help='optional private WG egress HTB/FQ-CoDel profile; 0 disables; never changes host interfaces')
     parser.add_argument('--window',type=float,default=10,help='receiver rolling window in seconds; 1 is stricter than original acceptance')
     parser.add_argument('--fault-plan',choices=['mixed','single-path'],default='mixed')
     parser.add_argument('--extra-mixed-faults',action='store_true',help='also repeat mixed/all-path cuts after the main fault phase')
@@ -85,6 +100,7 @@ def main():
     if args.seconds < 30 or args.fault_seconds < 90:
         raise ValueError('use >=30 steady seconds and >=90 fault seconds; only >=1800 qualifies as a soak')
     if args.ordered_output and not args.redundant:raise ValueError('ordered output requires redundancy')
+    if not 0<=args.wg_qos_mbps<=100000:raise ValueError('WG QoS must be 0 or 1..100000 Mbps')
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     binary = args.binary.resolve()
@@ -93,6 +109,7 @@ def main():
     names = {role: prefix+'-'+role for role in ('edge', 'exit')}
     tools = Path(__file__).resolve().parent
     mounts = ['--mount', f'type=bind,source={tools},target=/tools,readonly',
+              '--mount', f'type=bind,source={tools.parent / "qos.py"},target=/qos.py,readonly',
               '--mount', f'type=bind,source={binary},target=/tg,readonly',
               '--mount', f'type=bind,source={out},target=/out',
               '--mount', f'type=volume,source={volume},target=/private']
@@ -106,6 +123,8 @@ def main():
                     requested_udp_mode=args.udp_mode,
                     ordered_output=args.ordered_output,
                     application_pacing_mbps=args.app_pacing_mbps,
+                    wg_qos_mbps=args.wg_qos_mbps,
+                    harness_sources={path.relative_to(tools.parent).as_posix():hashlib.sha256(path.read_bytes()).hexdigest() for path in (tools/'run.py',tools/'node.py',tools.parent/'qos.py')},
                     scope='two isolated network namespaces on one Linux Docker VM; kernel WireGuard and TG; no WAN or DPI')
     (out/'manifest.json').write_text(json.dumps(manifest, indent=2))
     created = []
@@ -208,7 +227,7 @@ def main():
             docker('run', '-d', '--name', names[role], '--network', network, '--cap-add', 'NET_ADMIN',
                    *(['-e', 'TG_DIAGNOSTIC_PROFILE=/out/'+role] if args.profile else []),
                    *(['-e', 'GOMAXPROCS='+str(args.gomaxprocs)] if args.gomaxprocs else []),
-                   '--label', 'tg.wgsoak='+prefix, *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', role, args.mtu)
+                   '--label', 'tg.wgsoak='+prefix, *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', role, args.mtu,args.wg_qos_mbps)
             created.append(names[role])
         for attempt in range(30):
             ping = docker('exec', names['edge'], 'ping', '-c', '1', '-W', '1', '10.77.0.2', check=False)
@@ -220,6 +239,9 @@ def main():
         manifest['versions'] = execute('edge', 'sh', '-c', 'uname -r; wg --version; iperf3 --version; ip -details link show wg-tg; ip route get 10.77.0.2')
         manifest['lab_configuration'] = json.loads((out/'lab-config-summary.json').read_text())
         check_redundant_setup(manifest['lab_configuration'],args.redundant,args.udp_mode,args.ordered_output,args.app_pacing_mbps)
+        if args.wg_qos_mbps:
+            manifest['qos_configuration']={role:json.loads(execute(role,'python3','/qos.py','check','--interface','wg-tg','--mbps',args.wg_qos_mbps)) for role in names}
+            check_qos_setup(manifest['qos_configuration'],args.wg_qos_mbps)
         (out/'manifest.json').write_text(json.dumps(manifest, indent=2))
         for role in names:
             (out/(role+'-udp-socket-memory.txt')).write_text(execute(role,'ss','-u','-a','-n','-m'))
@@ -247,12 +269,16 @@ def main():
         result = dict(steady=steady, faults=fault, memory={}, scope=manifest['scope'])
         if additional is not None:result['additional_faults']=additional
         result['single_path_speed_gate_required']=args.fault_plan=='single-path'
+        if args.wg_qos_mbps:
+            result['qos_final']={role:json.loads(execute(role,'python3','/qos.py','check','--interface','wg-tg','--mbps',args.wg_qos_mbps)) for role in names}
+        result['qos_activity_passed']=check_qos_activity(result.get('qos_final',{}),args.wg_qos_mbps)
         if args.seconds >= 1800:
             for role in names:
                 result['memory'][role] = analyze_memory(rows(role), steady['start'], steady['start']+args.seconds)
         else:
             result['memory_note'] = 'short setup validation only; not 30-minute acceptance'
         result['passed'] = steady['passed'] and fault['recovery_passed'] and (fault['passed'] if args.fault_plan=='single-path' else True) and (additional['recovery_passed'] if additional else True) and all(m['passed'] for m in result['memory'].values())
+        result['passed']=result['passed'] and result['qos_activity_passed']
         (out/'summary.json').write_text(json.dumps(result, indent=2))
         print('SUMMARY '+json.dumps(result), flush=True)
         return 0 if result['passed'] else 1

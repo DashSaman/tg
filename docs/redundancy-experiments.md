@@ -30,6 +30,8 @@ receiver is authoritative; live /proc I/O deltas are advisory and can differ.
 | Same binary/load, GOMAXPROCS=8 | 300s | 215.42 | Steady failed (6 bad seconds); 180s single-path phase minimum 286.84, one bad second |
 | 10ms backup grace, GOMAXPROCS=4, 16 KiB TCP writes | 300s | 280.05 | One bad steady second; 180s single-path phase passed at 389.21 minimum |
 | Local UDP cap 500 Mbps, original 128 KiB writes, 400 Mbps offered | 300s | 271.84 | One bad steady second; 180s single-path phase passed at 353.56 minimum |
+| Clean c9f634f unpaced bulk, local UDP cap 500 Mbps | 1800s | 113.65 | Complete steady failed (19 bad seconds); single-path minimum 397.79 passed; memory passed; loaded ping mean 209.45 ms |
+| Same c9 Go binary, pre-encryption HTB400/FQ-CoDel | 300s | 316.01 | Short steady/single-path passed (fault minimum 335.75); loaded ping mean 1.11 ms, p95 1.43 ms; full test pending |
 
 The last DATAGRAM control also completed 180s mixed cuts and recovered after all
 three cycles; its all-path speed minimum was zero and remains a failed speed
