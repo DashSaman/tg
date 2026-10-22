@@ -30,12 +30,13 @@ type httpWire struct {
 	sendBuffer  []byte // selected-mode bounded storage, allocated on first write
 	readBuffer  []byte
 	packetMode  bool
+	packetBytes int           // negotiated/configured payload bound; zero only in internal fixtures
 	buffered    *bufio.Reader // sole receive worker; bounded, no fill delay
 }
 
 func sessionMode(c config.Config) string {
 	if c.StreamPackets {
-		return "packet-repair-v1"
+		return "packet-repair-v2-" + strconv.Itoa(c.MaxPacketBytes)
 	}
 	if c.Redundant {
 		return "repair-v1"
@@ -45,6 +46,9 @@ func sessionMode(c config.Config) string {
 
 func (w *httpWire) frameLimit() int {
 	if w.packetMode {
+		if w.packetBytes > 0 {
+			return w.packetBytes + session.Header
+		}
 		return session.MaxStreamFrame
 	}
 	return session.MaxFrame
@@ -67,13 +71,16 @@ func (w *httpWire) SendBatch(frames [][]byte) error {
 		return errors.New("HTTP batch limit exceeded")
 	}
 	limit := w.frameLimit()
+	required := 0
 	for _, b := range frames {
 		if len(b) == 0 || len(b) > limit {
 			return errors.New("invalid carrier frame size")
 		}
+		required += len(b) + 2
 	}
-	if w.sendBuffer == nil {
-		w.sendBuffer = make([]byte, MaxBatchFrames*(limit+2))
+	if len(w.sendBuffer) < required {
+		// Actual bounded batch bytes, rather than256 maximum-sized datagrams.
+		w.sendBuffer = make([]byte, required)
 	}
 	n := 0
 	for _, b := range frames {
@@ -162,7 +169,7 @@ func listenHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 		if e = controller.Flush(); e != nil {
 			return
 		}
-		w := &httpWire{reader: r.Body, writer: rw, packetMode: c.StreamPackets, beforeWrite: func() error { return controller.SetWriteDeadline(time.Now().Add(c.Timeout())) }, flush: controller.Flush, cancel: func() {
+		w := &httpWire{reader: r.Body, writer: rw, packetMode: c.StreamPackets, packetBytes: c.MaxPacketBytes, beforeWrite: func() error { return controller.SetWriteDeadline(time.Now().Add(c.Timeout())) }, flush: controller.Flush, cancel: func() {
 			_ = controller.SetReadDeadline(time.Now().Add(-time.Second))
 			_ = controller.SetWriteDeadline(time.Now().Add(-time.Second))
 		}}
@@ -217,5 +224,5 @@ func dialHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 		closeAll()
 		return nil, 0, errors.New("HTTPS session rejected")
 	}
-	return &httpWire{reader: resp.Body, writer: pw, packetMode: c.StreamPackets, cancel: closeAll}, other, nil
+	return &httpWire{reader: resp.Body, writer: pw, packetMode: c.StreamPackets, packetBytes: c.MaxPacketBytes, cancel: closeAll}, other, nil
 }

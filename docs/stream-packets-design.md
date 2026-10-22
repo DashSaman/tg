@@ -10,14 +10,16 @@ falls far short of8Gbps. Neither native bypass nor worker count is a capacity fi
 An explicit `stream_packets:true` mode removes redundant fragmentation on already
 reliable HTTPS/QUIC streams. The default remains the existing protocol. Complete
 packets use a distinct frame kind with original ID, index0/count1, exact length
-and at most8192 bytes. A7200-byte ciphertext packet becomes one frame rather
+and at most65507 bytes in explicitly configured packet mode. A7200-byte ciphertext packet becomes one frame rather
 than eight. The receiver checks the same dedupe/contiguous ACK history, takes an
 owned bounded buffer, and bypasses per-packet fragment assembly-map allocation.
 No crypto, encryption or authentication is removed. Sender replay, ACK ownership,
 queue limits, shutdown and carrier recovery retain their existing contracts.
 
 Both peers must opt in: HTTPS mode is distinct and native QUIC uses a distinct
-ALPN. Mismatches fail closed. Config validation permits this mode only with
+ALPN (`tg-packet-repair-v2-<max_packet_bytes>`); HTTPS uses
+`packet-repair-v2-<max_packet_bytes>`. The configured byte ceiling must match,
+and earlier packet-v1 peers fail closed. Config validation permits this mode only with
 acknowledged redundancy and reliable carriers; DATAGRAM remains unchanged.
 Legacy decoders reject the complete-packet kind even if its payload is short.
 Packet-mode decoders reject legacy Data fragments. Inconsistent pending assembly
@@ -43,3 +45,15 @@ The status JSON exposes `stream_packets` so deployment can verify the running
 mode. The lab accepts `--stream-packets` and checks both generated peer configs.
 This remains experimental until throughput and loaded recovery measurements
 on the exact built revision have been recorded.
+
+Large local WireGuard packets are a separate proxy-endpoint experiment. For
+example, inner MTU60000 needs at least60032 bytes of TG payload; select
+`max_packet_bytes:65507` and `retained_packets:2048` on both peers. Replay remains
+bounded by256MiB, independent of the packet-size opt-in. Encoder data batches
+are capped at256KiB plus bounded control frames; the encoder arena stays below
+512KiB per transmitter. Receive caching retains at most128 configured packet
+buffers. Transport send buffers grow only to actual bounded batch bytes.
+WG and TG communicate over loopback; outer HTTPS/QUIC still use the ordinary
+network MTU. This is not a way to enlarge packets arriving from ordinary
+1500-byte IP clients, nor a claim that native60000-MTU WG works across the public
+Internet. Ordinary IP results must remain separate. No host MTU is changed by TG.

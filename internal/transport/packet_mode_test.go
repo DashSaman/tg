@@ -29,6 +29,18 @@ func TestPacketAndLegacyWireRejectOversizeBeforeWriteOrDecode(t *testing.T) {
 	}
 }
 
+func TestLargePacketBatchAllocatesActualBytesRatherThanMaximumFrameCount(t *testing.T) {
+	var output bytes.Buffer
+	w := &httpWire{writer: &output, packetMode: true, packetBytes: session.MaxStreamPacket}
+	frame := make([]byte, session.MaxStreamFrame)
+	if err := w.SendBatch([][]byte{frame, frame, frame, frame}); err != nil {
+		t.Fatal(err)
+	}
+	if len(w.sendBuffer) != 4*(len(frame)+2) || len(w.sendBuffer) > 512<<10 {
+		t.Fatal("batch reserved memory for256 huge frames", len(w.sendBuffer))
+	}
+}
+
 func TestPacketModeRealTLSQUICNegotiationAndFullSizeRoundTrip(t *testing.T) {
 	for _, kind := range []string{"https", "quic-stream"} {
 		for _, serverMode := range []bool{false, true} {
@@ -36,6 +48,8 @@ func TestPacketModeRealTLSQUICNegotiationAndFullSizeRoundTrip(t *testing.T) {
 				edge, exit := fixture(t)
 				edge.Redundant = true
 				exit.Redundant = true
+				edge.MaxPacketBytes, exit.MaxPacketBytes = session.MaxStreamPacket, session.MaxStreamPacket
+				edge.RetainedPackets, exit.RetainedPackets = 2048, 2048
 				b, _ := json.Marshal(map[string]bool{"stream_packets": serverMode})
 				if err := json.Unmarshal(b, &exit); err != nil {
 					t.Fatal(err)
@@ -67,6 +81,14 @@ func TestPacketModeRealTLSQUICNegotiationAndFullSizeRoundTrip(t *testing.T) {
 				}
 				b, _ = json.Marshal(map[string]bool{"stream_packets": serverMode})
 				_ = json.Unmarshal(b, &edge)
+				if serverMode {
+					edge.MaxPacketBytes = session.MaxPacket
+					if w, _, err := Dial(ctx, edge, p, 99); err == nil {
+						w.Close()
+						t.Fatal("mismatched packet byte ceiling connected")
+					}
+					edge.MaxPacketBytes = session.MaxStreamPacket
+				}
 				w, _, err := Dial(ctx, edge, p, 99)
 				if err != nil {
 					t.Fatal(err)
@@ -74,7 +96,7 @@ func TestPacketModeRealTLSQUICNegotiationAndFullSizeRoundTrip(t *testing.T) {
 				defer w.Close()
 				size := session.MaxFrame
 				if serverMode {
-					size = session.Header + session.MaxPacket
+					size = session.MaxStreamFrame
 				}
 				payload := bytes.Repeat([]byte{91}, size)
 				if err := w.Send(payload); err != nil {

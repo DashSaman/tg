@@ -175,3 +175,28 @@ func TestOrderedOutputNeedsSessionRepair(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestLargeUDPPacketBudgetIsOptInAndReplayBytesRemainBounded(t *testing.T) {
+	c := valid()
+	c.Redundant = true
+	c.StreamPackets = true
+	c.MaxPacketBytes = 65507
+	c.RetainedPackets = 2048
+	if err := c.Validate(); err != nil {
+		t.Fatal("large packet mode rejected", err)
+	}
+	c.StreamPackets = false
+	if err := c.Validate(); err == nil {
+		t.Fatal("legacy accepted large packets")
+	}
+	c.StreamPackets = true
+	c.RetainedPackets = 8192
+	if err := c.Validate(); err == nil {
+		t.Fatal("large packets bypassed256MiB replay budget")
+	}
+	c.RetainedPackets = 2048
+	c.MaxPacketBytes = 65508
+	if err := c.Validate(); err == nil {
+		t.Fatal("oversized UDP payload accepted")
+	}
+}

@@ -52,7 +52,7 @@ func (e *Engine) admitLogLocked(packet []byte, now time.Time) bool {
 // Encode under engine.mu into transmitter-owned storage, then release the lock
 // BEFORE native I/O. ACK release cannot invalidate encoded frames. Whole packets
 // fit within one batch (at most 8 frames), including on a non-batching test wire.
-func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers *[transport.MaxBatchFrames][]byte, count int) (int, int) {
+func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers [][]byte, count int) (int, int) {
 	e := l.engine
 	e.mu.Lock()
 	defer e.mu.Unlock()
@@ -94,7 +94,7 @@ func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers *[transp
 		if e.cfg.StreamPackets {
 			needed = 1
 		}
-		if len(batch)-count < needed {
+		if min(len(batch), len(buffers))-count < needed {
 			break
 		}
 		var storage [session.MaxPacket / session.Chunk]session.Frame
@@ -129,13 +129,19 @@ func (l *link) fillLog(batch *[transport.MaxBatchFrames][]byte, buffers *[transp
 
 // Every row has a full slice bound, so no encoder can consume a neighbouring
 // frame's storage. Only opted-in packet mode allocates the larger arena.
-func logBuffers(packets bool) *[transport.MaxBatchFrames][]byte {
+func logBuffers(packets bool, packetBytes ...int) [][]byte {
 	size := session.MaxFrame
+	count := transport.MaxBatchFrames
 	if packets {
-		size = session.MaxStreamFrame
+		maximum := session.MaxPacket
+		if len(packetBytes) > 0 {
+			maximum = packetBytes[0]
+		}
+		size = maximum + session.Header
+		count = min(count, (256<<10)/size+3) // data byte cap plus three control slots
 	}
-	arena := make([]byte, transport.MaxBatchFrames*size)
-	rows := new([transport.MaxBatchFrames][]byte)
+	arena := make([]byte, count*size)
+	rows := make([][]byte, count)
 	for i := range rows {
 		begin, end := i*size, (i+1)*size
 		rows[i] = arena[begin:end:end]
@@ -145,7 +151,7 @@ func logBuffers(packets bool) *[transport.MaxBatchFrames][]byte {
 
 func (l *link) transmitLog() {
 	var batch [transport.MaxBatchFrames][]byte
-	buffers := logBuffers(l.engine.cfg.StreamPackets)
+	buffers := logBuffers(l.engine.cfg.StreamPackets, l.engine.cfg.MaxPacketBytes)
 	batchWire, canBatch := l.wire.(transport.BatchWire)
 	timer := time.NewTimer(time.Hour)
 	timer.Stop()

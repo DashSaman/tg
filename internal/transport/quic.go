@@ -24,10 +24,7 @@ const alpn = "tg-dgram-v2"
 // when one internal application batch spans several complete datagrams.
 const maxDatagramBundleFrames = 16
 
-func quicALPN(kind string, redundant bool, packets ...bool) string {
-	if len(packets) > 0 && packets[0] {
-		return "tg-packet-stream-v1"
-	}
+func quicALPN(kind string, redundant bool) string {
 	if kind == "quic-stream" {
 		if redundant {
 			return "tg-repair-v1"
@@ -38,6 +35,13 @@ func quicALPN(kind string, redundant bool, packets ...bool) string {
 		return "tg-repair-dgram-v1"
 	}
 	return alpn
+}
+
+func quicSessionALPN(p config.Carrier, c config.Config) string {
+	if c.StreamPackets {
+		return "tg-" + sessionMode(c)
+	}
+	return quicALPN(p.Kind, c.Redundant)
 }
 
 func quicModeConfig(p config.Carrier, c config.Config) *quic.Config {
@@ -58,8 +62,8 @@ func quicModeConfig(p config.Carrier, c config.Config) *quic.Config {
 
 // Reuse bounded two-byte stream framing and batching. No HTTP is sent here:
 // this is a full-duplex authenticated native QUIC stream with flow control.
-func newQUICStreamWire(conn *quic.Conn, stream *quic.Stream, timeout time.Duration, packets bool) Wire {
-	return &httpWire{reader: stream, writer: stream, packetMode: packets,
+func newQUICStreamWire(conn *quic.Conn, stream *quic.Stream, timeout time.Duration, packets bool, packetBytes int) Wire {
+	return &httpWire{reader: stream, writer: stream, packetMode: packets, packetBytes: packetBytes,
 		beforeWrite: func() error { return stream.SetWriteDeadline(time.Now().Add(timeout)) },
 		cancel:      func() { stream.CancelRead(0); stream.CancelWrite(0); _ = conn.CloseWithError(0, "closed") },
 	}
@@ -239,7 +243,7 @@ func listenQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 	if err != nil {
 		return nil, nil, err
 	}
-	tc.NextProtos = []string{quicALPN(p.Kind, c.Redundant, c.StreamPackets)}
+	tc.NextProtos = []string{quicSessionALPN(p, c)}
 	l, err := quic.ListenAddr(p.Address, tc, quicModeConfig(p, c))
 	if err != nil {
 		return nil, nil, err
@@ -287,7 +291,7 @@ func listenQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 					if e = stream.SetDeadline(time.Time{}); e != nil {
 						return
 					}
-					w := newQUICStreamWire(conn, stream, c.Timeout(), c.StreamPackets)
+					w := newQUICStreamWire(conn, stream, c.Timeout(), c.StreamPackets, c.MaxPacketBytes)
 					defer w.Close()
 					_ = accept(local, w, peerEpoch)
 					return
@@ -308,7 +312,7 @@ func dialQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	if err != nil {
 		return nil, 0, err
 	}
-	tc.NextProtos = []string{quicALPN(p.Kind, c.Redundant, c.StreamPackets)}
+	tc.NextProtos = []string{quicSessionALPN(p, c)}
 	tc.MinVersion = tls.VersionTLS13
 	dialCtx, cancel := context.WithTimeout(ctx, 4*time.Second)
 	defer cancel()
@@ -344,7 +348,7 @@ func dialQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 		if err = stream.SetDeadline(time.Time{}); err != nil {
 			return fail(err)
 		}
-		return newQUICStreamWire(conn, stream, c.Timeout(), c.StreamPackets), other, nil
+		return newQUICStreamWire(conn, stream, c.Timeout(), c.StreamPackets, c.MaxPacketBytes), other, nil
 	}
 	_ = stream.Close()
 	stream.CancelRead(0)

@@ -6,7 +6,6 @@ import (
 	"github.com/DashSaman/tg/internal/config"
 	"github.com/DashSaman/tg/internal/session"
 	"testing"
-	"time"
 )
 
 type overwritePacketWire struct {
@@ -32,7 +31,10 @@ func packetReceiveFixture(mode bool, w *overwritePacketWire) (*Engine, *link) {
 	c.Redundant = true
 	c.StreamPackets = mode
 	c.MaxPacketBytes = session.MaxPacket
-	e := &Engine{cfg: c, ctx: context.Background(), links: make(map[string]*link), receive: session.NewRedundantReassembler(8, time.Second), output: make(chan delivery, 8)}
+	if mode {
+		c.MaxPacketBytes = session.MaxStreamPacket
+	}
+	e := &Engine{cfg: c, ctx: context.Background(), links: make(map[string]*link), receive: newReceiver(c), output: make(chan delivery, 8)}
 	l := newLink(e, context.Background(), c.Carriers[0], w)
 	e.links[l.carrier.Name] = l
 	return e, l
@@ -40,7 +42,7 @@ func packetReceiveFixture(mode bool, w *overwritePacketWire) (*Engine, *link) {
 func TestQueuedPacketReceiveSurvivesNextWireRead(t *testing.T) {
 	w := &overwritePacketWire{scratch: make([]byte, session.MaxStreamFrame)}
 	for i, value := range []byte{7, 91} {
-		b, err := session.Encode(session.Frame{Kind: session.Packet, ID: uint64(i + 1), Count: 1, Total: 7200, Payload: bytes.Repeat([]byte{value}, 7200)})
+		b, err := session.Encode(session.Frame{Kind: session.Packet, ID: uint64(i + 1), Count: 1, Total: 60032, Payload: bytes.Repeat([]byte{value}, 60032)})
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -54,7 +56,7 @@ func TestQueuedPacketReceiveSurvivesNextWireRead(t *testing.T) {
 	}
 	for _, value := range []byte{7, 91} {
 		d := <-e.output
-		if !bytes.Equal(d.packet, bytes.Repeat([]byte{value}, 7200)) {
+		if !bytes.Equal(d.packet, bytes.Repeat([]byte{value}, 60032)) {
 			t.Fatal("queued output aliases overwritten carrier buffer")
 		}
 		d.owner.Release(d.packet)

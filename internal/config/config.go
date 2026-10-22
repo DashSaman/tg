@@ -109,7 +109,11 @@ func (c Config) Validate() error {
 	if c.Metrics != "" && !validAddress(c.Metrics, true) {
 		return errors.New("metrics must be loopback or disabled")
 	}
-	if c.QueueFrames < 8 || c.QueueFrames > 4096 || c.MaxPacketBytes < 512 || c.MaxPacketBytes > 8192 {
+	packetLimit := 8192
+	if c.StreamPackets {
+		packetLimit = 65507
+	}
+	if c.QueueFrames < 8 || c.QueueFrames > 4096 || c.MaxPacketBytes < 512 || c.MaxPacketBytes > packetLimit {
 		return errors.New("packet/queue limits out of range")
 	}
 	if c.RetainedPackets > (256<<20)/c.MaxPacketBytes {

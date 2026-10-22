@@ -58,6 +58,9 @@ func New(c config.Config) (*Engine, error) {
 }
 
 func newReceiver(c config.Config) *session.Reassembler {
+	if c.StreamPackets {
+		return session.NewPacketReassembler(128, 2*time.Second, c.MaxPacketBytes)
+	}
 	if c.Redundant {
 		return session.NewRedundantReassembler(128, 2*time.Second)
 	}

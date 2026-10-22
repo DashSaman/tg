@@ -7,7 +7,7 @@ import (
 )
 
 func TestCompletePacketEnvelopeAndLegacyRejection(t *testing.T) {
-	for _, size := range []int{1, 1536, 7200, MaxPacket} {
+	for _, size := range []int{1, 1536, 7200, MaxPacket, 60032, MaxStreamPacket} {
 		f := Frame{Kind: 5, ID: 1, Count: 1, Total: uint16(size), Payload: bytes.Repeat([]byte{37}, size)}
 		b, err := Encode(f)
 		if err != nil {
@@ -23,6 +23,9 @@ func TestCompletePacketEnvelopeAndLegacyRejection(t *testing.T) {
 		if err != nil || !bytes.Equal(got.Payload, f.Payload) {
 			t.Fatal("packet decoder failed", err)
 		}
+	}
+	if _, err := Encode(Frame{Kind: Packet, ID: 1, Count: 1, Total: MaxStreamPacket + 1, Payload: make([]byte, MaxStreamPacket+1)}); err == nil {
+		t.Fatal("packet larger than UDP ceiling encoded")
 	}
 	for _, alter := range []func(*Frame){func(f *Frame) { f.Index = 1 }, func(f *Frame) { f.Count = 2 }, func(f *Frame) { f.Total = 0 }, func(f *Frame) { f.Total = 2 }, func(f *Frame) { f.ID = 0 }} {
 		f := Frame{Kind: 5, ID: 1, Count: 1, Total: 1, Payload: []byte{1}}

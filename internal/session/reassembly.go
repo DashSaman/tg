@@ -23,6 +23,7 @@ type Reassembler struct {
 	contiguous     uint64
 	seen           []uint64
 	free           chan []byte
+	packetBytes    int
 	oldest, newest *assembly
 }
 
@@ -35,8 +36,19 @@ func NewReassembler(limit int, ttl time.Duration) *Reassembler {
 func NewRedundantReassembler(limit int, ttl time.Duration) *Reassembler {
 	return newReassembler(limit, ttl, 262144)
 }
+
+// Only explicitly negotiated packet streams use a larger reusable payload.
+// The caller validates this fixed ceiling; traffic cannot enlarge it.
+func NewPacketReassembler(limit int, ttl time.Duration, packetBytes int) *Reassembler {
+	if packetBytes < 1 || packetBytes > MaxStreamPacket {
+		panic("invalid complete packet buffer budget")
+	}
+	r := NewRedundantReassembler(limit, ttl)
+	r.packetBytes = packetBytes
+	return r
+}
 func newReassembler(limit int, ttl time.Duration, window int) *Reassembler {
-	return &Reassembler{limit: max(1, limit), ttl: ttl, pending: make(map[uint64]*assembly, max(1, limit)), free: make(chan []byte, min(128, max(1, limit))), seen: make([]uint64, window)}
+	return &Reassembler{limit: max(1, limit), ttl: ttl, packetBytes: MaxPacket, pending: make(map[uint64]*assembly, max(1, limit)), free: make(chan []byte, min(128, max(1, limit))), seen: make([]uint64, window)}
 }
 
 func (r *Reassembler) remove(a *assembly) {
@@ -58,13 +70,14 @@ func (r *Reassembler) discardOldest() { a := r.oldest; r.remove(a); r.Release(a.
 
 // Release returns a completed buffer after its last synchronous consumer. No slice
 // aliases may be read or written after release; incomplete buffers stay internal.
-// The cache is bounded to at most 128*8192 bytes, independent of traffic volume.
+// The cache is bounded to128 configured packet buffers, independent of traffic
+// volume. Legacy buffers remain8192 bytes; packet mode has an explicit ceiling.
 func (r *Reassembler) Release(packet []byte) {
-	if cap(packet) != MaxPacket {
+	if cap(packet) != r.packetBytes {
 		return
 	}
 	select {
-	case r.free <- packet[:MaxPacket]:
+	case r.free <- packet[:r.packetBytes]:
 	default:
 	}
 }
@@ -91,6 +104,9 @@ func (r *Reassembler) Push(now time.Time, f Frame) ([]byte, bool, error) {
 		r.discardOldest()
 	}
 	if f.Kind == Packet {
+		if len(f.Payload) > r.packetBytes {
+			return nil, false, errors.New("complete packet exceeds receiver budget")
+		}
 		if r.pending[f.ID] != nil {
 			return nil, false, errors.New("complete packet conflicts with pending fragments")
 		}
@@ -98,7 +114,7 @@ func (r *Reassembler) Push(now time.Time, f Frame) ([]byte, bool, error) {
 		select {
 		case data = <-r.free:
 		default:
-			data = make([]byte, MaxPacket)
+			data = make([]byte, r.packetBytes)
 		}
 		copy(data, f.Payload)
 		r.complete(f.ID)

@@ -14,6 +14,15 @@ def receiver(mbps):
 
 
 class CapacityTests(unittest.TestCase):
+    def test_large_packets_need_explicit_mode_and_keep_replay_byte_budget(self):
+        run.check_packet_profile(60000,65507,True)
+        ceiling=(256<<20)//65507
+        run.check_replay_profile(ceiling,65507,False,True)
+        for packet in (65508,65535):
+            with self.assertRaises(ValueError):run.check_packet_profile(60000,packet,True)
+        with self.assertRaises(ValueError):run.check_packet_profile(60000,65507)
+        with self.assertRaises(ValueError):run.check_replay_profile(ceiling+1,65507,False,True)
+
     def test_replay_count_and_byte_budgets_match_runtime_bounds(self):
         self.assertTrue(hasattr(run,'check_replay_profile'),'missing bounded replay preflight')
         for count,packet,ordered in ((8192,2048,False),(131072,2048,False),(32768,8192,False),(16384,8192,True)):

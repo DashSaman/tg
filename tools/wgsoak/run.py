@@ -101,13 +101,15 @@ def analyze_trial(document, seconds, window, target, health=None):
     return result
 
 
-def check_packet_profile(mtu,max_packet):
-    if not 512<=max_packet<=8192 or not 576<=mtu or ((mtu+15)//16)*16+32>max_packet:
-        raise ValueError('inner MTU plus WireGuard padding/overhead must fit a 512..8192-byte TG packet budget')
+def check_packet_profile(mtu,max_packet,stream_packets=False):
+    limit=65507 if stream_packets else 8192
+    if not 512<=max_packet<=limit or not 576<=mtu or ((mtu+15)//16)*16+32>max_packet:
+        raise ValueError('inner MTU plus WireGuard padding/overhead must fit the selected TG packet budget')
 
 
-def check_replay_profile(packets,max_packet,ordered=False):
-    if (not 512<=max_packet<=8192 or not 128<=packets<=131072
+def check_replay_profile(packets,max_packet,ordered=False,stream_packets=False):
+    limit=65507 if stream_packets else 8192
+    if (not 512<=max_packet<=limit or not 128<=packets<=131072
             or packets*max_packet>(256<<20) or (ordered and packets>16384)):
         raise ValueError('replay budget must be128..131072 packets, at most256MiB payload and16384 packets for ordered output')
 
@@ -149,10 +151,10 @@ def main():
     if not math.isfinite(args.target_mbps) or not 0 < args.target_mbps <= 100000:
         raise ValueError('receiver target must be finite and in 0..100000 Mbps, excluding zero')
     if not 0<=args.replica_delay_ms<=50:raise ValueError('backup delay must be 0..50ms')
-    check_packet_profile(args.mtu,args.max_packet_bytes)
+    check_packet_profile(args.mtu,args.max_packet_bytes,args.stream_packets)
     if args.stream_packets and (not args.redundant or args.udp_mode=='quic' or args.carrier=='quic'):
         raise ValueError('complete packet mode requires acknowledged reliable carriers')
-    check_replay_profile(args.retained_packets,args.max_packet_bytes,args.ordered_output)
+    check_replay_profile(args.retained_packets,args.max_packet_bytes,args.ordered_output,args.stream_packets)
     if args.stream_window_bytes!=0 and not 1<<20<=args.stream_window_bytes<=256<<20:raise ValueError('stream window must be0 or1..256MiB')
     if args.ordered_output and not args.redundant:raise ValueError('ordered output requires redundancy')
     if not 0<=args.wg_qos_mbps<=100000:raise ValueError('WG QoS must be 0 or 1..100000 Mbps')
