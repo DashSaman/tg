@@ -3,6 +3,20 @@ from run import fault_schedule,check_redundant_setup,check_qos_setup,check_qos_a
 
 
 class ScheduleTests(unittest.TestCase):
+    def test_capacity_windows_must_match_both_peers(self):
+        import inspect
+        self.assertIn('retained_packets',inspect.signature(check_redundant_setup).parameters)
+        c={r:dict(redundant=True,retained_packets=8192,stream_window_bytes=0) for r in ('edge','exit')}
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,retained_packets=2048)
+        c['edge']['retained_packets']=2048
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,retained_packets=2048)
+        c['exit']['retained_packets']=2048
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,retained_packets=2048,stream_window=32<<20)
+        c['edge']['stream_window_bytes']=32<<20
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,retained_packets=2048,stream_window=32<<20)
+        c['exit']['stream_window_bytes']=32<<20
+        check_redundant_setup(c,True,retained_packets=2048,stream_window=32<<20)
+
     def test_maximum_packet_budget_must_match_both_peers(self):
         c={r:dict(redundant=True,max_packet_bytes=2048) for r in ('edge','exit')}
         import inspect

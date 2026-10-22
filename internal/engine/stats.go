@@ -32,6 +32,7 @@ type Snapshot struct {
 	SelectiveReceived int               `json:"selectively_received_packets"`
 	OutputQueued      int               `json:"completed_output_queue"`
 	Retained          int               `json:"retained_packets"`
+	RetainedCapacity  int               `json:"retained_packet_capacity"`
 	Replayed          uint64            `json:"replayed_packets"`
 	Acked             uint64            `json:"acknowledged_packet_id"`
 	Redundant         bool              `json:"redundant"`
@@ -108,6 +109,7 @@ func (e *Engine) Snapshot() Snapshot {
 	}
 	s.OutputQueued = len(e.output)
 	s.Retained = len(e.retained)
+	s.RetainedCapacity = e.retainedLimit()
 	s.Replayed = c.replayed.Load()
 	s.Acked = e.acked
 	s.Redundant = e.cfg.Redundant

@@ -36,7 +36,7 @@ func (e *Engine) admitLogLocked(packet []byte, now time.Time) bool {
 		return false
 	}
 	if e.retained == nil {
-		e.retained = make(map[uint64]*retainedPacket, retainedCapacity)
+		e.retained = make(map[uint64]*retainedPacket, min(retainedCapacity, e.retainedLimit()))
 	}
 	id := e.sequence.Add(1)
 	e.retained[id] = &retainedPacket{packet: packet, born: now, lastSent: now}

@@ -116,6 +116,42 @@ with unchanged frame boundaries. Carrier encode/write storage is about 261 KiB
 per buffer; no extra batching timer is added and the DATAGRAM wire bundle stays
 at 16 frames. Performance for this additional change is pending.
 
+The subsequent 256-frame short probe averaged 2458.40 Mbps (minimum898.46),
+and changing only backup grace to50ms averaged2296.80 (minimum975.28). Both
+failed the explicit10Gbps target. These single short observations show no
+attributed throughput benefit from either change. Their negative verdicts and
+raw intervals remain available; no preferred default was selected from them.
+
+## Explicit bounded receive/replay windows
+
+`stream_window_bytes:0` retains native HTTP2 defaults and existing QUIC8MiB/
+16MiB maximum stream/connection credit. An explicit1..256MiB value configures
+both HTTP2 and reliable QUIC receive windows, with connection credit twice the
+stream budget. TLS settings and carrier/session wire formats do not change.
+
+Actual TLS/HTTP2 frame tests rejected the previous implementation: server
+advertised1MiB stream/connection credit, client4MiB stream credit. The opt-in
+32MiB tests now observe32MiB per stream,64MiB server connection credit, and
+64MiB+65535 client connection credit (Go1.26's additive initial connection credit).
+QUIC tests verify both initial and maximum windows; DATAGRAM mode is unaffected.
+These tests catch silently ignored settings rather than merely checking a struct.
+The exact pinned Go implementation was inspected and tested; do not infer
+acceptance of a large setting from a configuration value alone on other runtimes.
+
+`retained_packets` defaults to8192 and is bounded128..32768. Ordered output
+additionally limits it to16384 to fit its reorder budget. A smaller value can
+keep jumbo retained payload bounded:2048*8192bytes is16MiB; the maximum supported
+configuration32768*8192bytes permits256MiB of retained payload. Existing dedupe
+history remains larger than every allowed sender budget. An ACK-driven admission
+test checks the actual configured limit and release behavior.
+
+Windows are per connection/stream, not process-wide RAM caps. Both carriers can
+buffer unread data, in addition to the retained log and Go GC overhead. Explicit
+large-window profiles therefore require an intentional memory budget; defaults
+stay unchanged. High RTT/10Gbps still requires a measured bandwidth-delay-product
+budget and capacity acceptance. The lab records and checks both actual peers'
+window and replay settings. Performance of these overrides is pending.
+
 Raising caps or allocating more memory is not itself an efficiency improvement.
 Independent sessions,
 high-RTT window sizing and 10 Gbps hardware/path validation remain unfinished.

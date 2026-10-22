@@ -47,7 +47,7 @@ def fault_schedule(kind,seconds):
     return result[:last_clear]
 
 
-def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,pacing=0,preferred='auto',replica_delay=None,udp_gro=False,max_packet=None):
+def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,pacing=0,preferred='auto',replica_delay=None,udp_gro=False,max_packet=None,retained_packets=None,stream_window=None):
     for role in ('edge','exit'):
         if bool(configuration[role].get('redundant',False))!=required:
             raise ValueError('requested redundancy differs from actual '+role+' configuration')
@@ -61,6 +61,10 @@ def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,p
             raise ValueError('requested application UDP GRO differs from actual '+role+' configuration')
         if max_packet is not None and configuration[role].get('max_packet_bytes')!=max_packet:
             raise ValueError('requested maximum packet budget differs from actual '+role+' configuration')
+        if retained_packets is not None and configuration[role].get('retained_packets',8192)!=retained_packets:
+            raise ValueError('requested replay packet budget differs from actual '+role+' configuration')
+        if stream_window is not None and configuration[role].get('stream_window_bytes',0)!=stream_window:
+            raise ValueError('requested stream window differs from actual '+role+' configuration')
         if preferred!='auto':
             paths=configuration[role]['carriers']
             favored=lambda p:p['kind']=='https' if preferred=='https' else p['kind'] in ('quic','quic-stream')
@@ -116,6 +120,8 @@ def main():
     parser.add_argument('--udp-mode',choices=['auto','quic','quic-stream'],default='auto')
     parser.add_argument('--mtu', type=int, default=1280)
     parser.add_argument('--max-packet-bytes',type=int,default=2048,help='TG original packet budget; must include inner MTU plus WireGuard overhead')
+    parser.add_argument('--retained-packets',type=int,default=8192,help='bounded acknowledged sender log;128..32768 packets')
+    parser.add_argument('--stream-window-bytes',type=int,default=0,help='0 keeps native HTTP2/QUIC windows; explicit1..256MiB per stream')
     parser.add_argument('--mbps', type=float, default=350, help='aggregate TCP pacing target; 0 uses unpaced bulk TCP')
     parser.add_argument('--target-mbps', type=float, default=300, help='required receiver floor for steady traffic and recovery; distinct from offered --mbps')
     parser.add_argument('--redundant',action='store_true')
@@ -135,6 +141,8 @@ def main():
         raise ValueError('receiver target must be finite and in 0..100000 Mbps, excluding zero')
     if not 0<=args.replica_delay_ms<=50:raise ValueError('backup delay must be 0..50ms')
     check_packet_profile(args.mtu,args.max_packet_bytes)
+    if not 128<=args.retained_packets<=32768 or (args.ordered_output and args.retained_packets>16384):raise ValueError('replay budget exceeds configured bounds')
+    if args.stream_window_bytes!=0 and not 1<<20<=args.stream_window_bytes<=256<<20:raise ValueError('stream window must be0 or1..256MiB')
     if args.ordered_output and not args.redundant:raise ValueError('ordered output requires redundancy')
     if not 0<=args.wg_qos_mbps<=100000:raise ValueError('WG QoS must be 0 or 1..100000 Mbps')
     if args.preferred_carrier!='auto' and (args.carrier!='both' or not args.redundant):raise ValueError('explicit carrier preference requires both redundant carriers')
@@ -163,6 +171,7 @@ def main():
                     application_pacing_mbps=args.app_pacing_mbps,
                     application_udp_gro=args.app_udp_gro, replica_delay_ms=args.replica_delay_ms,
                     max_packet_bytes=args.max_packet_bytes,
+                    retained_packets=args.retained_packets,stream_window_bytes=args.stream_window_bytes,
                     wg_qos_mbps=args.wg_qos_mbps,
                     preferred_carrier=args.preferred_carrier,
                     harness_sources={path.relative_to(tools.parent).as_posix():hashlib.sha256(path.read_bytes()).hexdigest() for path in (tools/'run.py',tools/'node.py',tools/'recovery.py',tools/'memory.py',tools.parent/'qos.py',tools.parent/'acceptance.py')},
@@ -259,7 +268,7 @@ def main():
     try:
         docker('network', 'create', '--internal', '--label', 'tg.wgsoak='+prefix, network)
         docker('volume', 'create', '--label', 'tg.wgsoak='+prefix, volume)
-        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier, '1' if args.redundant else '0',args.udp_mode,'1' if args.ordered_output else '0',args.app_pacing_mbps,args.preferred_carrier,args.replica_delay_ms,'1' if args.app_udp_gro else '0',args.max_packet_bytes)
+        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier, '1' if args.redundant else '0',args.udp_mode,'1' if args.ordered_output else '0',args.app_pacing_mbps,args.preferred_carrier,args.replica_delay_ms,'1' if args.app_udp_gro else '0',args.max_packet_bytes,args.retained_packets,args.stream_window_bytes)
         for role in ('exit', 'edge'):
             docker('run', '-d', '--name', names[role], '--network', network, '--cap-add', 'NET_ADMIN',
                    *(['-e', 'TG_DIAGNOSTIC_PROFILE=/out/'+role] if args.profile else []),
@@ -279,7 +288,7 @@ def main():
         if any(mtu!=args.mtu for mtu in manifest['kernel_wg_mtu'].values()):
             raise ValueError('requested inner MTU differs from actual kernel WG interface')
         manifest['lab_configuration'] = json.loads((out/'lab-config-summary.json').read_text())
-        check_redundant_setup(manifest['lab_configuration'],args.redundant,args.udp_mode,args.ordered_output,args.app_pacing_mbps,args.preferred_carrier,args.replica_delay_ms,args.app_udp_gro,args.max_packet_bytes)
+        check_redundant_setup(manifest['lab_configuration'],args.redundant,args.udp_mode,args.ordered_output,args.app_pacing_mbps,args.preferred_carrier,args.replica_delay_ms,args.app_udp_gro,args.max_packet_bytes,args.retained_packets,args.stream_window_bytes)
         if args.wg_qos_mbps:
             manifest['qos_configuration']={role:json.loads(execute(role,'python3','/qos.py','check','--interface','wg-tg','--mbps',args.wg_qos_mbps)) for role in names}
             check_qos_setup(manifest['qos_configuration'],args.wg_qos_mbps)

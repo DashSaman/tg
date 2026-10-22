@@ -39,6 +39,13 @@ func sessionMode(c config.Config) string {
 	return ""
 }
 
+func httpWindowConfig(c config.Config) *http.HTTP2Config {
+	if c.StreamWindowBytes == 0 {
+		return nil
+	}
+	return &http.HTTP2Config{MaxReceiveBufferPerStream: c.StreamWindowBytes, MaxReceiveBufferPerConnection: 2 * c.StreamWindowBytes}
+}
+
 func (w *httpWire) Send(b []byte) error {
 	return w.SendBatch([][]byte{b})
 }
@@ -103,7 +110,7 @@ func listenHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 		return nil, nil, err
 	}
 	local, cancel := context.WithCancel(ctx)
-	srv := &http.Server{TLSConfig: tc, ReadHeaderTimeout: 3 * time.Second, MaxHeaderBytes: 8192, IdleTimeout: 10 * time.Second, ErrorLog: log.New(io.Discard, "", 0)}
+	srv := &http.Server{TLSConfig: tc, HTTP2: httpWindowConfig(c), ReadHeaderTimeout: 3 * time.Second, MaxHeaderBytes: 8192, IdleTimeout: 10 * time.Second, ErrorLog: log.New(io.Discard, "", 0)}
 	srv.Handler = http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		got := sha256.Sum256([]byte(r.Header.Get("Authorization")))
 		if r.Method != "POST" || r.URL.Path != p.Path || r.ProtoMajor != 2 || subtle.ConstantTimeCompare(got[:], want[:]) != 1 || r.Header.Get("X-Tg-Session") != c.SessionID || r.Header.Get("X-Tg-Mode") != sessionMode(c) {
@@ -160,7 +167,7 @@ func dialHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	}
 	local, cancel := context.WithCancel(ctx)
 	pr, pw := io.Pipe()
-	tr := &http.Transport{TLSClientConfig: tc, ForceAttemptHTTP2: true, TLSHandshakeTimeout: 3 * time.Second, ResponseHeaderTimeout: 3 * time.Second, DisableCompression: true}
+	tr := &http.Transport{TLSClientConfig: tc, HTTP2: httpWindowConfig(c), ForceAttemptHTTP2: true, TLSHandshakeTimeout: 3 * time.Second, ResponseHeaderTimeout: 3 * time.Second, DisableCompression: true}
 	closeAll := func() {
 		cancel()
 		_ = pw.CloseWithError(context.Canceled)

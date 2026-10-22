@@ -3,6 +3,7 @@ package engine
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"sync"
 	"testing"
 	"time"
@@ -11,6 +12,34 @@ import (
 	"github.com/DashSaman/tg/internal/session"
 	"github.com/DashSaman/tg/internal/transport"
 )
+
+func TestReliableLogHonorsSmallerConfiguredRetentionBudget(t *testing.T) {
+	c := config.Defaults()
+	c.Redundant = true
+	if err := json.Unmarshal([]byte(`{"retained_packets":128}`), &c); err != nil {
+		t.Fatal(err)
+	}
+	e := &Engine{cfg: c, links: make(map[string]*link)}
+	for _, carrier := range c.Carriers {
+		l := newLink(e, context.Background(), carrier, nil)
+		defer l.cancel()
+		l.lastPong = time.Now()
+		e.links[carrier.Name] = l
+	}
+	for range 128 {
+		if !e.admitRedundantLocked([]byte("bounded"), time.Now()) {
+			t.Fatal("capacity exhausted too soon")
+		}
+	}
+	if e.admitRedundantLocked([]byte("overflow"), time.Now()) || e.sequence.Load() != 128 {
+		t.Fatal("configured replay packet budget was ignored")
+	}
+	l := e.links[c.Carriers[0].Name]
+	e.onAck(l, ackFrame(1, 1))
+	if !e.admitRedundantLocked([]byte("replacement"), time.Now()) || len(e.retained) != 128 {
+		t.Fatal("ACK did not release bounded admission")
+	}
+}
 
 func TestBackupLogDefersFreshCopyButSendsUnacknowledgedOrFailedPrimary(t *testing.T) {
 	c := config.Defaults()

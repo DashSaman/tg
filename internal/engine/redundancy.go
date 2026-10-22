@@ -9,6 +9,13 @@ import (
 
 const retainedCapacity = 8192
 
+func (e *Engine) retainedLimit() int {
+	if e.cfg.RetainedPackets == 0 {
+		return retainedCapacity
+	} // partial internal test fixtures
+	return e.cfg.RetainedPackets
+}
+
 type retainedPacket struct {
 	packet   []byte
 	lastSent time.Time
@@ -21,7 +28,7 @@ type retainedPacket struct {
 // Admission, numbering, ACK release and repair share e.mu. Application packets
 // stay immutable while retained or queued by any link.
 func (e *Engine) admitRedundantLocked(packet []byte, now time.Time) bool {
-	if len(packet) == 0 || len(packet) > e.cfg.MaxPacketBytes || len(e.retained) >= retainedCapacity {
+	if len(packet) == 0 || len(packet) > e.cfg.MaxPacketBytes || len(e.retained) >= e.retainedLimit() {
 		return false
 	}
 	if e.streamLog() {
@@ -38,7 +45,7 @@ func (e *Engine) admitRedundantLocked(packet []byte, now time.Time) bool {
 		return false
 	}
 	if e.retained == nil {
-		e.retained = make(map[uint64]*retainedPacket, retainedCapacity)
+		e.retained = make(map[uint64]*retainedPacket, min(retainedCapacity, e.retainedLimit()))
 	}
 	e.sequence.Store(id)
 	e.retained[id] = &retainedPacket{packet: packet, born: now, lastSent: now}

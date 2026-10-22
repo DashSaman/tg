@@ -15,6 +15,43 @@ func valid() Config {
 	return c
 }
 
+func TestCapacityWindowsAreBoundedBeforeUse(t *testing.T) {
+	for key, values := range map[string][]int{"retained_packets": {0, 127, 32769}, "stream_window_bytes": {-1, 1, (256 << 20) + 1}} {
+		for _, value := range values {
+			c := valid()
+			b, _ := json.Marshal(c)
+			var fields map[string]any
+			_ = json.Unmarshal(b, &fields)
+			fields[key] = value
+			b, _ = json.Marshal(fields)
+			_ = json.Unmarshal(b, &c)
+			if c.Validate() == nil {
+				t.Fatalf("invalid %s=%d capacity accepted", key, value)
+			}
+		}
+	}
+}
+
+func TestOrderedOutputBudgetFitsItsReorderWindow(t *testing.T) {
+	c := valid()
+	c.Redundant = true
+	c.OrderedOutput = true
+	c.RetainedPackets = 32768
+	if c.Validate() == nil {
+		t.Fatal("sender can exceed bounded ordered receiver capacity")
+	}
+	c.RetainedPackets = 16384
+	c.StreamWindowBytes = 256 << 20
+	if err := c.Validate(); err != nil {
+		t.Fatal(err)
+	}
+	c.OrderedOutput = false
+	c.RetainedPackets = 32768
+	if err := c.Validate(); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestValidateBoundsAndExposure(t *testing.T) {
 	for _, alter := range []func(*Config){
 		func(c *Config) { c.AppAddress = "0.0.0.0:31820" }, func(c *Config) { c.Metrics = "0.0.0.0:19090" },

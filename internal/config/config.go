@@ -30,28 +30,30 @@ type Carrier struct {
 	CostMS  int    `json:"cost_ms"`
 }
 type Config struct {
-	Role            string    `json:"role"`
-	SessionID       string    `json:"session_id"`
-	AppAddress      string    `json:"app_address"`
-	Metrics         string    `json:"metrics"`
-	TLS             TLS       `json:"tls"`
-	TokenFile       string    `json:"token_file"`
-	Carriers        []Carrier `json:"carriers"`
-	ProbeIntervalMS int       `json:"probe_interval_ms"`
-	ProbeTimeoutMS  int       `json:"probe_timeout_ms"`
-	HoldDownMS      int       `json:"hold_down_ms"`
-	AutoUpgrade     bool      `json:"auto_upgrade"`
-	Redundant       bool      `json:"redundant"`
-	OrderedOutput   bool      `json:"ordered_output"`
-	ReplicaDelayMS  int       `json:"replica_delay_ms"`
-	AppPacingMbps   int       `json:"app_pacing_mbps"`
-	AppUDPGRO       bool      `json:"app_udp_gro"`
-	QueueFrames     int       `json:"queue_frames"`
-	MaxPacketBytes  int       `json:"max_packet_bytes"`
+	Role              string    `json:"role"`
+	SessionID         string    `json:"session_id"`
+	AppAddress        string    `json:"app_address"`
+	Metrics           string    `json:"metrics"`
+	TLS               TLS       `json:"tls"`
+	TokenFile         string    `json:"token_file"`
+	Carriers          []Carrier `json:"carriers"`
+	ProbeIntervalMS   int       `json:"probe_interval_ms"`
+	ProbeTimeoutMS    int       `json:"probe_timeout_ms"`
+	HoldDownMS        int       `json:"hold_down_ms"`
+	AutoUpgrade       bool      `json:"auto_upgrade"`
+	Redundant         bool      `json:"redundant"`
+	OrderedOutput     bool      `json:"ordered_output"`
+	ReplicaDelayMS    int       `json:"replica_delay_ms"`
+	AppPacingMbps     int       `json:"app_pacing_mbps"`
+	AppUDPGRO         bool      `json:"app_udp_gro"`
+	RetainedPackets   int       `json:"retained_packets"`
+	StreamWindowBytes int       `json:"stream_window_bytes"`
+	QueueFrames       int       `json:"queue_frames"`
+	MaxPacketBytes    int       `json:"max_packet_bytes"`
 }
 
 func Defaults() Config {
-	return Config{AppAddress: "127.0.0.1:31820", Metrics: "127.0.0.1:19090", TLS: TLS{CA: "ca.crt", Cert: "edge.crt", Key: "edge.key", ServerName: "localhost", PeerName: "tg-edge"}, TokenFile: "web.token", ProbeIntervalMS: 1000, ProbeTimeoutMS: 4000, HoldDownMS: 5000, ReplicaDelayMS: 10, QueueFrames: 1024, MaxPacketBytes: 2048, Carriers: []Carrier{{Name: "web", Kind: "https", Address: "127.0.0.1:8443", Path: "/private-channel", CostMS: 20}, {Name: "udp", Kind: "quic-stream", Address: "127.0.0.1:8444"}}}
+	return Config{AppAddress: "127.0.0.1:31820", Metrics: "127.0.0.1:19090", TLS: TLS{CA: "ca.crt", Cert: "edge.crt", Key: "edge.key", ServerName: "localhost", PeerName: "tg-edge"}, TokenFile: "web.token", ProbeIntervalMS: 1000, ProbeTimeoutMS: 4000, HoldDownMS: 5000, ReplicaDelayMS: 10, QueueFrames: 1024, MaxPacketBytes: 2048, RetainedPackets: 8192, Carriers: []Carrier{{Name: "web", Kind: "https", Address: "127.0.0.1:8443", Path: "/private-channel", CostMS: 20}, {Name: "udp", Kind: "quic-stream", Address: "127.0.0.1:8444"}}}
 }
 
 func validAddress(address string, loopback bool) bool {
@@ -71,6 +73,12 @@ func validAddress(address string, loopback bool) bool {
 }
 
 func (c Config) Validate() error {
+	if c.RetainedPackets < 128 || c.RetainedPackets > 32768 || (c.OrderedOutput && c.RetainedPackets > 16384) {
+		return errors.New("retained packet budget must be 128..32768, at most 16384 with ordered output")
+	}
+	if c.StreamWindowBytes != 0 && (c.StreamWindowBytes < 1<<20 || c.StreamWindowBytes > 256<<20) {
+		return errors.New("stream window must be 0 (native defaults) or 1..256 MiB")
+	}
 	if c.AppPacingMbps < 0 || c.AppPacingMbps > 100000 {
 		return errors.New("application pacing must be 0 (disabled) or 1..100000 Mbps")
 	}

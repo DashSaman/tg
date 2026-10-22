@@ -37,12 +37,18 @@ func quicALPN(kind string, redundant bool) string {
 	return alpn
 }
 
-func quicModeConfig(p config.Carrier) *quic.Config {
+func quicModeConfig(p config.Carrier, c config.Config) *quic.Config {
 	cfg := quicConfig()
 	if p.Kind == "quic-stream" {
 		cfg.EnableDatagrams = false
 		cfg.MaxStreamReceiveWindow = 8 << 20
 		cfg.MaxConnectionReceiveWindow = 16 << 20
+		if c.StreamWindowBytes != 0 {
+			cfg.InitialStreamReceiveWindow = uint64(c.StreamWindowBytes)
+			cfg.MaxStreamReceiveWindow = uint64(c.StreamWindowBytes)
+			cfg.InitialConnectionReceiveWindow = uint64(2 * c.StreamWindowBytes)
+			cfg.MaxConnectionReceiveWindow = uint64(2 * c.StreamWindowBytes)
+		}
 	}
 	return cfg
 }
@@ -231,7 +237,7 @@ func listenQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 		return nil, nil, err
 	}
 	tc.NextProtos = []string{quicALPN(p.Kind, c.Redundant)}
-	l, err := quic.ListenAddr(p.Address, tc, quicModeConfig(p))
+	l, err := quic.ListenAddr(p.Address, tc, quicModeConfig(p, c))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -303,7 +309,7 @@ func dialQUIC(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	tc.MinVersion = tls.VersionTLS13
 	dialCtx, cancel := context.WithTimeout(ctx, 4*time.Second)
 	defer cancel()
-	conn, err := quic.DialAddr(dialCtx, p.Address, tc, quicModeConfig(p))
+	conn, err := quic.DialAddr(dialCtx, p.Address, tc, quicModeConfig(p, c))
 	if err != nil {
 		return nil, 0, err
 	}
