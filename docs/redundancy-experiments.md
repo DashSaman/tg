@@ -89,6 +89,16 @@ syscalls accounted for about 56.6%/52.6% of flat CPU samples. Mutex/block totals
 aggregate goroutines and are not wall-clock percentages or proof of one cause.
 Instrumentation results are not release speed or memory certification.
 
+The clean Linux UDP_SEGMENT runtime551e239 completed a600s unpaced kernel-WG
+comparison at the same400Mbps pre-encryption queue profile and500Mbps local
+UDP cap. Steady average381.441Mbps,min full1s218.324,three bad seconds: FAIL.
+The subsequent180s single-path cuts passed,min333.966Mbps,no bad seconds.
+Both peers had positive native GSO counters and zero offload fallbacks;
+120 loaded pings all returned,mean1.276ms,p952.75ms. Lab cleanup was empty.
+This is a scoped improvement, not full acceptance. The next control explicitly
+prefers HTTPS with QUIC still enabled as a deferred backup, keeping unpaced
+traffic and all speed gates unchanged. The harness verifies both actual costs.
+
 Retransmission sampling/backoff uses principles discussed in
 [RFC 6298](https://www.rfc-editor.org/rfc/rfc6298.html); TG is not a TCP
 implementation or a claim of that RFC's timer conformance. QUIC DATAGRAM remains

@@ -3,6 +3,13 @@ from run import fault_schedule,check_redundant_setup,check_qos_setup,check_qos_a
 
 
 class ScheduleTests(unittest.TestCase):
+    def test_preferred_carrier_costs_must_match_both_peers(self):
+        c={r:dict(redundant=True,carriers=[dict(kind='quic-stream',cost_ms=0),dict(kind='https',cost_ms=20)]) for r in ('edge','exit')}
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,preferred='https')
+        c['edge']['carriers'][0]['cost_ms']=20;c['edge']['carriers'][1]['cost_ms']=0
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,preferred='https')
+        c['exit']['carriers'][0]['cost_ms']=20;c['exit']['carriers'][1]['cost_ms']=0
+        check_redundant_setup(c,True,preferred='https')
     def test_requested_qos_cannot_be_missing_on_either_peer(self):
         report=dict(interface='wg-tg',requested_mbps=0,qdiscs=[],classes_text='')
         with self.assertRaises(ValueError):check_qos_setup(dict(edge=report,exit=report),400)

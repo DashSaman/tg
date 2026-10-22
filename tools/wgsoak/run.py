@@ -46,7 +46,7 @@ def fault_schedule(kind,seconds):
     return result[:last_clear]
 
 
-def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,pacing=0):
+def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,pacing=0,preferred='auto'):
     for role in ('edge','exit'):
         if bool(configuration[role].get('redundant',False))!=required:
             raise ValueError('requested redundancy differs from actual '+role+' configuration')
@@ -54,6 +54,11 @@ def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,p
             raise ValueError('requested output ordering differs from actual '+role+' configuration')
         if configuration[role].get('app_pacing_mbps',0)!=pacing:
             raise ValueError('requested application pacing differs from actual '+role+' configuration')
+        if preferred!='auto':
+            paths=configuration[role]['carriers']
+            favored=lambda p:p['kind']=='https' if preferred=='https' else p['kind'] in ('quic','quic-stream')
+            if not any(favored(p) for p in paths) or not any(not favored(p) for p in paths) or any(p.get('cost_ms')!=(0 if favored(p) else 20) for p in paths):
+                raise ValueError('requested preferred carrier differs from actual '+role+' configuration')
         if udp_mode!='auto':
             native=[p['kind'] for p in configuration[role]['carriers'] if p['kind'] in ('quic','quic-stream')]
             if not native or any(kind!=udp_mode for kind in native):
@@ -93,6 +98,7 @@ def main():
     parser.add_argument('--ordered-output',action='store_true',help='sequence barrier control; default preserves independent UDP delivery')
     parser.add_argument('--app-pacing-mbps',type=int,default=0,help='optional TG local UDP output cap; 0 disables; distinct from TCP offered rate')
     parser.add_argument('--wg-qos-mbps',type=int,default=0,help='optional private WG egress HTB/FQ-CoDel profile; 0 disables; never changes host interfaces')
+    parser.add_argument('--preferred-carrier',choices=['auto','udp','https'],default='auto',help='diagnostic deferred-copy preference; both carrier kinds remain enabled')
     parser.add_argument('--window',type=float,default=10,help='receiver rolling window in seconds; 1 is stricter than original acceptance')
     parser.add_argument('--fault-plan',choices=['mixed','single-path'],default='mixed')
     parser.add_argument('--extra-mixed-faults',action='store_true',help='also repeat mixed/all-path cuts after the main fault phase')
@@ -101,6 +107,7 @@ def main():
         raise ValueError('use >=30 steady seconds and >=90 fault seconds; only >=1800 qualifies as a soak')
     if args.ordered_output and not args.redundant:raise ValueError('ordered output requires redundancy')
     if not 0<=args.wg_qos_mbps<=100000:raise ValueError('WG QoS must be 0 or 1..100000 Mbps')
+    if args.preferred_carrier!='auto' and (args.carrier!='both' or not args.redundant):raise ValueError('explicit carrier preference requires both redundant carriers')
     out = args.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
     binary = args.binary.resolve()
@@ -124,6 +131,7 @@ def main():
                     ordered_output=args.ordered_output,
                     application_pacing_mbps=args.app_pacing_mbps,
                     wg_qos_mbps=args.wg_qos_mbps,
+                    preferred_carrier=args.preferred_carrier,
                     harness_sources={path.relative_to(tools.parent).as_posix():hashlib.sha256(path.read_bytes()).hexdigest() for path in (tools/'run.py',tools/'node.py',tools.parent/'qos.py')},
                     scope='two isolated network namespaces on one Linux Docker VM; kernel WireGuard and TG; no WAN or DPI')
     (out/'manifest.json').write_text(json.dumps(manifest, indent=2))
@@ -222,7 +230,7 @@ def main():
     try:
         docker('network', 'create', '--internal', '--label', 'tg.wgsoak='+prefix, network)
         docker('volume', 'create', '--label', 'tg.wgsoak='+prefix, volume)
-        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier, '1' if args.redundant else '0',args.udp_mode,'1' if args.ordered_output else '0',args.app_pacing_mbps)
+        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier, '1' if args.redundant else '0',args.udp_mode,'1' if args.ordered_output else '0',args.app_pacing_mbps,args.preferred_carrier)
         for role in ('exit', 'edge'):
             docker('run', '-d', '--name', names[role], '--network', network, '--cap-add', 'NET_ADMIN',
                    *(['-e', 'TG_DIAGNOSTIC_PROFILE=/out/'+role] if args.profile else []),
@@ -238,7 +246,7 @@ def main():
             raise RuntimeError('WireGuard handshake/connectivity failed; inspect node logs')
         manifest['versions'] = execute('edge', 'sh', '-c', 'uname -r; wg --version; iperf3 --version; ip -details link show wg-tg; ip route get 10.77.0.2')
         manifest['lab_configuration'] = json.loads((out/'lab-config-summary.json').read_text())
-        check_redundant_setup(manifest['lab_configuration'],args.redundant,args.udp_mode,args.ordered_output,args.app_pacing_mbps)
+        check_redundant_setup(manifest['lab_configuration'],args.redundant,args.udp_mode,args.ordered_output,args.app_pacing_mbps,args.preferred_carrier)
         if args.wg_qos_mbps:
             manifest['qos_configuration']={role:json.loads(execute(role,'python3','/qos.py','check','--interface','wg-tg','--mbps',args.wg_qos_mbps)) for role in names}
             check_qos_setup(manifest['qos_configuration'],args.wg_qos_mbps)

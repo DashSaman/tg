@@ -13,7 +13,7 @@ def command(*args, **kwargs):
     return subprocess.run(args, check=True, capture_output=True, text=True, **kwargs).stdout.strip()
 
 
-def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0', pacing='0'):
+def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0', pacing='0', preferred='auto'):
     os.umask(0o077)
     command('/tg', 'init', '--dir', '/private/pki', '--server-name', 'localhost', *(['--redundant'] if redundant=='1' else []))
     public = {}
@@ -34,11 +34,14 @@ def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordere
         elif carrier != 'both':
             config['carriers'] = [c for c in config['carriers'] if c['kind'] == carrier]
         for path in config['carriers']:
+            if preferred!='auto':
+                favored=path['kind']=='https' if preferred=='https' else path['kind'] in ('quic','quic-stream')
+                path['cost_ms']=0 if favored else 20
             port = 8443 if path['kind'] == 'https' else 8444
             path['address'] = f'{exit_name if role == "edge" else "0.0.0.0"}:{port}'
         p.write_text(json.dumps(config))
         public[role] = {k:config.get(k) for k in ('auto_upgrade','redundant','ordered_output','replica_delay_ms','app_pacing_mbps','queue_frames','max_packet_bytes','probe_interval_ms','probe_timeout_ms','hold_down_ms')}
-        public[role]['carriers'] = [{k:c[k] for k in ('name','kind')} for c in config['carriers']]
+        public[role]['carriers'] = [dict(name=c['name'],kind=c['kind'],cost_ms=c.get('cost_ms',0)) for c in config['carriers']]
         key = command('wg', 'genkey')
         Path('/private/'+role+'.key').write_text(key+'\n')
         Path('/private/'+role+'.pub').write_text(command('wg', 'pubkey', input=key)+'\n')
