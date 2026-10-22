@@ -23,6 +23,7 @@ type PathStatus struct {
 }
 type Snapshot struct {
 	StreamPackets     bool              `json:"stream_packets"`
+	TLSRecordBatch    bool              `json:"tls_record_batch"`
 	OrderedOutput     bool              `json:"ordered_output"`
 	Deferred          uint64            `json:"deferred_first_sends"`
 	SessionRTTMS      float64           `json:"session_ack_rtt_ms"`
@@ -115,6 +116,7 @@ func (e *Engine) Snapshot() Snapshot {
 	s.Acked = e.acked
 	s.Redundant = e.cfg.Redundant
 	s.StreamPackets = e.cfg.StreamPackets
+	s.TLSRecordBatch = e.cfg.TLSRecordBatch
 	s.OrderedOutput = e.cfg.OrderedOutput
 	s.ExtraCopies = c.extraCopies.Load()
 	s.ReplicaSkips = c.replicaSkips.Load()

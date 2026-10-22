@@ -57,3 +57,22 @@ WG and TG communicate over loopback; outer HTTPS/QUIC still use the ordinary
 network MTU. This is not a way to enlarge packets arriving from ordinary
 1500-byte IP clients, nor a claim that native60000-MTU WG works across the public
 Internet. Ordinary IP results must remain separate. No host MTU is changed by TG.
+
+`tls_record_batch:true` is a separate experimental, default-off HTTPS setting.
+It coalesces already encrypted TLS records into at most262496 bytes per TCP
+connection, allocated only on the first full-size record. Short/control records
+flush immediately. A full-record tail schedules a200-microsecond fallback;
+actual wake-up latency depends on the scheduler and is not a200us latency
+guarantee. TLS authentication, encryption and wire bytes are unchanged. QUIC
+does not use this wrapper. Either peer may enable it independently; for controlled
+lab comparisons `--tls-record-batch` verifies that both actual configs enabled it.
+Async flush errors close the underlying connection, remain sticky for later
+writes, and let ordinary carrier reconnection/replay recover. Closing interrupts
+a blocked flush; deadlines also apply before buffered acceptance.
+
+Early disposable prototypes had conflicting short results. A4-record prototype
+once received4.85Gbps over HTTPS alone, but a repeat ABBA did not reproduce it.
+The16-record/short-tail-merge variant used fewer CPU seconds per Gbit than the
+4-record variant in both repeated runs. Neither established8Gbps. Production
+flag-off/on capacity and loaded recovery measurements are still required; the
+prototype peak must never be labeled a released, stable or ordinary-IP capacity.

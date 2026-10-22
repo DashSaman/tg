@@ -48,6 +48,7 @@ func TestPacketModeRealTLSQUICNegotiationAndFullSizeRoundTrip(t *testing.T) {
 				edge, exit := fixture(t)
 				edge.Redundant = true
 				exit.Redundant = true
+				edge.TLSRecordBatch, exit.TLSRecordBatch = true, true
 				edge.MaxPacketBytes, exit.MaxPacketBytes = session.MaxStreamPacket, session.MaxStreamPacket
 				edge.RetainedPackets, exit.RetainedPackets = 2048, 2048
 				b, _ := json.Marshal(map[string]bool{"stream_packets": serverMode})

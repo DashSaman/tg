@@ -49,6 +49,7 @@ type Config struct {
 	RetainedPackets   int       `json:"retained_packets"`
 	StreamWindowBytes int       `json:"stream_window_bytes"`
 	StreamPackets     bool      `json:"stream_packets"`
+	TLSRecordBatch    bool      `json:"tls_record_batch"`
 	QueueFrames       int       `json:"queue_frames"`
 	MaxPacketBytes    int       `json:"max_packet_bytes"`
 }

@@ -3,6 +3,16 @@ from run import fault_schedule,check_redundant_setup,check_qos_setup,check_qos_a
 
 
 class ScheduleTests(unittest.TestCase):
+    def test_tls_record_batch_must_match_both_actual_peers(self):
+        import inspect
+        self.assertIn('tls_record_batch',inspect.signature(check_redundant_setup).parameters)
+        c={r:dict(redundant=True) for r in ('edge','exit')}
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,tls_record_batch=True)
+        c['edge']['tls_record_batch']=True
+        with self.assertRaises(ValueError):check_redundant_setup(c,True,tls_record_batch=True)
+        c['exit']['tls_record_batch']=True
+        check_redundant_setup(c,True,tls_record_batch=True)
+
     def test_complete_packet_mode_must_match_both_actual_peers(self):
         import inspect
         self.assertIn('stream_packets',inspect.signature(check_redundant_setup).parameters)

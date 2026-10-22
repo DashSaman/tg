@@ -136,6 +136,9 @@ func listenHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch ui
 	if err != nil {
 		return nil, nil, err
 	}
+	if c.TLSRecordBatch {
+		listener = recordBatchListener{listener}
+	}
 	local, cancel := context.WithCancel(ctx)
 	srv := &http.Server{TLSConfig: tc, HTTP2: httpWindowConfig(c), ReadHeaderTimeout: 3 * time.Second, MaxHeaderBytes: 8192, IdleTimeout: 10 * time.Second, ErrorLog: log.New(io.Discard, "", 0)}
 	srv.Handler = http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
@@ -195,6 +198,15 @@ func dialHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	local, cancel := context.WithCancel(ctx)
 	pr, pw := io.Pipe()
 	tr := &http.Transport{TLSClientConfig: tc, HTTP2: httpWindowConfig(c), ForceAttemptHTTP2: true, TLSHandshakeTimeout: 3 * time.Second, ResponseHeaderTimeout: 3 * time.Second, DisableCompression: true}
+	if c.TLSRecordBatch {
+		tr.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
+			conn, err := (&net.Dialer{}).DialContext(ctx, network, address)
+			if err != nil {
+				return nil, err
+			}
+			return newRecordBatchConn(conn, 200*time.Microsecond), nil
+		}
+	}
 	closeAll := func() {
 		cancel()
 		_ = pw.CloseWithError(context.Canceled)
