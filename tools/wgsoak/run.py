@@ -47,7 +47,7 @@ def fault_schedule(kind,seconds):
     return result[:last_clear]
 
 
-def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,pacing=0,preferred='auto',replica_delay=None,udp_gro=False,max_packet=None,retained_packets=None,stream_window=None,stream_packets=False,tls_record_batch=False):
+def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,pacing=0,preferred='auto',replica_delay=None,udp_gro=False,max_packet=None,retained_packets=None,stream_window=None,stream_packets=False,tls_record_batch=False,tcp_mode='auto'):
     for role in ('edge','exit'):
         if bool(configuration[role].get('tls_record_batch',False))!=tls_record_batch:
             raise ValueError('requested TLS record batching differs from actual '+role+' configuration')
@@ -71,13 +71,17 @@ def check_redundant_setup(configuration,required,udp_mode='auto',ordered=False,p
             raise ValueError('requested stream window differs from actual '+role+' configuration')
         if preferred!='auto':
             paths=configuration[role]['carriers']
-            favored=lambda p:p['kind']=='https' if preferred=='https' else p['kind'] in ('quic','quic-stream')
+            favored=lambda p:p['kind'] in ('https','https-connect') if preferred=='https' else p['kind'] in ('quic','quic-stream')
             if not any(favored(p) for p in paths) or not any(not favored(p) for p in paths) or any(p.get('cost_ms')!=(0 if favored(p) else 20) for p in paths):
                 raise ValueError('requested preferred carrier differs from actual '+role+' configuration')
         if udp_mode!='auto':
             native=[p['kind'] for p in configuration[role]['carriers'] if p['kind'] in ('quic','quic-stream')]
             if not native or any(kind!=udp_mode for kind in native):
                 raise ValueError('requested UDP mode differs from actual '+role+' configuration')
+        if tcp_mode!='auto':
+            native=[p['kind'] for p in configuration[role]['carriers'] if p['kind'] in ('https','https-connect')]
+            if not native or any(kind!=tcp_mode for kind in native):
+                raise ValueError('requested TCP mode differs from actual '+role+' configuration')
 
 def check_qos_setup(reports,required):
     if not required:return
@@ -130,6 +134,7 @@ def main():
     parser.add_argument('--gomaxprocs', type=int, default=0, help='diagnostic scheduler control; 0 keeps runtime default')
     parser.add_argument('--carrier', choices=['both', 'quic', 'quic-stream', 'https'], default='both')
     parser.add_argument('--udp-mode',choices=['auto','quic','quic-stream'],default='auto')
+    parser.add_argument('--tcp-mode',choices=['auto','https','https-connect'],default='auto',help='explicit TCP carrier; auto preserves the generated HTTPS2 default')
     parser.add_argument('--mtu', type=int, default=1280)
     parser.add_argument('--max-packet-bytes',type=int,default=2048,help='TG original packet budget; must include inner MTU plus WireGuard overhead')
     parser.add_argument('--retained-packets',type=int,default=8192,help='bounded sender log;128..131072 packets within256MiB payload budget')
@@ -183,6 +188,7 @@ def main():
                     queue_frames=args.queue_frames, block_size=args.block_size,
                     redundant=args.redundant, window_seconds=args.window, fault_plan=args.fault_plan, extra_mixed_faults=args.extra_mixed_faults,
                     requested_udp_mode=args.udp_mode,
+                    requested_tcp_mode=args.tcp_mode,
                     ordered_output=args.ordered_output,
                     application_pacing_mbps=args.app_pacing_mbps,
                     application_udp_gro=args.app_udp_gro, replica_delay_ms=args.replica_delay_ms,
@@ -286,7 +292,7 @@ def main():
     try:
         docker('network', 'create', '--internal', '--label', 'tg.wgsoak='+prefix, network)
         docker('volume', 'create', '--label', 'tg.wgsoak='+prefix, volume)
-        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier, '1' if args.redundant else '0',args.udp_mode,'1' if args.ordered_output else '0',args.app_pacing_mbps,args.preferred_carrier,args.replica_delay_ms,'1' if args.app_udp_gro else '0',args.max_packet_bytes,args.retained_packets,args.stream_window_bytes,'1' if args.stream_packets else '0','1' if args.tls_record_batch else '0')
+        docker('run', '--rm', *mounts, 'tg-wgsoak:local', 'python3', '/tools/node.py', 'init', names['exit'], args.queue_frames, args.carrier, '1' if args.redundant else '0',args.udp_mode,'1' if args.ordered_output else '0',args.app_pacing_mbps,args.preferred_carrier,args.replica_delay_ms,'1' if args.app_udp_gro else '0',args.max_packet_bytes,args.retained_packets,args.stream_window_bytes,'1' if args.stream_packets else '0','1' if args.tls_record_batch else '0',args.tcp_mode)
         for role in ('exit', 'edge'):
             docker('run', '-d', '--name', names[role], '--network', network, '--cap-add', 'NET_ADMIN',
                    *(['-e', 'TG_DIAGNOSTIC_PROFILE=/out/'+role] if args.profile else []),
@@ -306,7 +312,7 @@ def main():
         if any(mtu!=args.mtu for mtu in manifest['kernel_wg_mtu'].values()):
             raise ValueError('requested inner MTU differs from actual kernel WG interface')
         manifest['lab_configuration'] = json.loads((out/'lab-config-summary.json').read_text())
-        check_redundant_setup(manifest['lab_configuration'],args.redundant,args.udp_mode,args.ordered_output,args.app_pacing_mbps,args.preferred_carrier,args.replica_delay_ms,args.app_udp_gro,args.max_packet_bytes,args.retained_packets,args.stream_window_bytes,args.stream_packets,args.tls_record_batch)
+        check_redundant_setup(manifest['lab_configuration'],args.redundant,args.udp_mode,args.ordered_output,args.app_pacing_mbps,args.preferred_carrier,args.replica_delay_ms,args.app_udp_gro,args.max_packet_bytes,args.retained_packets,args.stream_window_bytes,args.stream_packets,args.tls_record_batch,args.tcp_mode)
         if args.wg_qos_mbps:
             manifest['qos_configuration']={role:json.loads(execute(role,'python3','/qos.py','check','--interface','wg-tg','--mbps',args.wg_qos_mbps)) for role in names}
             check_qos_setup(manifest['qos_configuration'],args.wg_qos_mbps)

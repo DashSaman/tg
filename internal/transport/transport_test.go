@@ -33,7 +33,7 @@ func fixture(t *testing.T) (config.Config, config.Config) {
 }
 
 func TestSecureCarriersAndAuthentication(t *testing.T) {
-	for _, kind := range []string{"https", "quic", "quic-stream"} {
+	for _, kind := range []string{"https", "https-connect", "quic", "quic-stream"} {
 		t.Run(kind, func(t *testing.T) {
 			edge, exit := fixture(t)
 			p := config.Carrier{Name: kind, Kind: kind, Address: "127.0.0.1:0", Path: "/private-path"}

@@ -14,6 +14,14 @@ def receiver(mbps):
 
 
 class CapacityTests(unittest.TestCase):
+    def test_requested_tcp_protocol_must_match_both_actual_peers(self):
+        paths=[dict(kind='https-connect',cost_ms=0),dict(kind='quic-stream',cost_ms=20)]
+        actual={role:dict(carriers=[dict(p) for p in paths]) for role in ('edge','exit')}
+        run.check_redundant_setup(actual,False,preferred='https',tcp_mode='https-connect')
+        actual['exit']['carriers'][0]['kind']='https'
+        with self.assertRaisesRegex(ValueError,'TCP mode'):
+            run.check_redundant_setup(actual,False,preferred='https',tcp_mode='https-connect')
+
     def test_large_packets_need_explicit_mode_and_keep_replay_byte_budget(self):
         run.check_packet_profile(60000,65507,True)
         ceiling=(256<<20)//65507

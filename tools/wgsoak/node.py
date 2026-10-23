@@ -13,7 +13,7 @@ def command(*args, **kwargs):
     return subprocess.run(args, check=True, capture_output=True, text=True, **kwargs).stdout.strip()
 
 
-def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0', pacing='0', preferred='auto',replica_delay='10',udp_gro='0',max_packet='2048',retained='8192',stream_window='0',stream_packets='0',tls_record_batch='0'):
+def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordered='0', pacing='0', preferred='auto',replica_delay='10',udp_gro='0',max_packet='2048',retained='8192',stream_window='0',stream_packets='0',tls_record_batch='0',tcp_mode='auto'):
     os.umask(0o077)
     command('/tg', 'init', '--dir', '/private/pki', '--server-name', 'localhost', *(['--redundant'] if redundant=='1' else []))
     public = {}
@@ -34,17 +34,22 @@ def initialize(exit_name, queue, carrier, redundant='0', udp_mode='auto', ordere
         if udp_mode!='auto':
             for path in config['carriers']:
                 if path['kind'] in ('quic','quic-stream'):path['kind']=udp_mode
+        if tcp_mode!='auto':
+            for path in config['carriers']:
+                if path['kind'] in ('https','https-connect'):path['kind']=tcp_mode
         if carrier in ('quic','quic-stream'):
             config['carriers'] = [c for c in config['carriers'] if c['kind'] in ('quic','quic-stream')]
             for c in config['carriers']:
                 c['kind'] = carrier
+        elif carrier == 'https':
+            config['carriers'] = [c for c in config['carriers'] if c['kind'] in ('https','https-connect')]
         elif carrier != 'both':
             config['carriers'] = [c for c in config['carriers'] if c['kind'] == carrier]
         for path in config['carriers']:
             if preferred!='auto':
-                favored=path['kind']=='https' if preferred=='https' else path['kind'] in ('quic','quic-stream')
+                favored=path['kind'] in ('https','https-connect') if preferred=='https' else path['kind'] in ('quic','quic-stream')
                 path['cost_ms']=0 if favored else 20
-            port = 8443 if path['kind'] == 'https' else 8444
+            port = 8443 if path['kind'] in ('https','https-connect') else 8444
             path['address'] = f'{exit_name if role == "edge" else "0.0.0.0"}:{port}'
         p.write_text(json.dumps(config))
         public[role] = {k:config.get(k) for k in ('auto_upgrade','redundant','ordered_output','replica_delay_ms','app_pacing_mbps','app_udp_gro','queue_frames','max_packet_bytes','probe_interval_ms','probe_timeout_ms','hold_down_ms')}
@@ -97,7 +102,7 @@ def run(role, mtu, qos='0'):
                     if key in ('Rss', 'Pss'):
                         status[key.lower()+'_kib'] = int(value.split()[0])
             fields = Path(f'/proc/{process.pid}/stat').read_text().rsplit(')', 1)[1].split()
-            row = dict(time=time.time(), pid=process.pid, start_ticks=int(fields[19]),
+            row = dict(time=time.time(), monotonic_seconds=time.monotonic(), pid=process.pid, start_ticks=int(fields[19]),
                        cpu_ticks=int(fields[11])+int(fields[12]), threads=int(fields[17]), **status)
             # Shared-VM totals include kernel workers and unrelated workloads;
             # never sum these duplicate host counters across the two roles.

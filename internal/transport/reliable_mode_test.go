@@ -8,7 +8,7 @@ import (
 )
 
 func TestReliableModeNegotiationAndMismatch(t *testing.T) {
-	for _, kind := range []string{"https", "quic-stream", "quic"} {
+	for _, kind := range []string{"https", "https-connect", "quic-stream", "quic"} {
 		for _, serverMode := range []bool{false, true} {
 			t.Run(kind+map[bool]string{false: "/legacy", true: "/repair"}[serverMode], func(t *testing.T) {
 				edge, exit := fixture(t)

@@ -42,7 +42,7 @@ func TestLargePacketBatchAllocatesActualBytesRatherThanMaximumFrameCount(t *test
 }
 
 func TestPacketModeRealTLSQUICNegotiationAndFullSizeRoundTrip(t *testing.T) {
-	for _, kind := range []string{"https", "quic-stream"} {
+	for _, kind := range []string{"https", "https-connect", "quic-stream"} {
 		for _, serverMode := range []bool{false, true} {
 			t.Run(kind+map[bool]string{false: "/legacy", true: "/packet"}[serverMode], func(t *testing.T) {
 				edge, exit := fixture(t)

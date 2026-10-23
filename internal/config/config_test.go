@@ -15,6 +15,28 @@ func valid() Config {
 	return c
 }
 
+func TestConnectIsReliableAndSharesTCPAddressBudget(t *testing.T) {
+	c := valid()
+	c.Redundant = true
+	c.StreamPackets = true
+	c.Carriers[0].Kind = "https-connect"
+	if err := c.Validate(); err != nil {
+		t.Fatal("authenticated CONNECT carrier rejected", err)
+	}
+	other := c.Carriers[0]
+	other.Name = "h2"
+	other.Kind = "https"
+	c.Carriers = append(c.Carriers, other)
+	if c.Validate() == nil {
+		t.Fatal("HTTPS2 and CONNECT can occupy the same TCP endpoint")
+	}
+	c.Carriers = c.Carriers[:2]
+	c.Carriers[0].Path = "/"
+	if c.Validate() == nil {
+		t.Fatal("CONNECT omitted private path guard")
+	}
+}
+
 func TestCompletePacketModeRequiresAcknowledgedReliableCarriers(t *testing.T) {
 	c := valid()
 	if err := json.Unmarshal([]byte(`{"stream_packets":true}`), &c); err != nil {

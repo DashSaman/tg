@@ -29,6 +29,13 @@ type Carrier struct {
 	Path    string `json:"path,omitempty"`
 	CostMS  int    `json:"cost_ms"`
 }
+
+// Reliable carriers own in-connection retransmission; the session log owns
+// replay across reconnects. DATAGRAM remains a separate experimental backend.
+func (p Carrier) Reliable() bool {
+	return p.Kind == "https" || p.Kind == "https-connect" || p.Kind == "quic-stream"
+}
+
 type Config struct {
 	Role              string    `json:"role"`
 	SessionID         string    `json:"session_id"`
@@ -80,7 +87,7 @@ func (c Config) Validate() error {
 			return errors.New("stream packets require acknowledged redundant mode")
 		}
 		for _, p := range c.Carriers {
-			if p.Kind != "https" && p.Kind != "quic-stream" {
+			if !p.Reliable() {
 				return errors.New("stream packets require reliable carriers")
 			}
 		}
@@ -142,8 +149,8 @@ func (c Config) Validate() error {
 			return errors.New("invalid or duplicate carrier name")
 		}
 		names[p.Name] = true
-		if p.Kind != "https" && p.Kind != "quic" && p.Kind != "quic-stream" {
-			return errors.New("carrier kind must be https, quic-stream or quic")
+		if !p.Reliable() && p.Kind != "quic" {
+			return errors.New("carrier kind must be https, https-connect, quic-stream or quic")
 		}
 		if !validAddress(p.Address, false) || p.CostMS < 0 || p.CostMS > 10000 {
 			return errors.New("invalid carrier address/cost")
@@ -152,15 +159,18 @@ func (c Config) Validate() error {
 		if network == "quic-stream" {
 			network = "quic"
 		}
+		if network == "https-connect" {
+			network = "https"
+		}
 		key := network + "/" + p.Address
 		if addresses[key] {
 			return errors.New("duplicate carrier endpoint")
 		}
 		addresses[key] = true
-		if p.Kind == "https" {
+		if p.Kind == "https" || p.Kind == "https-connect" {
 			u, e := url.ParseRequestURI(p.Path)
 			if e != nil || u.Path != p.Path || len(p.Path) < 2 || !strings.HasPrefix(p.Path, "/") || c.TokenFile == "" {
-				return errors.New("HTTPS needs a private path and token_file")
+				return errors.New("HTTPS carriers need a private path and token_file")
 			}
 		}
 	}

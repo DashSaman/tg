@@ -223,6 +223,10 @@ func (l *link) transmit() {
 	}
 }
 func (l *link) receive() {
+	if receiver, ok := l.wire.(transport.BatchReceiver); ok && l.engine.cfg.StreamPackets && l.carrier.Kind == "https-connect" {
+		l.receiveBatches(receiver)
+		return
+	}
 	decode := session.Decode
 	if l.engine.cfg.StreamPackets {
 		decode = session.DecodePacketStream
@@ -238,40 +242,47 @@ func (l *link) receive() {
 			l.engine.counters.malformed.Add(1)
 			return
 		}
-		switch f.Kind {
-		case session.Data, session.Packet:
-			l.engine.onData(l, f)
-		case session.Ack:
-			if !l.engine.cfg.Redundant {
-				l.engine.counters.malformed.Add(1)
-				return
-			}
-			l.engine.onAck(l, f)
-		case session.Probe:
-			if !l.sendControl(session.Frame{Kind: session.Pong, ID: f.ID}) {
-				return
-			}
-		case session.Pong:
-			l.mu.Lock()
-			if sent, ok := l.pending[f.ID]; ok {
-				sample := time.Since(sent)
-				if l.lastPong.IsZero() {
-					l.rtt = sample
-				} else {
-					delta := sample - l.rtt
-					if delta < 0 {
-						delta = -delta
-					}
-					l.jitter = (l.jitter*7 + delta) / 8
-					l.rtt = (l.rtt*7 + sample) / 8
-				}
-				l.lastPong = time.Now()
-				l.engine.notifyAdmission()
-				delete(l.pending, f.ID)
-			}
-			l.mu.Unlock()
+		if !l.handleFrame(f) {
+			return
 		}
 	}
+}
+
+func (l *link) handleFrame(f session.Frame) bool {
+	switch f.Kind {
+	case session.Data, session.Packet:
+		l.engine.onData(l, f)
+	case session.Ack:
+		if !l.engine.cfg.Redundant {
+			l.engine.counters.malformed.Add(1)
+			return false
+		}
+		l.engine.onAck(l, f)
+	case session.Probe:
+		if !l.sendControl(session.Frame{Kind: session.Pong, ID: f.ID}) {
+			return false
+		}
+	case session.Pong:
+		l.mu.Lock()
+		if sent, ok := l.pending[f.ID]; ok {
+			sample := time.Since(sent)
+			if l.lastPong.IsZero() {
+				l.rtt = sample
+			} else {
+				delta := sample - l.rtt
+				if delta < 0 {
+					delta = -delta
+				}
+				l.jitter = (l.jitter*7 + delta) / 8
+				l.rtt = (l.rtt*7 + sample) / 8
+			}
+			l.lastPong = time.Now()
+			l.engine.notifyAdmission()
+			delete(l.pending, f.ID)
+		}
+		l.mu.Unlock()
+	}
+	return true
 }
 func (l *link) probe() {
 	ticker := time.NewTicker(l.engine.cfg.Interval())

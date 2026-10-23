@@ -198,6 +198,10 @@ func dialHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 	local, cancel := context.WithCancel(ctx)
 	pr, pw := io.Pipe()
 	tr := &http.Transport{TLSClientConfig: tc, HTTP2: httpWindowConfig(c), ForceAttemptHTTP2: true, TLSHandshakeTimeout: 3 * time.Second, ResponseHeaderTimeout: 3 * time.Second, DisableCompression: true}
+	// This carrier requires H2. Do not start an unbounded streaming HTTP/1
+	// request against a wrong endpoint before discovering a protocol mismatch.
+	tr.Protocols = new(http.Protocols)
+	tr.Protocols.SetHTTP2(true)
 	if c.TLSRecordBatch {
 		tr.DialContext = func(ctx context.Context, network, address string) (net.Conn, error) {
 			conn, err := (&net.Dialer{}).DialContext(ctx, network, address)
@@ -207,12 +211,19 @@ func dialHTTP(ctx context.Context, c config.Config, p config.Carrier, epoch uint
 			return newRecordBatchConn(conn, 200*time.Microsecond), nil
 		}
 	}
+	var closeOnce sync.Once
 	closeAll := func() {
-		cancel()
-		_ = pw.CloseWithError(context.Canceled)
-		_ = pr.CloseWithError(context.Canceled)
-		tr.CloseIdleConnections()
+		closeOnce.Do(func() {
+			cancel()
+			_ = pw.CloseWithError(context.Canceled)
+			_ = pr.CloseWithError(context.Canceled)
+			tr.CloseIdleConnections()
+		})
 	}
+	// HTTP/1 fallback/error handling may wait for its request writer to finish.
+	// Cancellation alone cannot interrupt that writer's empty io.Pipe read.
+	// Close both ends even while Client.Do has not returned a Wire yet.
+	context.AfterFunc(local, closeAll)
 	req, err := http.NewRequestWithContext(local, "POST", "https://"+p.Address+p.Path, pr)
 	if err != nil {
 		closeAll()

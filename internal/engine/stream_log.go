@@ -17,7 +17,7 @@ func (e *Engine) streamLog() bool {
 		return false
 	}
 	for _, c := range e.cfg.Carriers {
-		if c.Kind != "quic-stream" && c.Kind != "https" {
+		if !c.Reliable() {
 			return false
 		}
 	}
