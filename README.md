@@ -1,6 +1,8 @@
 # TG
 
-The [new packet/TLS measurements](docs/stream-packets-validation.md) show **19.80% lower TG CPU per Gbit** in a proxy/HTTPS comparison. A fresh 30-minute ordinary-IP run offered 1 Gbps: receiver mean **1000.00 Mbps**, minimum full 1 s **457.71 Mbps**. Original 300 Mbps milestone: **PASS**; 800 Mbps floor: **FAIL**. **8 Gbps and 10 Gbps remain unachieved.**
+The [latest CONNECT measurements](docs/connect-validation.md) reached **8.76 Gbps summed mean in a 90 s two-group proxy test**; its speed floors and latency gates failed. A full 30-minute run received **7735.35 Mbps aggregate mean**; combined acceptance: **FAIL**. **Stable 8 Gbps and final 10 Gbps remain required goals.**
+
+The [earlier d44 packet/TLS measurements](docs/stream-packets-validation.md) show **19.80% lower TG CPU per Gbit** in a proxy/HTTPS comparison. A fresh 30-minute ordinary-IP run offered 1 Gbps: receiver mean **1000.00 Mbps**, minimum full 1 s **457.71 Mbps**. Original 300 Mbps milestone: **PASS**; 800 Mbps floor: **FAIL**. **The stable 8 Gbps and final 10 Gbps acceptance gates remained unmet in that earlier stage.**
 
 Personal Iran-to-overseas tunnel with an original bounded session layer over
 authenticated reliable QUIC and full-duplex HTTPS/2 carriers.

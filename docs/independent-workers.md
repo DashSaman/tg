@@ -1,5 +1,7 @@
 # Independent sessions for aggregate capacity
 
+The [latest CONNECT group measurements](connect-validation.md) include a short 8.76 Gbps summed mean and a separate full 30-minute run; consult their exact scope and failed gates before choosing a worker count.
+
 The required goal is 10 Gbps aggregate with low CPU. It remains unverified.
 Do not equate worker count, configured rate, or a larger receive window with
 delivered goodput. The single-VM two-session tests did not achieve this goal.
