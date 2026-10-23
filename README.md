@@ -1,6 +1,8 @@
 # TG
 
-The [latest CONNECT measurements](docs/connect-validation.md) reached **8.76 Gbps summed mean in a 90 s two-group proxy test**; its speed floors and latency gates failed. A full 30-minute run received **7735.35 Mbps aggregate mean**; combined acceptance: **FAIL**. **Stable 8 Gbps and final 10 Gbps remain required goals.**
+Current near-term target: **about 1 Gbps aggregate with low gaming latency and bounded resources**. The [latest ordinary-IP validation](docs/one-gig-validation.md) received 1050.00 Mbps on average over 30 minutes, with a minimum complete second of 298.34 Mbps. UDP RTT p95 was 31.02 ms, adjacent RTT variation p95 was 13.39 ms, and loss was 0.0767%. **Full local acceptance: FAIL; daemon memory gates: PASS.** The runtime is unchanged; real Iran-path testing remains pending.
+
+The [earlier CONNECT measurements](docs/connect-validation.md) reached **8.76 Gbps summed mean in a 90 s two-group proxy test**; its speed floors and latency gates failed. A full 30-minute run received **7735.35 Mbps aggregate mean**; combined acceptance: **FAIL**. The stable 8/10 Gbps targets were unmet in that stage.
 
 The [earlier d44 packet/TLS measurements](docs/stream-packets-validation.md) show **19.80% lower TG CPU per Gbit** in a proxy/HTTPS comparison. A fresh 30-minute ordinary-IP run offered 1 Gbps: receiver mean **1000.00 Mbps**, minimum full 1 s **457.71 Mbps**. Original 300 Mbps milestone: **PASS**; 800 Mbps floor: **FAIL**. **The stable 8 Gbps and final 10 Gbps acceptance gates remained unmet in that earlier stage.**
 
@@ -8,7 +10,7 @@ Personal Iran-to-overseas tunnel with an original bounded session layer over
 authenticated reliable QUIC and full-duplex HTTPS/2 carriers.
 
 **Status: v0.1 development prototype, locally tested. Real Iran-path performance
-and censorship resistance are unverified.** Initial acceptance target: **300 Mbps
+and censorship resistance are unverified.** Original acceptance milestone: **300 Mbps
 aggregate receiver goodput**. **10 Gbps aggregate remains a required, unachieved
 goal**, with separate profiling and capacity validation still needed.
 See [actual capacity probes and remaining work](docs/capacity-10g.md).
