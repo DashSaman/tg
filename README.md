@@ -1,5 +1,7 @@
 # TG
 
+[فارسی: معرفی مدیریتی و فنی](README-fa.md) · [نصب روی ایران و خارج، Xray و X-UI](docs/deployment-fa.md)
+
 Current near-term target: **about 1 Gbps aggregate with low gaming latency and bounded resources**. The [latest ordinary-IP validation](docs/one-gig-validation.md) received 1050.00 Mbps on average over 30 minutes, with a minimum complete second of 298.34 Mbps. UDP RTT p95 was 31.02 ms, adjacent RTT variation p95 was 13.39 ms, and loss was 0.0767%. **Full local acceptance: FAIL; daemon memory gates: PASS.** The runtime is unchanged; real Iran-path testing remains pending.
 
 The [earlier CONNECT measurements](docs/connect-validation.md) reached **8.76 Gbps summed mean in a 90 s two-group proxy test**; its speed floors and latency gates failed. A full 30-minute run received **7735.35 Mbps aggregate mean**; combined acceptance: **FAIL**. The stable 8/10 Gbps targets were unmet in that stage.
