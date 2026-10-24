@@ -1,0 +1,3768 @@
+{
+  "published_utc": "2026-10-22T23:40:32.353743+00:00",
+  "runtime_commit": "d44c4836c84a13e79735e8c3594f074b57c3876f",
+  "confirmed_next_goal_mbps": 8000,
+  "final_goal_mbps": 10000,
+  "goal_8000_achieved": false,
+  "goal_10000_achieved": false,
+  "units": "1GB/s=8Gbps, decimal aggregate receiver application goodput. 300Mbps is only the original milestone.",
+  "environment": "Shared12-logical-CPU WSL2 Linux Docker VM, Go1.26.10, iperf3.12, GOMAXPROCS4 per TG daemon. No physical-host, WAN, Iran filtering or DPI acceptance.",
+  "production_same_binary_tls_comparison": {
+    "off": {
+      "Mbps_mean": 1707.6691722278215,
+      "pooled_cpu_s_per_Gbit": 1.8928077357244253
+    },
+    "on": {
+      "Mbps_mean": 2320.5182522699483,
+      "pooled_cpu_s_per_Gbit": 1.5179607205209809
+    },
+    "CPU_reduction_percent": 19.803755454326744,
+    "speed_change_percent": 35.88804494506424
+  },
+  "capacity_groups": {
+    "tg-stream-packets-comparison": {
+      "cases": {
+        "legacy-ip": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 60.039014,
+            "received_mbps": 1296.1775288315027,
+            "minimum_window_mbps": 490.0846000541992,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 490.0846000541959,
+            "complete_one_second_intervals": 60,
+            "complete_one_second_below_target": 60,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "stream_packets": false,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792705495.5713782,
+            "end": 1792705535.9026933,
+            "seconds": 40.33131504058838,
+            "receiver_gbit": 49.56678808055655
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 74.88112377937972,
+              "average_cores": 1.85664969525594,
+              "cpu_seconds_per_gbit": 1.5107116413853972,
+              "rss_median_mib": 50.12890625,
+              "rss_peak_mib": 52.65234375,
+              "extra_copies": 2931302,
+              "frame_sent_bytes": 10608245908,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8117
+            },
+            "exit": {
+              "cpu_seconds": 77.51176584545969,
+              "average_cores": 1.921875489739273,
+              "cpu_seconds_per_gbit": 1.5637843170206354,
+              "rss_median_mib": 28.76171875,
+              "rss_peak_mib": 30.97265625,
+              "extra_copies": 10639,
+              "frame_sent_bytes": 46255912,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 58
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 3.074495958406033,
+          "tg_average_cores": 3.778525184995213,
+          "shared_vm_average_busy_cores": 8.741927370430577,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-stream-packets-comparison/legacy-ip",
+          "capacity_analysis_sha256": "150482f34741cc710677f9f4c9ee17d9819b3c49c813e47b4d6cef5e50cc8629",
+          "raw_sha256": {
+            "both-probe-client.json": "adef0e09b4d61938026dbac8d6791f4a388bef5f61a5cb231f6e93216284cde5",
+            "both-probe-server.json": "a625444a40d4e0fa7d42ec9f986e813bf107fa68aefcc2fdab32035cfb64b6a0",
+            "edge-monitor.jsonl": "7278a40a6d17c8f5e00203f1a36f793bf1b7c5b1b3844260f30dcb87ae6eae4b",
+            "exit-monitor.jsonl": "16743bb5c9e92587f3147366425622ca817233b24977a1a0ef86687c868e4352",
+            "manifest.json": "c0a1aeccd7934d8476e6aa50e35116c2e06128f15931bea3ba379c3cd7602b59"
+          }
+        },
+        "packet-ip": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 60.051589,
+            "received_mbps": 1607.0315861250565,
+            "minimum_window_mbps": 1229.4587432543622,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1229.4587432543624,
+            "complete_one_second_intervals": 60,
+            "complete_one_second_below_target": 60,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792705569.3797238,
+            "end": 1792705609.1324675,
+            "seconds": 39.7527437210083,
+            "receiver_gbit": 64.05380401784005
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 87.37092560544846,
+              "average_cores": 2.1978590010951917,
+              "cpu_seconds_per_gbit": 1.3640239942832155,
+              "rss_median_mib": 62.1171875,
+              "rss_peak_mib": 64.2890625,
+              "extra_copies": 3745129,
+              "frame_sent_bytes": 13464183692,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8192
+            },
+            "exit": {
+              "cpu_seconds": 90.2086943739573,
+              "average_cores": 2.269244483023805,
+              "cpu_seconds_per_gbit": 1.4083268863912075,
+              "rss_median_mib": 37.6796875,
+              "rss_peak_mib": 38.89453125,
+              "extra_copies": 763,
+              "frame_sent_bytes": 58844064,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 55
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.7723508806744235,
+          "tg_average_cores": 4.467103484118997,
+          "shared_vm_average_busy_cores": 8.178560604949954,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-stream-packets-comparison/packet-ip",
+          "capacity_analysis_sha256": "5685f601572818915fc4fcfa0c094f4747b6eb8e09e31971aeae8aa189b273c2",
+          "raw_sha256": {
+            "both-probe-client.json": "ea208dccfce211da117d37d1af9e3a72172897e18e21b4259e6dd734cbe04fe8",
+            "both-probe-server.json": "33a56441b4fe76cd97163ae460ed26883e95df9a60b7100e0a0e99698297ae4b",
+            "edge-monitor.jsonl": "b0cb6224dd109cb828ddb9021b6df8e0e3cf30c4ea29ecc997f203cf5ba39395",
+            "exit-monitor.jsonl": "96c8e84f692b455d9973ecd55e0e305779744970a0b9e3c27f31c0ad212b3cf4",
+            "manifest.json": "5d0886c835028e116756fe6ef7a4559c4d45cfcc87da781c245d1e60eab0107c"
+          }
+        },
+        "packet-proxy": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 60.06712,
+            "received_mbps": 2313.407941249722,
+            "minimum_window_mbps": 1224.6104492608033,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1223.2665028414697,
+            "complete_one_second_intervals": 60,
+            "complete_one_second_below_target": 60,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792705642.601864,
+            "end": 1792705682.3768198,
+            "seconds": 39.77495574951172,
+            "receiver_gbit": 86.39812653448801
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 100.97576401928156,
+              "average_cores": 2.5386769668630276,
+              "cpu_seconds_per_gbit": 1.1687263146727436,
+              "rss_median_mib": 88.626953125,
+              "rss_peak_mib": 89.8828125,
+              "extra_copies": 818640,
+              "frame_sent_bytes": 15377136456,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3103
+            },
+            "exit": {
+              "cpu_seconds": 99.52626775471377,
+              "average_cores": 2.502234531233528,
+              "cpu_seconds_per_gbit": 1.1519493737515862,
+              "rss_median_mib": 36.255859375,
+              "rss_peak_mib": 36.71875,
+              "extra_copies": 10034,
+              "frame_sent_bytes": 33919200,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 58
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.3206756884243296,
+          "tg_average_cores": 5.0409114980965555,
+          "shared_vm_average_busy_cores": 7.487314494527047,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-stream-packets-comparison/packet-proxy",
+          "capacity_analysis_sha256": "0f48da27254a7a5e449c7ed181cabc60385b713182bf4a06bd2902c5e83bb502",
+          "raw_sha256": {
+            "both-probe-client.json": "2cb8cd8400f8703f499e6deb21018fdb6b6b4720b22925f4edaaeb710e4097f5",
+            "both-probe-server.json": "fc5950280725f45dcdcef7edbac7ce745309dadbac0f3d6948645112c4b16d13",
+            "edge-monitor.jsonl": "1ce5ba95cca2e36f019158a53cdff7f2f99aa9267bdef4111ef8c1be119b5daa",
+            "exit-monitor.jsonl": "a94d843a871b91293a1b8457aabd518ac63ee929e3a04f10f328318ca881d739",
+            "manifest.json": "7bb98b1d45bc43a53c483f1fa6edde6ab614d7020e8e05b9b98408a868dad0ef"
+          }
+        },
+        "legacy-proxy": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 60.053433,
+            "received_mbps": 2699.1245783400927,
+            "minimum_window_mbps": 1957.9587292289123,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1957.9587292289161,
+            "complete_one_second_intervals": 60,
+            "complete_one_second_below_target": 60,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "stream_packets": false,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792705716.206785,
+            "end": 1792705755.8589592,
+            "seconds": 39.65217423439026,
+            "receiver_gbit": 108.07475231806174
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 102.58430097869946,
+              "average_cores": 2.5871040607334033,
+              "cpu_seconds_per_gbit": 0.949197650500239,
+              "rss_median_mib": 76.083984375,
+              "rss_peak_mib": 76.91015625,
+              "extra_copies": 966286,
+              "frame_sent_bytes": 19596191224,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3094
+            },
+            "exit": {
+              "cpu_seconds": 104.90694511441241,
+              "average_cores": 2.645679515435671,
+              "cpu_seconds_per_gbit": 0.9706887396389626,
+              "rss_median_mib": 27.298828125,
+              "rss_peak_mib": 27.609375,
+              "extra_copies": 46,
+              "frame_sent_bytes": 39455744,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 27
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.9198863901392016,
+          "tg_average_cores": 5.232783576169074,
+          "shared_vm_average_busy_cores": 7.809787851273527,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-stream-packets-comparison/legacy-proxy",
+          "capacity_analysis_sha256": "98d4c497493ab1e2e33cc040d2aef9d63bdac139f3b2c7f237b99c93bbca5cff",
+          "raw_sha256": {
+            "both-probe-client.json": "0c199fadbf5de64bb4aa7fd546a00505f6e45484afab485753e5ac0155054edd",
+            "both-probe-server.json": "88a3e1cd56aa055387773d837f2e767ae83951944397b5a4cffc39e65498d7e4",
+            "edge-monitor.jsonl": "a28d5e36af95dd8c5013d2d0126ea78e0d924f9577de1811631c4df391ae0607",
+            "exit-monitor.jsonl": "a30815a4aab2cd0eaca4bf0961f44ae84f65e6bb13216e1a2f72fb6dd5d32145",
+            "manifest.json": "c654e9019aaead0f57eba25eeaff9028c5ed3f5243780b846e4deffeca4f5408"
+          }
+        }
+      },
+      "plan_sha256": "cedcecd9e95c8eb8cc11b33721ce30dde10961bbf76670c8a1034b66e4b58693",
+      "prototype_only": false
+    },
+    "tg-packet-tuning": {
+      "cases": {
+        "proxy-window16m": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.120047,
+            "received_mbps": 2180.1921162005883,
+            "minimum_window_mbps": 973.5188855604554,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 973.5153814614462,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 16777216,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792705798.9633121,
+            "end": 1792705824.161165,
+            "seconds": 25.197852849960327,
+            "receiver_gbit": 57.12890049329934
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 60.65140061625507,
+              "average_cores": 2.407006699237493,
+              "cpu_seconds_per_gbit": 1.0616588117842192,
+              "rss_median_mib": 89.5625,
+              "rss_peak_mib": 91.5234375,
+              "extra_copies": 507410,
+              "frame_sent_bytes": 9858739032,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3125
+            },
+            "exit": {
+              "cpu_seconds": 59.842919551448105,
+              "average_cores": 2.374921383491702,
+              "cpu_seconds_per_gbit": 1.0475069366767717,
+              "rss_median_mib": 36.765625,
+              "rss_peak_mib": 47.171875,
+              "extra_copies": 6187,
+              "frame_sent_bytes": 19973288,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 42
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.109165748460991,
+          "tg_average_cores": 4.781928082729195,
+          "shared_vm_average_busy_cores": 7.6455487627927905,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-tuning/proxy-window16m",
+          "capacity_analysis_sha256": "e22b973a5dfe975b3b5205e240d5a2cd0036b88974281b1a3227793e2a25f6e9",
+          "raw_sha256": {
+            "both-probe-client.json": "9fb41ec180a2096517b526447bf6c71a272fc89def257f66e7c5df53b0987c40",
+            "both-probe-server.json": "3d1714b89f7857d3846fde713d366c248c2277d1df4be4596279852de6fbeaa3",
+            "edge-monitor.jsonl": "a2102fbb4ed3e3b17484f38677ff45143ce753e65c8c78cce28d36515e8c5b27",
+            "exit-monitor.jsonl": "f4b9b4b68591b822efff2131e68e6394c5925b0b629b9b632281929608b51e33",
+            "manifest.json": "5d2ae01725c3f9021847d4995bd402ea71d778e0cde89d5bdbba12763c16c1fe"
+          }
+        },
+        "proxy-delay50": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.055274,
+            "received_mbps": 2277.2409828869313,
+            "minimum_window_mbps": 1571.2283271355393,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1571.2283271355393,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 50,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792705858.9097059,
+            "end": 1792705882.9318473,
+            "seconds": 24.022141456604004,
+            "receiver_gbit": 51.56000183658531
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 63.77684381512787,
+              "average_cores": 2.654919168232388,
+              "cpu_seconds_per_gbit": 1.2369441726798753,
+              "rss_median_mib": 88.9296875,
+              "rss_peak_mib": 89.87109375,
+              "extra_copies": 461488,
+              "frame_sent_bytes": 8707546968,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3118
+            },
+            "exit": {
+              "cpu_seconds": 62.73833686793353,
+              "average_cores": 2.611687928874715,
+              "cpu_seconds_per_gbit": 1.216802456035144,
+              "rss_median_mib": 38.203125,
+              "rss_peak_mib": 38.54296875,
+              "extra_copies": 0,
+              "frame_sent_bytes": 18932536,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 40
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.4537466287150194,
+          "tg_average_cores": 5.266607097107102,
+          "shared_vm_average_busy_cores": 7.752043210811338,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-tuning/proxy-delay50",
+          "capacity_analysis_sha256": "8865daf79eb50e02ebbb48023d0f178b596643d2e77a53ed0c108e2dd4c94041",
+          "raw_sha256": {
+            "both-probe-client.json": "5e9b2e772efc27ab465967997ec00b73ad793564e1069afab8810465e68b3e05",
+            "both-probe-server.json": "b35e4a7244acb4ad2b314978645ff4d4dfd54db8d64f82f1290b8aa5e8b22fc9",
+            "edge-monitor.jsonl": "89f4d901d93759ab76198eb59ffcaad6706e778988cd7ed28b87bbb8fabc384d",
+            "exit-monitor.jsonl": "1b5413ed5350ad1b14cfb9b01d0ef7f6df249f42de6f79b75a3974b9dd0b3145",
+            "manifest.json": "1574b35f4b6a3f253610b60be2ae48de08c033bd75c60cdf2dd670bfdc373963"
+          }
+        },
+        "proxy-https-filtered": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.116992,
+            "received_mbps": 1485.060916117812,
+            "minimum_window_mbps": 1294.2977457022544,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1294.2977457022541,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792706007.0823052,
+            "end": 1792706031.7310815,
+            "seconds": 24.648776292800903,
+            "receiver_gbit": 37.178418128791016
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 41.183652659996135,
+              "average_cores": 1.6708193612039282,
+              "cpu_seconds_per_gbit": 1.1077300953830378,
+              "rss_median_mib": 78.11328125,
+              "rss_peak_mib": 78.9453125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 3825405192,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3108
+            },
+            "exit": {
+              "cpu_seconds": 47.22775837932448,
+              "average_cores": 1.9160285207796768,
+              "cpu_seconds_per_gbit": 1.2703003719986472,
+              "rss_median_mib": 26.85546875,
+              "rss_peak_mib": 27.64453125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 19055920,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 79
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.378030467381685,
+          "tg_average_cores": 3.586847881983605,
+          "shared_vm_average_busy_cores": 5.519339412448368,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-tuning/proxy-https-filtered",
+          "capacity_analysis_sha256": "d12bcdad2d99d51d9f526ce8520aaf8daf682747426f65b74212ebef8cfb722f",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "20af99f2cfae40e2e4c46adf6010f63bd29e210147c410b3917f37b65acb9a04",
+            "exit-monitor.jsonl": "fdb54a29b3bf6421216906e2dae5427511669c8370967f947faa9c8d54f331ac",
+            "https-probe-client.json": "afa19f67e752b0ce305563d9ffe446b668d2c7cbac2eb7eb96a3554e952376c7",
+            "https-probe-server.json": "90eedd96121c1729c6f099a89adfbc2d6b6b97d7ec0686b3f479e6b8592bbf29",
+            "manifest.json": "437cefda2287c037f0215d3d42d6ecd21ddfbdd38a818ea98c97d626df54c893"
+          }
+        },
+        "proxy-window16m-delay50": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.072396,
+            "received_mbps": 2644.466515958016,
+            "minimum_window_mbps": 1570.2753403933436,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1570.2753403933436,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 16777216,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 50,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792706066.5554316,
+            "end": 1792706091.2082937,
+            "seconds": 24.652862071990967,
+            "receiver_gbit": 66.75630929719232
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 64.30181275692337,
+              "average_cores": 2.6082899652441998,
+              "cpu_seconds_per_gbit": 0.9632319916108337,
+              "rss_median_mib": 89.80078125,
+              "rss_peak_mib": 90.52734375,
+              "extra_copies": 551890,
+              "frame_sent_bytes": 10952550232,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3074
+            },
+            "exit": {
+              "cpu_seconds": 63.51414435474252,
+              "average_cores": 2.5763395815572787,
+              "cpu_seconds_per_gbit": 0.9514328311947863,
+              "rss_median_mib": 37.95703125,
+              "rss_peak_mib": 39.296875,
+              "extra_copies": 0,
+              "frame_sent_bytes": 22274984,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 51
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.9146648228056198,
+          "tg_average_cores": 5.184629546801478,
+          "shared_vm_average_busy_cores": 7.692722606845919,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-tuning/proxy-window16m-delay50",
+          "capacity_analysis_sha256": "851b4310096207dec96a9863f7040b60313da02286d9ed3a73aa5322b8f1f540",
+          "raw_sha256": {
+            "both-probe-client.json": "d5fd9eb1decaa5a0be4c32e2fa19139ed3724be67e0dcdd82864b0d8d37cdd6d",
+            "both-probe-server.json": "24b78de6749c50c8e9b539e51da0118e38feaa660bd804ec702769f3995ed20d",
+            "edge-monitor.jsonl": "12b768cbd2eceaa0c232b32dd4dff43e01ac027ddc15a5595d3e6d99a090bd4b",
+            "exit-monitor.jsonl": "ff0bc851ead356e3553a6356dffa3d89aa93494314f9d6f19889467aedac9744",
+            "manifest.json": "98b8f1c262d1b5d531cd948407fc5393d51974de9b3c2d38057f3ce3b0f9406c"
+          }
+        }
+      },
+      "plan_sha256": "1a2b571280219e92fa403e204638616e2c873d7b5a7a84bdc00782878fdbb9fa",
+      "prototype_only": false
+    },
+    "tg-packet-batch-abba": {
+      "cases": {
+        "proxy-a1": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.061022,
+            "received_mbps": 2338.3053225912186,
+            "minimum_window_mbps": 1642.1472153271943,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1641.9038110688218,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792706457.048064,
+            "end": 1792706481.0518343,
+            "seconds": 24.003770351409912,
+            "receiver_gbit": 57.36931300493605
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 64.00163208618898,
+              "average_cores": 2.666315797444284,
+              "cpu_seconds_per_gbit": 1.1156074342511697,
+              "rss_median_mib": 89.0703125,
+              "rss_peak_mib": 90.05078125,
+              "extra_copies": 488073,
+              "frame_sent_bytes": 9428533304,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3107
+            },
+            "exit": {
+              "cpu_seconds": 62.87562318880814,
+              "average_cores": 2.6194061294672824,
+              "cpu_seconds_per_gbit": 1.0959800613857504,
+              "rss_median_mib": 36.16015625,
+              "rss_peak_mib": 36.390625,
+              "extra_copies": 2267,
+              "frame_sent_bytes": 20983792,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 53
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.21158749563692,
+          "tg_average_cores": 5.285721926911566,
+          "shared_vm_average_busy_cores": 7.826503345952304,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-batch-abba/proxy-a1",
+          "capacity_analysis_sha256": "dba7cbd0534fd991d770cf2fba9f5316bca0079edffe67cd9a30c0dfcb87e6b3",
+          "raw_sha256": {
+            "both-probe-client.json": "7e2cdbba6609cb9cd5c3dd76df69986ed1c85831a54d53697620ecb71d63dbde",
+            "both-probe-server.json": "f1a6ee2319b3dca96f1f58d0dbcfb8669ad90aa71a708d2153f8ca50f01b1e36",
+            "edge-monitor.jsonl": "9f29806134ae29477d609001221ee1fa1de5722ae4cbbfd5957c286c9928271f",
+            "exit-monitor.jsonl": "fddbc7c044d1afb9dc5f87fca6cfbb9d05730d51d6afbe697a7de87536b2b9d7",
+            "manifest.json": "25253f5bc57e2bba7dfa45f2ee3dc310f1c69e61a9b9dcc7b8472bd0cfe1b5fc"
+          }
+        },
+        "proxy-b1": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.065996,
+            "received_mbps": 2761.636279025099,
+            "minimum_window_mbps": 2202.098735524292,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 2202.0719026736724,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "0cce2569a9c091d34f28542c076b8188c8595217e677bd261c20eb5f6dc6b8b2",
+          "cpu_span": {
+            "start": 1792706515.0520396,
+            "end": 1792706539.6932554,
+            "seconds": 24.641215801239014,
+            "receiver_gbit": 67.72402513192662
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 64.00478877368472,
+              "average_cores": 2.597468781165677,
+              "cpu_seconds_per_gbit": 0.9450824673962185,
+              "rss_median_mib": 83.21875,
+              "rss_peak_mib": 83.890625,
+              "extra_copies": 556960,
+              "frame_sent_bytes": 11075428216,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3095
+            },
+            "exit": {
+              "cpu_seconds": 64.44523904221813,
+              "average_cores": 2.6153433159323933,
+              "cpu_seconds_per_gbit": 0.9515860718065501,
+              "rss_median_mib": 38.02734375,
+              "rss_peak_mib": 38.828125,
+              "extra_copies": 28,
+              "frame_sent_bytes": 22498752,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 42
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.8966685392027685,
+          "tg_average_cores": 5.21281209709807,
+          "shared_vm_average_busy_cores": 7.815971032132671,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-batch-abba/proxy-b1",
+          "capacity_analysis_sha256": "9a14b28ea253e70e37df04078220fbfc76599660be37f67df508f4b9fbce39e7",
+          "raw_sha256": {
+            "both-probe-client.json": "cc112f315a0dcada12dba5d60412bcf0f906a1db69098f7f81fa77fb6d6e4db9",
+            "both-probe-server.json": "45c937609267589288b7e21ab20276536001eba9136c14fa98daf2a71fccab42",
+            "edge-monitor.jsonl": "4069e414585aa5d245382ae2675b490707c64c3768b45c85ced0c1e244d846d8",
+            "exit-monitor.jsonl": "d3af1aeedc94cfa3f2984d894f24b58d83883c44b9f4a20a128d8234d76345ba",
+            "manifest.json": "6d17a2d7010a0c9c09d2bb8c38b422c19e5dd06d442a9d4e0faa74b9818efb79"
+          }
+        },
+        "proxy-b2": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.067686,
+            "received_mbps": 2459.443443180109,
+            "minimum_window_mbps": 1825.3586103423195,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1825.3408816126212,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "0cce2569a9c091d34f28542c076b8188c8595217e677bd261c20eb5f6dc6b8b2",
+          "cpu_span": {
+            "start": 1792706573.634851,
+            "end": 1792706598.2890253,
+            "seconds": 24.654174327850342,
+            "receiver_gbit": 60.434170303228726
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 63.726303928478025,
+              "average_cores": 2.5848078739546447,
+              "cpu_seconds_per_gbit": 1.054474705431232,
+              "rss_median_mib": 82.62890625,
+              "rss_peak_mib": 84.72265625,
+              "extra_copies": 515625,
+              "frame_sent_bytes": 10093691128,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3099
+            },
+            "exit": {
+              "cpu_seconds": 63.97811838769473,
+              "average_cores": 2.5950217410210525,
+              "cpu_seconds_per_gbit": 1.058641461720815,
+              "rss_median_mib": 37.73046875,
+              "rss_peak_mib": 38.05859375,
+              "extra_copies": 72,
+              "frame_sent_bytes": 20786304,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 57
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.113116167152047,
+          "tg_average_cores": 5.179829614975697,
+          "shared_vm_average_busy_cores": 7.779078398805238,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-batch-abba/proxy-b2",
+          "capacity_analysis_sha256": "6ab5102ff323ff35e8888d43f6541ab685148bbf5957736a7f6b242aa227d165",
+          "raw_sha256": {
+            "both-probe-client.json": "62e52ffef87a749225140ff45324e1709f5a6a9cd9b8f26e53e3284fda79af40",
+            "both-probe-server.json": "e9166c958520a41a9249381a99f897766870dcacac352d03aec1358332fa4975",
+            "edge-monitor.jsonl": "9e4e121d1bad7dc70d176651ea415c401d65433712dd4b8c73c10ecd2a4ca2a4",
+            "exit-monitor.jsonl": "b25fb00687cca4f8571c6730bedf4c133b09a7dfa7dc580d87c4ed62a94b789d",
+            "manifest.json": "272a8eeac6625ddb90daaa19f94d18a45415906ef6537dcfb250fe4e5eee41b3"
+          }
+        },
+        "proxy-a2": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.056681,
+            "received_mbps": 2632.0648759725555,
+            "minimum_window_mbps": 2252.2810573850156,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 2252.2810573850156,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "7ad07f90d74cc5ff83f4a676ce0181e803fef5c75f5960f39e307563b64d28ab",
+          "cpu_span": {
+            "start": 1792706631.746053,
+            "end": 1792706656.3660223,
+            "seconds": 24.619969367980957,
+            "receiver_gbit": 65.05836795580542
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 63.44726441470468,
+              "average_cores": 2.577065124102869,
+              "cpu_seconds_per_gbit": 0.9752360289425769,
+              "rss_median_mib": 88.88671875,
+              "rss_peak_mib": 91.73828125,
+              "extra_copies": 545034,
+              "frame_sent_bytes": 10702911240,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3106
+            },
+            "exit": {
+              "cpu_seconds": 62.33124673088427,
+              "average_cores": 2.5317353486210266,
+              "cpu_seconds_per_gbit": 0.9580819299559789,
+              "rss_median_mib": 36.39453125,
+              "rss_peak_mib": 37.765625,
+              "extra_copies": 1148,
+              "frame_sent_bytes": 21819176,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 39
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.9333179588985556,
+          "tg_average_cores": 5.108800472723895,
+          "shared_vm_average_busy_cores": 7.750549962733856,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-batch-abba/proxy-a2",
+          "capacity_analysis_sha256": "979baeb787dbcde297a00b0696481a82706eabd18360748e56a816982dcf8ca2",
+          "raw_sha256": {
+            "both-probe-client.json": "e98795b58c53de4b18df1422baad12f57897668a407195549385813b4c40ee5f",
+            "both-probe-server.json": "f2bbdb4d3229e1bd56353093bfc22b49950ed7780dcd539cfdc775c7687a9d58",
+            "edge-monitor.jsonl": "e937a6de3def3ba940d221fca963af58ac99f3833ca505d376420787b3c59ef5",
+            "exit-monitor.jsonl": "1d874068cce5a211400b79a170b931e85b95274e8ff6a9b3d25ddb6faad3cf78",
+            "manifest.json": "05dab5f972b31e039e6a42e42ca2031e1071b37d80cbefb67d15a168f4ac2ef2"
+          }
+        },
+        "ip-legacy": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.073852,
+            "received_mbps": 1413.6956935475582,
+            "minimum_window_mbps": 522.9307814252319,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 522.9307814252304,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "stream_packets": false,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "0cce2569a9c091d34f28542c076b8188c8595217e677bd261c20eb5f6dc6b8b2",
+          "cpu_span": {
+            "start": 1792706690.083662,
+            "end": 1792706714.7441769,
+            "seconds": 24.66051483154297,
+            "receiver_gbit": 39.453103599498554
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 52.99026162479403,
+              "average_cores": 2.148789755070921,
+              "cpu_seconds_per_gbit": 1.3431202311157981,
+              "rss_median_mib": 47.9609375,
+              "rss_peak_mib": 51.66015625,
+              "extra_copies": 2040460,
+              "frame_sent_bytes": 7466819132,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 7797
+            },
+            "exit": {
+              "cpu_seconds": 56.06092439130976,
+              "average_cores": 2.273307137919234,
+              "cpu_seconds_per_gbit": 1.4209509335539903,
+              "rss_median_mib": 28.22265625,
+              "rss_peak_mib": 30.4375,
+              "extra_copies": 299,
+              "frame_sent_bytes": 35387096,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 59
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.7640711646697884,
+          "tg_average_cores": 4.422096892990155,
+          "shared_vm_average_busy_cores": 8.08186748347735,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-batch-abba/ip-legacy",
+          "capacity_analysis_sha256": "2913944287a9387b1a20605e9e8f337aced18e34bad56908a709ce09c1234706",
+          "raw_sha256": {
+            "both-probe-client.json": "4e32a338d1a6df1df92d2d3ff1bcbfd3afa651755d1783e48b114f2c11dd715e",
+            "both-probe-server.json": "6a3ce02f56a7ab93aafdd8330c82e236724b1d75f8eb4ff9d3336d8965b467ae",
+            "edge-monitor.jsonl": "37a8208f0a879e642c50b02015fd7b4fb5b272f262045fa17c1d997e15ed6602",
+            "exit-monitor.jsonl": "19b6f358118af3823c7849cf048db246c85f3f2ff5f9182bf6a758021d0f3d83",
+            "manifest.json": "d26413a7577b20f80758c9f6b3fc45b4b4d6e9d5e07a3f83b2f63f8673892314"
+          }
+        },
+        "ip-packet": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.063592,
+            "received_mbps": 1512.6195632163544,
+            "minimum_window_mbps": 834.7451345078707,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 834.7451345078708,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "0cce2569a9c091d34f28542c076b8188c8595217e677bd261c20eb5f6dc6b8b2",
+          "cpu_span": {
+            "start": 1792706754.0505204,
+            "end": 1792706778.3613427,
+            "seconds": 24.310822248458862,
+            "receiver_gbit": 37.23530572450647
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 52.110820037747864,
+              "average_cores": 2.1435235511645985,
+              "cpu_seconds_per_gbit": 1.3995002598689839,
+              "rss_median_mib": 47.74609375,
+              "rss_peak_mib": 57.0390625,
+              "extra_copies": 2013046,
+              "frame_sent_bytes": 7150399292,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 6861
+            },
+            "exit": {
+              "cpu_seconds": 54.39825820551651,
+              "average_cores": 2.2376149045705347,
+              "cpu_seconds_per_gbit": 1.4609322294274658,
+              "rss_median_mib": 40.0390625,
+              "rss_peak_mib": 40.921875,
+              "extra_copies": 1125,
+              "frame_sent_bytes": 32349304,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 85
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.86043248929645,
+          "tg_average_cores": 4.381138455735133,
+          "shared_vm_average_busy_cores": 8.085208221762286,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-packet-batch-abba/ip-packet",
+          "capacity_analysis_sha256": "169ac035b8172927766cfc00d43a8af40a9b0ea5fe577ad850d0463bf19913ab",
+          "raw_sha256": {
+            "both-probe-client.json": "541d5fa2551f2e0726babe279640c1a8105729078c40a67a81dac3292055f926",
+            "both-probe-server.json": "04fbccf82121ceebdbaeeaca3007f457c49eb98e3aeb95c52595e502cdde572a",
+            "edge-monitor.jsonl": "ac948e42e9bc22121b9633d62747232b2a705c38fdfa17b4548878eb125c1406",
+            "exit-monitor.jsonl": "fb1616fd9eaf3549cc824d5fb3ced76f56a73ede50fff2fc2875639e3b42c863",
+            "manifest.json": "92516a4812d1ed499a543f278355df69ede2d98b169f2515cd395cd4299dbd46"
+          }
+        }
+      },
+      "plan_sha256": "623c7cf28daf3f1848bc64d5f6b8c09e1af9188fdb825260ae5a43d4636ad3ce",
+      "prototype_only": false
+    },
+    "tg-large-packet-probes": {
+      "cases": {
+        "proxy-60000": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 60.159362,
+            "received_mbps": 2421.418750019324,
+            "minimum_window_mbps": 773.7142290326996,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 773.6837146500628,
+            "complete_one_second_intervals": 60,
+            "complete_one_second_below_target": 60,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "90c690fe552ffff8e9210182b08f697dd87b3e2a853ad95482ba9efccbea744f",
+          "cpu_span": {
+            "start": 1792707299.1927166,
+            "end": 1792707339.5847518,
+            "seconds": 40.392035245895386,
+            "receiver_gbit": 93.76696442910755
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 91.08515647461219,
+              "average_cores": 2.2550276538458953,
+              "cpu_seconds_per_gbit": 0.9713992239076595,
+              "rss_median_mib": 76.49609375,
+              "rss_peak_mib": 83.79296875,
+              "extra_copies": 98483,
+              "frame_sent_bytes": 17097177712,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 368
+            },
+            "exit": {
+              "cpu_seconds": 88.42209854820413,
+              "average_cores": 2.189097380459172,
+              "cpu_seconds_per_gbit": 0.9429984119306284,
+              "rss_median_mib": 30.5859375,
+              "rss_peak_mib": 37.68359375,
+              "extra_copies": 1450,
+              "frame_sent_bytes": 17359464,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 13
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.9143976358382877,
+          "tg_average_cores": 4.444125034305067,
+          "shared_vm_average_busy_cores": 8.290711261543114,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-large-packet-probes/proxy-60000",
+          "capacity_analysis_sha256": "588dd8fc2a5dfa0076486bd2daa165cb604026f50a33b57cdee619fc8c23a741",
+          "raw_sha256": {
+            "both-probe-client.json": "9b5c67616cccd6a86f955a3190894577763639f82490641080326541fb202c51",
+            "both-probe-server.json": "e93005f42012cfe13b90e0321b86a13ce00132e9f060ae33f962f558237c18e5",
+            "edge-monitor.jsonl": "881b6c39069cf25adb97d709c62cba33638688e1208d204b8629303449cbc109",
+            "exit-monitor.jsonl": "0acb78a20c051bf82e83633570d6c2af4351aab2aeb20fff5331e27cb92ce90b",
+            "manifest.json": "6adfb51b5c9fe92e6db2c47f28b315bbccd338b8d94a3a02c365fb91a599e9f7"
+          }
+        },
+        "proxy-7168": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 60.085819,
+            "received_mbps": 2427.0531235997632,
+            "minimum_window_mbps": 1598.2332848764572,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1598.2332848764554,
+            "complete_one_second_intervals": 60,
+            "complete_one_second_below_target": 60,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "90c690fe552ffff8e9210182b08f697dd87b3e2a853ad95482ba9efccbea744f",
+          "cpu_span": {
+            "start": 1792707373.8672078,
+            "end": 1792707413.5462162,
+            "seconds": 39.67900848388672,
+            "receiver_gbit": 98.54735460224185
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 101.3158031863384,
+              "average_cores": 2.553385456380086,
+              "cpu_seconds_per_gbit": 1.0280925712848468,
+              "rss_median_mib": 59.234375,
+              "rss_peak_mib": 59.41796875,
+              "extra_copies": 904263,
+              "frame_sent_bytes": 17605277752,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 2048
+            },
+            "exit": {
+              "cpu_seconds": 101.64340279039452,
+              "average_cores": 2.5616417010941936,
+              "cpu_seconds_per_gbit": 1.031416857414884,
+              "rss_median_mib": 26.1015625,
+              "rss_peak_mib": 26.59765625,
+              "extra_copies": 5,
+              "frame_sent_bytes": 40693400,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 30
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.0595094286997306,
+          "tg_average_cores": 5.115027157474279,
+          "shared_vm_average_busy_cores": 7.849776832604679,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-large-packet-probes/proxy-7168",
+          "capacity_analysis_sha256": "49ebfe873f3ca505736bc36c124f382b92253197f9a2d99edcda80c4846c4d92",
+          "raw_sha256": {
+            "both-probe-client.json": "fe237df73edb903ec580755c91ac73cdd77dd924705412dc792e738817c84e69",
+            "both-probe-server.json": "227d5e175207b14db4e727c956fb6e3950adb10f08ea6c86322a66975a45ae79",
+            "edge-monitor.jsonl": "3bfab6c845a3b00d010e0bbf909777a262b80407fe3d93e55121781216696b1c",
+            "exit-monitor.jsonl": "6c4e4661146f0d2d0b46e53f82369da8ef4c214f2c7660ebdb3a4ad87800f385",
+            "manifest.json": "79bdc3b3b2820e9fff107a41537c3e315d0dcc40c1ce2fc8434248eb8ef240c2"
+          }
+        },
+        "proxy-60000-https": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 60.102316,
+            "received_mbps": 1565.0706688906962,
+            "minimum_window_mbps": 975.5905129197236,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 975.3171350839519,
+            "complete_one_second_intervals": 60,
+            "complete_one_second_below_target": 60,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "90c690fe552ffff8e9210182b08f697dd87b3e2a853ad95482ba9efccbea744f",
+          "cpu_span": {
+            "start": 1792707452.0669916,
+            "end": 1792707491.728212,
+            "seconds": 39.66122055053711,
+            "receiver_gbit": 63.76035013019237
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 59.97295994620732,
+              "average_cores": 1.512130971102833,
+              "cpu_seconds_per_gbit": 0.94059960184893,
+              "rss_median_mib": 68.462890625,
+              "rss_peak_mib": 70.1953125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 7227255752,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 370
+            },
+            "exit": {
+              "cpu_seconds": 69.31644811792057,
+              "average_cores": 1.7477134378554031,
+              "cpu_seconds_per_gbit": 1.0871403305719494,
+              "rss_median_mib": 23.1875,
+              "rss_peak_mib": 30.62109375,
+              "extra_copies": 0,
+              "frame_sent_bytes": 11112784,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 5
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.027739932420879,
+          "tg_average_cores": 3.259844408958236,
+          "shared_vm_average_busy_cores": 4.742377465015983,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-large-packet-probes/proxy-60000-https",
+          "capacity_analysis_sha256": "9d25af9dbb9b567c1fe53d6e46a6f9129361885ed792d803f999190a37373465",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "c4afdf74764d480a9fba8f87abdd4e89db9cfcc70b4813a3752e963e45e490ec",
+            "exit-monitor.jsonl": "9f4489b948e6e13f687c9199c99b8e744492c6e463a7c8ef4deed260ff837139",
+            "https-probe-client.json": "d465bf108701337b13660253dd98128d44125f7ab15375e92f7f87fc2875a506",
+            "https-probe-server.json": "33778308182aec5e1a40cabed67dc8ff02d80f945b8880dc43368c2933aa3c9f",
+            "manifest.json": "8e3c8ce1691c95ec5d41feabd3d699d5c456bc0d707bbf7fb85fe78155c76062"
+          }
+        },
+        "ordinary-1500": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 60.055346,
+            "received_mbps": 1579.9673172143575,
+            "minimum_window_mbps": 1279.7353190272484,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1279.7353190272484,
+            "complete_one_second_intervals": 60,
+            "complete_one_second_below_target": 60,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "90c690fe552ffff8e9210182b08f697dd87b3e2a853ad95482ba9efccbea744f",
+          "cpu_span": {
+            "start": 1792707526.791404,
+            "end": 1792707566.5221415,
+            "seconds": 39.73073744773865,
+            "receiver_gbit": 62.31698707402966
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 85.93138300479288,
+              "average_cores": 2.162843896814803,
+              "cpu_seconds_per_gbit": 1.3789399494348213,
+              "rss_median_mib": 50.857421875,
+              "rss_peak_mib": 51.60546875,
+              "extra_copies": 3524927,
+              "frame_sent_bytes": 12858631520,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8192
+            },
+            "exit": {
+              "cpu_seconds": 88.15167768013879,
+              "average_cores": 2.2187274473848486,
+              "cpu_seconds_per_gbit": 1.4145689934498715,
+              "rss_median_mib": 26.912109375,
+              "rss_peak_mib": 28.828125,
+              "extra_copies": 599,
+              "frame_sent_bytes": 56614064,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 48
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.7935089428846926,
+          "tg_average_cores": 4.381571344199652,
+          "shared_vm_average_busy_cores": 8.1902385751906,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-large-packet-probes/ordinary-1500",
+          "capacity_analysis_sha256": "890903bf1d31a1d853746c1ad836caff4e58714c419012e8d315aeebe807b8db",
+          "raw_sha256": {
+            "both-probe-client.json": "11e67b547c758960bdbe8a4397a3878692884fe01ff531055920d0ac1db71c72",
+            "both-probe-server.json": "6fe1f47f3ce1e44aaa76665cbd8cbfcc3afab5040a9da15a699dad818ba30d20",
+            "edge-monitor.jsonl": "ebddb372bfe037f97d7e7296edd5adc154ea61ece7cf089659862f7350a04cdd",
+            "exit-monitor.jsonl": "7e6eebf306defc8b49784c7a52bced9885a31fede86f2bd98517815a8b734682",
+            "manifest.json": "a04feddcd4d2b6a7f6141811e5ab995b5c5ace29ea5cd9050b739db743779446"
+          }
+        }
+      },
+      "plan_sha256": "2cf7ea6e53df1386fee3fa3697e7f9a48778574f197a8635cc9549dc8b97223b",
+      "prototype_only": false
+    },
+    "tg-tls-batch-lab-probes": {
+      "cases": {
+        "large-https": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.031447,
+            "received_mbps": 4853.228653656188,
+            "minimum_window_mbps": 4100.0241598190305,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 4100.006800244786,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "fadc61e1ee9d63fe06daa87620ae1a5ba7e2eadfd352586d7e8318cd16d4b1e6",
+          "cpu_span": {
+            "start": 1792707689.6235762,
+            "end": 1792707714.316792,
+            "seconds": 24.69321584701538,
+            "receiver_gbit": 120.06128161741508
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 38.55930800368645,
+              "average_cores": 1.5615344814777148,
+              "cpu_seconds_per_gbit": 0.321163554846589,
+              "rss_median_mib": 76.6484375,
+              "rss_peak_mib": 77.62890625,
+              "extra_copies": 0,
+              "frame_sent_bytes": 12189073032,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 375
+            },
+            "exit": {
+              "cpu_seconds": 44.55023791435049,
+              "average_cores": 1.8041488881139467,
+              "cpu_seconds_per_gbit": 0.3710624883741738,
+              "rss_median_mib": 26.890625,
+              "rss_peak_mib": 27.61328125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 13174976,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 12
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 0.6922260432207628,
+          "tg_average_cores": 3.3656833695916615,
+          "shared_vm_average_busy_cores": 5.8415660585919404,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-batch-lab-probes/large-https",
+          "capacity_analysis_sha256": "97a5821b544ccbb0009494416c526ebda10fae1ea7e28b9daa9c3a1f5c970d9f",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "a4252fe497e2a3a0cd048b8718105f666d48cbc97ad39e66f55223ed8d804420",
+            "exit-monitor.jsonl": "a1c170eb76de30b5354e4b86210e8525e6a11cb5888cebcda2047311cabfc585",
+            "https-probe-client.json": "0d099eaf574b5fcd698bb97dbcc6d6b68b9d7caeb1633de87e43a63eea0e1a58",
+            "https-probe-server.json": "fc02662c1ad69e3603269173f77f182dbd7edb4049c6bdc237d8d723a06c600f",
+            "manifest.json": "739d66b4ca3429a06b685ab6bbae528428625062900f9b5cfaf864d3fbbe0f7b"
+          }
+        },
+        "large-both": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.070257,
+            "received_mbps": 3699.1936616647204,
+            "minimum_window_mbps": 3285.335114472523,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 3285.335114472523,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "fadc61e1ee9d63fe06daa87620ae1a5ba7e2eadfd352586d7e8318cd16d4b1e6",
+          "cpu_span": {
+            "start": 1792707748.999389,
+            "end": 1792707773.652905,
+            "seconds": 24.653516054153442,
+            "receiver_gbit": 91.37354273836044
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 69.4951132521504,
+              "average_cores": 2.8188722898388514,
+              "cpu_seconds_per_gbit": 0.7605605645733047,
+              "rss_median_mib": 78.1015625,
+              "rss_peak_mib": 78.80078125,
+              "extra_copies": 74283,
+              "frame_sent_bytes": 13765272464,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 369
+            },
+            "exit": {
+              "cpu_seconds": 67.85420702177535,
+              "average_cores": 2.7523135796422746,
+              "cpu_seconds_per_gbit": 0.7426023440512699,
+              "rss_median_mib": 31.39453125,
+              "rss_peak_mib": 32.00390625,
+              "extra_copies": 0,
+              "frame_sent_bytes": 13920352,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 9
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.5031629086245744,
+          "tg_average_cores": 5.571185869481126,
+          "shared_vm_average_busy_cores": 7.661592025206599,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-batch-lab-probes/large-both",
+          "capacity_analysis_sha256": "5e209cabc48f5e2c2e79cd7452e142b0854351a55bd52782de0eed3ea5b3e2b7",
+          "raw_sha256": {
+            "both-probe-client.json": "06228f355e7921a08008bc50a0ce1e3ef87c85f94fbd8f54257ffc98eca882fb",
+            "both-probe-server.json": "a327885252adb9b465b6a41e0faaaa0392d13e12d1b160ef3ddae021b68a961f",
+            "edge-monitor.jsonl": "20b98aeebf3f2147a3eedd1219c4fdd1922516ec4ed2d1f318d842b38abca5aa",
+            "exit-monitor.jsonl": "ceac1668635c793ac55c98980bd3240af26590b6127268bbbda59e51e369d344",
+            "manifest.json": "781fe254b52d46c109f7563402b5ca05105043c316924213a20c9faf106ef7d5"
+          }
+        },
+        "ip-both": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.053013,
+            "received_mbps": 1709.3997526869068,
+            "minimum_window_mbps": 1368.664357425705,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1368.664357425705,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "fadc61e1ee9d63fe06daa87620ae1a5ba7e2eadfd352586d7e8318cd16d4b1e6",
+          "cpu_span": {
+            "start": 1792707807.1507728,
+            "end": 1792707831.836193,
+            "seconds": 24.685420274734497,
+            "receiver_gbit": 42.4182750921388
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 54.198922059780095,
+              "average_cores": 2.195584335068123,
+              "cpu_seconds_per_gbit": 1.2777257430211855,
+              "rss_median_mib": 49.67578125,
+              "rss_peak_mib": 52.2890625,
+              "extra_copies": 2102508,
+              "frame_sent_bytes": 7888624720,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8104
+            },
+            "exit": {
+              "cpu_seconds": 55.8910880015289,
+              "average_cores": 2.2641335403445964,
+              "cpu_seconds_per_gbit": 1.3176181228521233,
+              "rss_median_mib": 27.734375,
+              "rss_peak_mib": 28.88671875,
+              "extra_copies": 102,
+              "frame_sent_bytes": 35157584,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 53
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.595343865873309,
+          "tg_average_cores": 4.459717875412719,
+          "shared_vm_average_busy_cores": 8.2798233037154,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-batch-lab-probes/ip-both",
+          "capacity_analysis_sha256": "25c7d0ef5317f565fe06076a749a197b8aee5ef3cc66a11c42935d3e40980d9d",
+          "raw_sha256": {
+            "both-probe-client.json": "14e58d8474be133caf3d801cd08c7eceffbb709461c2b5bd582a372fac468615",
+            "both-probe-server.json": "227f0a5e1888c268804556c98ceb816880b95fbbcddc4fad7eef25949962a91b",
+            "edge-monitor.jsonl": "3c695c2fb6c39e39b1b986897f383aff4e7b12c2b0cafd9a9304e0ee66469b59",
+            "exit-monitor.jsonl": "7ac0dbfef0572b69e6de2e1894c3232231db238ae4d31c7dffa6d3ce6cdbedee",
+            "manifest.json": "d49623aeaf695073a4169c773782164d88b377b8a631c86eea292680f285f96b"
+          }
+        }
+      },
+      "plan_sha256": "ca12208edb5fbe7f7d3d1821b6a79d19ac43e537a27598c8cf797944296c21ab",
+      "prototype_only": true
+    },
+    "tg-tls-batch16-lab-probes": {
+      "cases": {
+        "large-https": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.068005,
+            "received_mbps": 1843.7329347061182,
+            "minimum_window_mbps": 906.3735413294602,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 906.3735413294578,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 50,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "a89816d42d84f6ba65ecb2ece0edc96b3a9e23293f01325034daac45387508c4",
+          "cpu_span": {
+            "start": 1792707923.2546313,
+            "end": 1792707948.560238,
+            "seconds": 25.305606603622437,
+            "receiver_gbit": 43.15959870627051
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 29.628821524305323,
+              "average_cores": 1.170840201082713,
+              "cpu_seconds_per_gbit": 0.6864943700229691,
+              "rss_median_mib": 74.4765625,
+              "rss_peak_mib": 75.22265625,
+              "extra_copies": 0,
+              "frame_sent_bytes": 3990086632,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 369
+            },
+            "exit": {
+              "cpu_seconds": 32.56002069377246,
+              "average_cores": 1.28667220682675,
+              "cpu_seconds_per_gbit": 0.7544097181107925,
+              "rss_median_mib": 35.44921875,
+              "rss_peak_mib": 37.5625,
+              "extra_copies": 0,
+              "frame_sent_bytes": 6021984,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.4409040881337616,
+          "tg_average_cores": 2.457512407909463,
+          "shared_vm_average_busy_cores": 8.3652368674112,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-batch16-lab-probes/large-https",
+          "capacity_analysis_sha256": "bc122db5ff4bee44c97923b783f3d1ef6f9fecdf4133c4e52b7acec03e06fda0",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "5b73cb6c36f29dc99beb6c19caf4f21b9eaa3ad45e06004f812635228037558a",
+            "exit-monitor.jsonl": "c73392a9f6fda59cfd2d5ebe763938f32e15c51effea3d1b97689bee323cdf4a",
+            "https-probe-client.json": "75a8e35a60b9b201689ea0224547a712ca6136a81992d12a2d90db37261bd109",
+            "https-probe-server.json": "5ff88cfcc25a120e3f609be76b16838f9f098ef87eecdb86301d3c734956d981",
+            "manifest.json": "79c93e2d4699c6917829998ddb2ba51dd70bb7f31a70f66fe81cd6949fd7b13b"
+          }
+        },
+        "large-both-delay50": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.054605,
+            "received_mbps": 3246.1134007500455,
+            "minimum_window_mbps": 2617.678239671388,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 2617.678239671388,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 50,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "a89816d42d84f6ba65ecb2ece0edc96b3a9e23293f01325034daac45387508c4",
+          "cpu_span": {
+            "start": 1792707982.607043,
+            "end": 1792708007.2477112,
+            "seconds": 24.640668153762817,
+            "receiver_gbit": 80.69284252376887
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 66.89482643532546,
+              "average_cores": 2.7148138198967673,
+              "cpu_seconds_per_gbit": 0.829005700420343,
+              "rss_median_mib": 77.3359375,
+              "rss_peak_mib": 77.84375,
+              "extra_copies": 110779,
+              "frame_sent_bytes": 14821127184,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 369
+            },
+            "exit": {
+              "cpu_seconds": 66.52797685819768,
+              "average_cores": 2.6999258479132737,
+              "cpu_seconds_per_gbit": 0.8244594536200804,
+              "rss_median_mib": 30.56640625,
+              "rss_peak_mib": 31.3515625,
+              "extra_copies": 0,
+              "frame_sent_bytes": 12914296,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 10
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.6534651540404235,
+          "tg_average_cores": 5.414739667810042,
+          "shared_vm_average_busy_cores": 7.227020293329351,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-batch16-lab-probes/large-both-delay50",
+          "capacity_analysis_sha256": "e8bd230fe07d1e058bba461ef8cc00307718e6dd0f8096e0c648f68593585267",
+          "raw_sha256": {
+            "both-probe-client.json": "33395b7b80dfb0e3bd615c91f36aa1233be03a698e1a60a5f26e7b2e8b3afa94",
+            "both-probe-server.json": "35a65fe738bb8b882869cfae6fa26b106a42c01b22b096ee0999095d48bd26fc",
+            "edge-monitor.jsonl": "05b76ff0e9cebc16910a5f38af6ab74638cc6ff4b63c00d64380a0057998700c",
+            "exit-monitor.jsonl": "8079874a303ecb33c10bfb5a7e48143c06499459d10d110935d45e9c3779437c",
+            "manifest.json": "9d78036577597e1a660c14251f5f40d3d98380dc94cfecfc98668552b9965efb"
+          }
+        }
+      },
+      "plan_sha256": "2c4c1df8839e0bf187b694ca99fec541c923fc914ac778a3bc6ebdd01ba822f8",
+      "prototype_only": true
+    },
+    "tg-tls-lab-abba": {
+      "cases": {
+        "a1": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.138083,
+            "received_mbps": 1610.9220680904857,
+            "minimum_window_mbps": 1338.7908299852065,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1338.7765617514765,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "fadc61e1ee9d63fe06daa87620ae1a5ba7e2eadfd352586d7e8318cd16d4b1e6",
+          "cpu_span": {
+            "start": 1792708140.3250208,
+            "end": 1792708165.5885262,
+            "seconds": 25.263505458831787,
+            "receiver_gbit": 39.02516751408692
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 32.09684482246143,
+              "average_cores": 1.2704826285791941,
+              "cpu_seconds_per_gbit": 0.8224652670837461,
+              "rss_median_mib": 72.828125,
+              "rss_peak_mib": 73.14453125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 3826873944,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 371
+            },
+            "exit": {
+              "cpu_seconds": 35.022758741766076,
+              "average_cores": 1.3862984611869285,
+              "cpu_seconds_per_gbit": 0.8974403179467175,
+              "rss_median_mib": 28.89453125,
+              "rss_peak_mib": 29.90625,
+              "extra_copies": 0,
+              "frame_sent_bytes": 5939512,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 9
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.7199055850304636,
+          "tg_average_cores": 2.6567810897661226,
+          "shared_vm_average_busy_cores": 7.714044310266729,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-lab-abba/a1",
+          "capacity_analysis_sha256": "784d848963efb0dd03caac526b853e28ed39f6784c38bf6e6c61236df038130a",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "48790dc7c0ba07b982b9b00679b30a99756acd7e7a4f78d6e67259324f4c5852",
+            "exit-monitor.jsonl": "4732e4167b3af0a7cb9533cbc2e279966dbec7aa350e898e2b9d932539d4598f",
+            "https-probe-client.json": "70d7021653983620479e15a02649df56313845b068ea36514aae1b8b5fc37b0c",
+            "https-probe-server.json": "b472e2b75e6814e5b835174b38b99a271dec9969f8ad0cce319dac2a950eb420",
+            "manifest.json": "b8bfb054c413e7cc742abca094a5a36e6f78c3285252b8c2a450d316169b3143"
+          }
+        },
+        "b1": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.092038,
+            "received_mbps": 2326.177984681021,
+            "minimum_window_mbps": 1783.678960801651,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1783.675892332114,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "a89816d42d84f6ba65ecb2ece0edc96b3a9e23293f01325034daac45387508c4",
+          "cpu_span": {
+            "start": 1792708204.993411,
+            "end": 1792708230.226184,
+            "seconds": 25.232772827148438,
+            "receiver_gbit": 59.58881275511234
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 37.55828458727901,
+              "average_cores": 1.4884723468389218,
+              "cpu_seconds_per_gbit": 0.6302908692211987,
+              "rss_median_mib": 71.02734375,
+              "rss_peak_mib": 75.39453125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 6194391720,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 371
+            },
+            "exit": {
+              "cpu_seconds": 43.23850870321765,
+              "average_cores": 1.7135853042950746,
+              "cpu_seconds_per_gbit": 0.725614535750388,
+              "rss_median_mib": 26.05859375,
+              "rss_peak_mib": 30.19921875,
+              "extra_copies": 0,
+              "frame_sent_bytes": 8011768,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 9
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.3559054049715866,
+          "tg_average_cores": 3.2020576511339964,
+          "shared_vm_average_busy_cores": 5.830380798257721,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-lab-abba/b1",
+          "capacity_analysis_sha256": "3ccf37145ee198aff84d912216d3a831093404af9bd2284aae488cd10197eb59",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "ec7c95b1b2b851350360f81c719e4ecc1a6ed3ad117f81012ec83ac4246c10e8",
+            "exit-monitor.jsonl": "e98b907f02e468c0c343c06792ac647773b1d982bcba9510cee886c43214d592",
+            "https-probe-client.json": "b3851ecc933863a6cf17ff175b85b2b478beab1afd91272ebf3b2c3c841fd894",
+            "https-probe-server.json": "6e3051a4b488e56997d396ffef8e87ff74b926977fece261982db6dde9a2aa28",
+            "manifest.json": "bc064f5fb417be8141a42d31336cc076b1fe05f996b206e95f66d42d32b1bd71"
+          }
+        },
+        "b2": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.070227,
+            "received_mbps": 2129.809832996847,
+            "minimum_window_mbps": 1569.558423277336,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1569.5584232773347,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "a89816d42d84f6ba65ecb2ece0edc96b3a9e23293f01325034daac45387508c4",
+          "cpu_span": {
+            "start": 1792708277.9119039,
+            "end": 1792708303.4487467,
+            "seconds": 25.536842823028564,
+            "receiver_gbit": 52.25688707039983
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 33.42907518184864,
+              "average_cores": 1.3090527836002903,
+              "cpu_seconds_per_gbit": 0.6397065928709723,
+              "rss_median_mib": 71.79296875,
+              "rss_peak_mib": 73.33203125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 5153836320,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 371
+            },
+            "exit": {
+              "cpu_seconds": 37.4386574625504,
+              "average_cores": 1.4660644513498373,
+              "cpu_seconds_per_gbit": 0.7164348961719345,
+              "rss_median_mib": 25.75,
+              "rss_peak_mib": 31.609375,
+              "extra_copies": 0,
+              "frame_sent_bytes": 6787800,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 9
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.3561414890429067,
+          "tg_average_cores": 2.7751172349501276,
+          "shared_vm_average_busy_cores": 7.2977243707958355,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-lab-abba/b2",
+          "capacity_analysis_sha256": "7ee9d817af7a27dc5f63ef28b838b3432a3790969a3b80c24b98147550a37ed0",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "1b943139282224e6770ee5a5c3d1765f31718a2c0937fa8765d4adf2f091a325",
+            "exit-monitor.jsonl": "24d61933b869f4f30b59ae30e11fe2a14aaeff95b4d7a8b18c9f671d1d265622",
+            "https-probe-client.json": "a5eee4c0f0b75bafcc8ef484e3f415716b128cfb2ac622c953874cb5f8b75571",
+            "https-probe-server.json": "e9139595198517501afe1eb80312b26293bea0e513504101d6e1bebf5485dffa",
+            "manifest.json": "9a62a51ec614d4497d020082a5ef5e6b42946fee7a4d016b41c5e5417df74a61"
+          }
+        },
+        "a2": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.095452,
+            "received_mbps": 1671.7997768821563,
+            "minimum_window_mbps": 1274.1504605649968,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1274.1504605649973,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "fadc61e1ee9d63fe06daa87620ae1a5ba7e2eadfd352586d7e8318cd16d4b1e6",
+          "cpu_span": {
+            "start": 1792708343.3241336,
+            "end": 1792708367.9778829,
+            "seconds": 24.653749227523804,
+            "receiver_gbit": 42.479909306725126
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 38.21698450173881,
+              "average_cores": 1.5501489914999544,
+              "cpu_seconds_per_gbit": 0.8996484485358484,
+              "rss_median_mib": 70.375,
+              "rss_peak_mib": 70.65625,
+              "extra_copies": 0,
+              "frame_sent_bytes": 4347363328,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 370
+            },
+            "exit": {
+              "cpu_seconds": 43.59728470887214,
+              "average_cores": 1.768383555236276,
+              "cpu_seconds_per_gbit": 1.0263036202379583,
+              "rss_median_mib": 24.47265625,
+              "rss_peak_mib": 25.67578125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 6787000,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 5
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.9259520687738068,
+          "tg_average_cores": 3.3185325467362308,
+          "shared_vm_average_busy_cores": 4.749483104867229,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-lab-abba/a2",
+          "capacity_analysis_sha256": "c0943d79eb146665aec0180ecf1f5545241fbd7024b02031586cbcc43b3fbf00",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "2a50f79185aa3fdfff4b09dcfa04424c072b8d4f14d6deab96deea703481bc4f",
+            "exit-monitor.jsonl": "d9e58ce90ae3b74b85c1eca9e1c7629275f53e8d37707fcfadbc9875c64d01c7",
+            "https-probe-client.json": "749a8fb9cf0c900abe7cd1242cc4a2417664562be25ec26c8fd6cea3f10ed1fa",
+            "https-probe-server.json": "e542df122db1c3a565da96506155c1febf71408b9788876a2072027f2d302a1f",
+            "manifest.json": "d51ee12f6e664fbffafb5f12d3142f8b035dcb75cd69fb5453a31c5571666597"
+          }
+        },
+        "a-both-paced": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.050859,
+            "received_mbps": 3231.520634933953,
+            "minimum_window_mbps": 2350.780177240298,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 2350.780177240298,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 50,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "fadc61e1ee9d63fe06daa87620ae1a5ba7e2eadfd352586d7e8318cd16d4b1e6",
+          "cpu_span": {
+            "start": 1792708402.8256447,
+            "end": 1792708427.4743617,
+            "seconds": 24.648716926574707,
+            "receiver_gbit": 80.14874418900857
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 67.26991874722945,
+              "average_cores": 2.729144845454541,
+              "cpu_seconds_per_gbit": 0.839313446865643,
+              "rss_median_mib": 76.62109375,
+              "rss_peak_mib": 78.39453125,
+              "extra_copies": 73973,
+              "frame_sent_bytes": 12642420744,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 371
+            },
+            "exit": {
+              "cpu_seconds": 65.83132227809233,
+              "average_cores": 2.670780895987211,
+              "cpu_seconds_per_gbit": 0.8213643637740278,
+              "rss_median_mib": 32.44921875,
+              "rss_peak_mib": 33.11328125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 12814112,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 10
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.6606778106396707,
+          "tg_average_cores": 5.399925741441751,
+          "shared_vm_average_busy_cores": 7.3419031710144,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-lab-abba/a-both-paced",
+          "capacity_analysis_sha256": "9795cd35c0c52fd746abe4bd44e7ce5995b84a002e37c68aadc1ee478a4af8de",
+          "raw_sha256": {
+            "both-probe-client.json": "accb738b7f5ef9c05c7112ead7b84598b555a40da6bd16534ff0a81b73932945",
+            "both-probe-server.json": "77fe3dd13c2760b6a3c4b7cd89011c216f7069292b565c3479f48b4d47bc8f95",
+            "edge-monitor.jsonl": "607dc1ba77345e4ebb8ee7062db4f65f3f970560acd2f08db5950c7f85469da3",
+            "exit-monitor.jsonl": "05041060ab986ab878eb184e2dcb63dcf82d5b8ef98dcbcd1abc75d9dfc0c579",
+            "manifest.json": "aed8ebf181612c6471c16cca318c0b75f858b148b4cfd432c54b0e2d6548e17e"
+          }
+        }
+      },
+      "plan_sha256": "8d4e7647f591f0c40f08124eecd17e3081b34476bed5c9584aa77425280ce6d5",
+      "prototype_only": true
+    },
+    "tg-tls-release-abba": {
+      "cases": {
+        "proxy-off1": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.105431,
+            "received_mbps": 1726.5552065337763,
+            "minimum_window_mbps": 1405.0120836616593,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1405.0120836616618,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "tls_record_batch": false,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "ded1d3165003414ec96ad67541050bda0a0c815eb740cc62352c5ee743080999",
+          "cpu_span": {
+            "start": 1792708721.670763,
+            "end": 1792708746.4362013,
+            "seconds": 24.765438318252563,
+            "receiver_gbit": 42.35972400736879
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 37.637226533510514,
+              "average_cores": 1.5197480476560439,
+              "cpu_seconds_per_gbit": 0.8885144418543246,
+              "rss_median_mib": 75.15625,
+              "rss_peak_mib": 75.6328125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 4295203152,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 371
+            },
+            "exit": {
+              "cpu_seconds": 43.512066189455346,
+              "average_cores": 1.7569673361034837,
+              "cpu_seconds_per_gbit": 1.0272037226183555,
+              "rss_median_mib": 21.69140625,
+              "rss_peak_mib": 22.28125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 6691496,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 4
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.9157181644726804,
+          "tg_average_cores": 3.276715383759528,
+          "shared_vm_average_busy_cores": 4.518469398087654,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-release-abba/proxy-off1",
+          "capacity_analysis_sha256": "d36319c0c24ca2fa16a71684b88db83156b9b0eb12183e4e0997d6dd709f78b6",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "31b7e0e6ff1f47551aa61663176fa4ab8107116e6a615ba3809e3bb675dc0ff9",
+            "exit-monitor.jsonl": "4670fb88afbe908c2001aad36d38b20356e72b5e8ddba856d4c1aa9e6de783b5",
+            "https-probe-client.json": "670d2a0dc1ae190d43c1aa0ddba8df8c4ac68234f94abc2722b4047ac046b32a",
+            "https-probe-server.json": "d48abeb08ac65d09478730196b9115bee7a358be80e0b629b8ad6f8353c58a4e",
+            "manifest.json": "1a17b3f1fb79d32fe82f03054026f3575d2e843e0b9f3488fe6404b167b3eb68"
+          }
+        },
+        "proxy-on1": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.072101,
+            "received_mbps": 2318.174749919024,
+            "minimum_window_mbps": 2010.115470870697,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 2010.1115706776957,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "tls_record_batch": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "ded1d3165003414ec96ad67541050bda0a0c815eb740cc62352c5ee743080999",
+          "cpu_span": {
+            "start": 1792708786.2097025,
+            "end": 1792708810.8600154,
+            "seconds": 24.650312900543213,
+            "receiver_gbit": 56.35874538987972
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 39.56658626874785,
+              "average_cores": 1.6051149706856633,
+              "cpu_seconds_per_gbit": 0.7020487414159644,
+              "rss_median_mib": 68.9296875,
+              "rss_peak_mib": 70.125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 5783598368,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 368
+            },
+            "exit": {
+              "cpu_seconds": 46.34207341421756,
+              "average_cores": 1.8799791143095927,
+              "cpu_seconds_per_gbit": 0.8222694294138626,
+              "rss_median_mib": 23.3359375,
+              "rss_peak_mib": 23.8359375,
+              "extra_copies": 0,
+              "frame_sent_bytes": 8083168,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 6
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.524318170829827,
+          "tg_average_cores": 3.4850940849952563,
+          "shared_vm_average_busy_cores": 5.324104084055032,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-release-abba/proxy-on1",
+          "capacity_analysis_sha256": "40cb253c86d9de93c8b411e2faf2daa4eee81fa6ffb7a1afb6e96c05b138c3e6",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "9c09505b06bd7e1b0d8260f42673eb577ca45938db5b41bca001c8ee4987759a",
+            "exit-monitor.jsonl": "534f1f34b9902dd3a12adef39d73a42ca4e59ee6be39892521cc5b923423bcab",
+            "https-probe-client.json": "f1fa29c695c35534d7b034092c33c1864b7102b01e9b8880b80e76b3057cbb9a",
+            "https-probe-server.json": "397565dd13eaa4808037965f21e0ec5f45c7dd62aa8d41a1cffc1b882f1e61c4",
+            "manifest.json": "2060de33a5b038691b8915e2d3e6eb1f28ce1118116d40efdefe4a0b4962dae8"
+          }
+        },
+        "proxy-on2": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.073304,
+            "received_mbps": 2322.8617546208725,
+            "minimum_window_mbps": 2145.66924188011,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 2145.6626281677545,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "tls_record_batch": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "ded1d3165003414ec96ad67541050bda0a0c815eb740cc62352c5ee743080999",
+          "cpu_span": {
+            "start": 1792708852.5360901,
+            "end": 1792708877.3890083,
+            "seconds": 24.85291814804077,
+            "receiver_gbit": 57.847267822347995
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 40.191773908253836,
+              "average_cores": 1.6171853006896202,
+              "cpu_seconds_per_gbit": 0.694791222148726,
+              "rss_median_mib": 69.66796875,
+              "rss_peak_mib": 70.16796875,
+              "extra_copies": 0,
+              "frame_sent_bytes": 5849559568,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 371
+            },
+            "exit": {
+              "cpu_seconds": 47.2598085122426,
+              "average_cores": 1.9015798559642474,
+              "cpu_seconds_per_gbit": 0.816975637594155,
+              "rss_median_mib": 23.546875,
+              "rss_peak_mib": 24.50390625,
+              "extra_copies": 0,
+              "frame_sent_bytes": 8186976,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 6
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.511766859742881,
+          "tg_average_cores": 3.518765156653868,
+          "shared_vm_average_busy_cores": 5.081420440847098,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-release-abba/proxy-on2",
+          "capacity_analysis_sha256": "ab1180a6badf43af54ae0b59fd4c9843234dec598bd3e172167eb7abf4bdf409",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "fc18a5ec435d1f375726e137d1b8c66fd1ab62c2c39d056a89b8ea6a20d8dca2",
+            "exit-monitor.jsonl": "0f650a446dd1b9e47cac80fb95bc5453acde8a232f1de9b9115097c8bb289a64",
+            "https-probe-client.json": "03a03fcd02e6e2fcdceec91715e9ed0fd1b9cdd5a7c168f2316af6dd1492a77b",
+            "https-probe-server.json": "7b3c53232008f8ea99ac6528e97cec3df22f359aaa991a7506e7bb1d28abbd49",
+            "manifest.json": "a74e9197db7caf96cbe5bbd1f5d3bae60134ee483cb38b85e766c22e1d004d5e"
+          }
+        },
+        "proxy-off2": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.095699,
+            "received_mbps": 1688.783137921867,
+            "minimum_window_mbps": 578.1002649252167,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 578.1002649252172,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "tls_record_batch": false,
+            "retained_packets": 2048,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "ded1d3165003414ec96ad67541050bda0a0c815eb740cc62352c5ee743080999",
+          "cpu_span": {
+            "start": 1792708917.6971288,
+            "end": 1792708942.3672783,
+            "seconds": 24.670149564743042,
+            "receiver_gbit": 43.43983275530994
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 37.71456037199147,
+              "average_cores": 1.5287528060182756,
+              "cpu_seconds_per_gbit": 0.8682022461834032,
+              "rss_median_mib": 70.08203125,
+              "rss_peak_mib": 70.6171875,
+              "extra_copies": 0,
+              "frame_sent_bytes": 4445165912,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 371
+            },
+            "exit": {
+              "cpu_seconds": 43.538211667167914,
+              "average_cores": 1.7648134460193896,
+              "cpu_seconds_per_gbit": 1.0022647166348941,
+              "rss_median_mib": 29.62109375,
+              "rss_peak_mib": 30.1953125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 6831008,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.8704669628182975,
+          "tg_average_cores": 3.293566252037665,
+          "shared_vm_average_busy_cores": 4.58427351066829,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-release-abba/proxy-off2",
+          "capacity_analysis_sha256": "d3b6e0bbac5e5cf6be62bed01dc09196fda40c05a3f1cb5c6f2e27154de45d0c",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "f407c1a0c192fe5c5be489728c5f855eb7541a415357aaf280a278bb73d354bb",
+            "exit-monitor.jsonl": "3962e3d0a723e9f7ab418f0cf15defd53b7e3d7c9dfcd2219125f01e1c65b8c8",
+            "https-probe-client.json": "5a902a2b9e65963b02a0bd797f5a8e701b8a093cf3b75585122d61bc7dba4c7a",
+            "https-probe-server.json": "84ce20a49849eae1d9d4dc6e219eadb9e60c688ffd2073ff59dd9e98a0e30909",
+            "manifest.json": "bf0bd140c56da2d6b6d74c47fc798ebe9c6b2d56302a1f83ca80c3b880daa894"
+          }
+        },
+        "ip-off": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.041996,
+            "received_mbps": 1648.8327474652767,
+            "minimum_window_mbps": 1389.9236405753327,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1389.8988075771795,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "tls_record_batch": false,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "ded1d3165003414ec96ad67541050bda0a0c815eb740cc62352c5ee743080999",
+          "cpu_span": {
+            "start": 1792708977.1383772,
+            "end": 1792709001.8140206,
+            "seconds": 24.67564344406128,
+            "receiver_gbit": 40.558865832044376
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 53.741402167052875,
+              "average_cores": 2.1779128997743276,
+              "cpu_seconds_per_gbit": 1.3250223117578737,
+              "rss_median_mib": 50.9453125,
+              "rss_peak_mib": 52.24609375,
+              "extra_copies": 2076416,
+              "frame_sent_bytes": 7598085260,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8192
+            },
+            "exit": {
+              "cpu_seconds": 55.57986478981427,
+              "average_cores": 2.252418054094989,
+              "cpu_seconds_per_gbit": 1.370350566999885,
+              "rss_median_mib": 26.34375,
+              "rss_peak_mib": 27.51171875,
+              "extra_copies": 161,
+              "frame_sent_bytes": 34193456,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 69
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.695372878757759,
+          "tg_average_cores": 4.4303309538693165,
+          "shared_vm_average_busy_cores": 8.20288514147793,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-release-abba/ip-off",
+          "capacity_analysis_sha256": "2b1769ebb7576cbf27cbfde940b84daf0acfc54c3bdea7cc85bc2dd73fcf7c2d",
+          "raw_sha256": {
+            "both-probe-client.json": "618ff18b4192957328c38ff1b9494064ac981dc7095b6283c6eda1fb62ea03a5",
+            "both-probe-server.json": "4ab868ad4079b901032652c9caaf96d5e06e630252292ec36df533bb68b6168c",
+            "edge-monitor.jsonl": "f5ab6b08986625c9d112fdb734fafd2ccd3cfa26c5de687a2c7c8bdc4e241a42",
+            "exit-monitor.jsonl": "a0ea29590ac5a258c2ec8fc9c82b49acb693813640231341c62854f17ad1e3d0",
+            "manifest.json": "bb3ad3bb80f17118471fe7bcad7fa65c8e15e427d03eede0bf3ac5ea41a9b7c0"
+          }
+        },
+        "ip-on": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.042002,
+            "received_mbps": 1710.0905267931919,
+            "minimum_window_mbps": 1360.3225089997788,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1360.2959178877077,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "tls_record_batch": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "ded1d3165003414ec96ad67541050bda0a0c815eb740cc62352c5ee743080999",
+          "cpu_span": {
+            "start": 1792709035.4169116,
+            "end": 1792709060.0958166,
+            "seconds": 24.67890501022339,
+            "receiver_gbit": 41.158983339406824
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 52.01657318061637,
+              "average_cores": 2.107734243438604,
+              "cpu_seconds_per_gbit": 1.2637963564764285,
+              "rss_median_mib": 44.6484375,
+              "rss_peak_mib": 50.62890625,
+              "extra_copies": 2499793,
+              "frame_sent_bytes": 8325157196,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8056
+            },
+            "exit": {
+              "cpu_seconds": 55.01127493535036,
+              "average_cores": 2.229080865320467,
+              "cpu_seconds_per_gbit": 1.3365557278641755,
+              "rss_median_mib": 27.71484375,
+              "rss_peak_mib": 29.58203125,
+              "extra_copies": 168,
+              "frame_sent_bytes": 33654736,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 61
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.600352084340604,
+          "tg_average_cores": 4.336815108759071,
+          "shared_vm_average_busy_cores": 8.365228910866138,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-release-abba/ip-on",
+          "capacity_analysis_sha256": "949c577421ba0772199b4659ae73a461b303f96aeec180df3e7a4462e98e9559",
+          "raw_sha256": {
+            "both-probe-client.json": "caa0e98a6a1e9a0525ece5ecd8067fe11bc3841bd6c3244069636cc80804fbe7",
+            "both-probe-server.json": "2e383ed0a1fa52f1a2e907fed76ad2aa37927e747005a9ba0f02a5f3c213ef28",
+            "edge-monitor.jsonl": "bd883d37da10c823b24fa6533525cae4e6b365244a4e2d280d050e3b4481a72a",
+            "exit-monitor.jsonl": "fc7f9c790c692aef5490f71ee126900e8253200720b34336f1225955948269f2",
+            "manifest.json": "074ea482740020527e0e40c52b0ee5e613b7360b3e73d12208f88205f34750e4"
+          }
+        }
+      },
+      "plan_sha256": "32408a8a77b32934c837408992ab7d98b82caeb56c1ca8353feb32c29f2ea490",
+      "prototype_only": false
+    },
+    "tg-tls-read-lab-probes": {
+      "cases": {
+        "large-https": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.077785,
+            "received_mbps": 2187.0946846212605,
+            "minimum_window_mbps": 1845.5945714062882,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1845.5945714062864,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "tls_record_batch": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 50,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "c2ab3ce4a78a7ec709c65362986039767e05d2db21112c70186d61b9ffcc0d1d",
+          "cpu_span": {
+            "start": 1792711977.5598347,
+            "end": 1792712002.3664873,
+            "seconds": 24.806652545928955,
+            "receiver_gbit": 53.3151075354978
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 40.100085079165346,
+              "average_cores": 1.6165052904627477,
+              "cpu_seconds_per_gbit": 0.7521336246478778,
+              "rss_median_mib": 72.421875,
+              "rss_peak_mib": 73.36328125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 5429410848,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 370
+            },
+            "exit": {
+              "cpu_seconds": 46.67523755320346,
+              "average_cores": 1.881561305653204,
+              "cpu_seconds_per_gbit": 0.8754598782742126,
+              "rss_median_mib": 33.3046875,
+              "rss_peak_mib": 36.8125,
+              "extra_copies": 0,
+              "frame_sent_bytes": 7544848,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 6
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.6275935029220905,
+          "tg_average_cores": 3.498066596115952,
+          "shared_vm_average_busy_cores": 5.015413766203646,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-read-lab-probes/large-https",
+          "capacity_analysis_sha256": "ef6ec7e316764e5ea902527aeff03002022a4c3282776ac69903538d60e0b053",
+          "raw_sha256": {
+            "edge-monitor.jsonl": "41ceb8255c368380c112b305eaa0759a2d0fa82068015bf5f3fd9aef48b27ecc",
+            "exit-monitor.jsonl": "dc3d3a9c80e52d689a90923bdb08bd2c956cb992e090528378591278533dfdb9",
+            "https-probe-client.json": "bb868760174830595a08b458dad049bdc3d237f362cad446649542f8b49cc74e",
+            "https-probe-server.json": "1973879de5679d4e43ef0a92ff10642a7148d1a0b617a4611793520a18a5a631",
+            "manifest.json": "8c98e541e982c7c774258e6c7af652448e281fb06de1638bc65209b072d27c7c"
+          }
+        },
+        "large-both": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.05265,
+            "received_mbps": 3181.322858477803,
+            "minimum_window_mbps": 2375.251678379471,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 2375.2478762393853,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 60000,
+            "max_packet_bytes": 65507,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "tls_record_batch": true,
+            "retained_packets": 2048,
+            "replica_delay_ms": 50,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "c2ab3ce4a78a7ec709c65362986039767e05d2db21112c70186d61b9ffcc0d1d",
+          "cpu_span": {
+            "start": 1792712036.9855897,
+            "end": 1792712061.6338015,
+            "seconds": 24.64821171760559,
+            "receiver_gbit": 78.61720954358134
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 68.21354960732073,
+              "average_cores": 2.767484732314171,
+              "cpu_seconds_per_gbit": 0.8676668887555293,
+              "rss_median_mib": 77.15625,
+              "rss_peak_mib": 78.9453125,
+              "extra_copies": 103531,
+              "frame_sent_bytes": 14151994400,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 368
+            },
+            "exit": {
+              "cpu_seconds": 67.5640502119787,
+              "average_cores": 2.7411339607943814,
+              "cpu_seconds_per_gbit": 0.8594053465421545,
+              "rss_median_mib": 31.8984375,
+              "rss_peak_mib": 32.32421875,
+              "extra_copies": 0,
+              "frame_sent_bytes": 12685368,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 9
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 1.727072235297684,
+          "tg_average_cores": 5.508618693108553,
+          "shared_vm_average_busy_cores": 7.427823175671668,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-read-lab-probes/large-both",
+          "capacity_analysis_sha256": "cdc097b0b3bf463dc31dfdc4242d84ec8781558d08b0f54fb7cf46e681917591",
+          "raw_sha256": {
+            "both-probe-client.json": "987f633152ee815e6e7d7c66706d04a9f3b86b38392b30ab804193977db68e89",
+            "both-probe-server.json": "bebc5e3f3b06c7a30c570cf0ec1e6dfb683584ee41db4346e625adb6a45ef547",
+            "edge-monitor.jsonl": "181dc1e8aa0dbe1821c77bcf05aa436b5ca13d56ed84875c8691794ae9c2ad37",
+            "exit-monitor.jsonl": "d31fecb3cd21d4aa3512269438041e68a31a2714097239fddbbd73f41d00aa68",
+            "manifest.json": "c2e2fdc18519d3122cc8c48e09bd752f3e256f180b2043e367678cb847c87a67"
+          }
+        },
+        "ordinary-ip": {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 45.051771,
+            "received_mbps": 1680.2022224609107,
+            "minimum_window_mbps": 1466.5920758892746,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 1466.5861145140088,
+            "complete_one_second_intervals": 45,
+            "complete_one_second_below_target": 45,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "aggregate receiver bitrate below target",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "stream_packets": true,
+            "tls_record_batch": true,
+            "retained_packets": 8192,
+            "replica_delay_ms": 50,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "c2ab3ce4a78a7ec709c65362986039767e05d2db21112c70186d61b9ffcc0d1d",
+          "cpu_span": {
+            "start": 1792712095.236201,
+            "end": 1792712119.843263,
+            "seconds": 24.607061862945557,
+            "receiver_gbit": 41.441369371371096
+          },
+          "roles": {
+            "edge": {
+              "cpu_seconds": 50.91321123588641,
+              "average_cores": 2.0690487763008334,
+              "cpu_seconds_per_gbit": 1.2285600598675857,
+              "rss_median_mib": 52.12890625,
+              "rss_peak_mib": 53.37890625,
+              "extra_copies": 2087733,
+              "frame_sent_bytes": 7739360520,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8192
+            },
+            "exit": {
+              "cpu_seconds": 53.33987443587741,
+              "average_cores": 2.167665312216695,
+              "cpu_seconds_per_gbit": 1.2871165997889575,
+              "rss_median_mib": 29.26953125,
+              "rss_peak_mib": 29.82421875,
+              "extra_copies": 0,
+              "frame_sent_bytes": 35367768,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 29
+            }
+          },
+          "tg_cpu_seconds_per_gbit": 2.515676659656543,
+          "tg_average_cores": 4.2367140885175285,
+          "shared_vm_average_busy_cores": 8.082664033790342,
+          "cleanup_passed": true,
+          "scope": "Interior10s/5s exclusions; process ticks and interpolated common monitor wall-clock span mapped to receiver intervals using pre-launch timestamp. Small launch offset/clock skew is not corrected; diagnostic, not cycle-exact. Global Linux VM CPU including kernel workers and unrelated workloads; not TG attribution or physical Windows-host CPU.",
+          "evidence_directory": "work/tg-tls-read-lab-probes/ordinary-ip",
+          "capacity_analysis_sha256": "e8737ddf8405b4aa20aea71a8473bec6fb39c31fa2cad71cd413398ec645b66f",
+          "raw_sha256": {
+            "both-probe-client.json": "80795024f9a24c408bac0c780701ed83115e20062c7549bb14333777df4640ad",
+            "both-probe-server.json": "a270819cbb006c9a80bc16b6606918090b28222407dfd8fe6ddaa56bdd6f6890",
+            "edge-monitor.jsonl": "cf64026d0c2422a02e3d3047e08136850ee2d12a85a52c4b4a5b16e60e9c3421",
+            "exit-monitor.jsonl": "a69f20b3827b7ccde5424192bd5fcf8b4a82c0253e9b4d5d0c19104f91b194c2",
+            "manifest.json": "43c720c8bcfad48ac28ecde3ba7362a34c1e4699ba93e2765377c9acd2df29f4"
+          }
+        }
+      },
+      "plan_sha256": "408f5286879273c57b3be63e05f5c426f52e56305776ec38d85f320b46aa6f56",
+      "prototype_only": true
+    }
+  },
+  "current_fullpair_probe": {
+    "receiver": {
+      "passed": false,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 60.051993,
+      "received_mbps": 2855.852270814725,
+      "minimum_window_mbps": 1273.264579030191,
+      "window_seconds": 1.0,
+      "maximum_udp_interval_loss_percent": null,
+      "minimum_complete_one_second_mbps": 1273.264579030191,
+      "complete_one_second_intervals": 60,
+      "complete_one_second_below_target": 60,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [
+        "complete one-second receiver interval below target or absent",
+        "aggregate receiver bitrate below target",
+        "rolling receiver window below target or absent"
+      ]
+    },
+    "profile": {
+      "mtu": 60000,
+      "max_packet_bytes": 65507,
+      "stream_window_bytes": 0,
+      "stream_packets": true,
+      "tls_record_batch": true,
+      "retained_packets": 2048,
+      "replica_delay_ms": 50,
+      "gomaxprocs": 4,
+      "application_udp_gro": false,
+      "preferred_carrier": "https"
+    },
+    "roles": {
+      "edge": {
+        "cpu_seconds": 108.0293029183636,
+        "average_cores": 2.7059373022381883,
+        "cpu_seconds_per_gbit": 0.9675565843583611,
+        "rss_median_mib": 75.681640625,
+        "rss_peak_mib": 77.82421875,
+        "extra_copies": 153384,
+        "frame_sent_bytes": 21301051672,
+        "dropped": 0,
+        "app_errors": 0,
+        "gro_packets": 0,
+        "retained_peak": 371
+      },
+      "exit": {
+        "cpu_seconds": 107.78193578152154,
+        "average_cores": 2.6997412059490675,
+        "cpu_seconds_per_gbit": 0.9653410586117378,
+        "rss_median_mib": 36.623046875,
+        "rss_peak_mib": 37.31640625,
+        "extra_copies": 0,
+        "frame_sent_bytes": 20214120,
+        "dropped": 0,
+        "app_errors": 0,
+        "gro_packets": 0,
+        "retained_peak": 6
+      }
+    },
+    "binary_sha256": "ded1d3165003414ec96ad67541050bda0a0c815eb740cc62352c5ee743080999",
+    "tg_cpu_seconds_per_gbit": 1.9328976429700988,
+    "tg_average_cores": 5.405678508187256,
+    "shared_vm_average_busy_cores": 7.29035865926006,
+    "cleanup_passed": true
+  },
+  "native_jumbo_viability": {
+    "native-1420": {
+      "kind": "native",
+      "mtu": 1420,
+      "generators": 1,
+      "streams": 8,
+      "individual": [
+        {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 30.010328,
+          "received_mbps": 783.4251792249654,
+          "minimum_window_mbps": 676.207872,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 676.207872,
+          "complete_one_second_intervals": 30,
+          "complete_one_second_below_target": 30,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "aggregate receiver bitrate below target",
+            "rolling receiver window below target or absent"
+          ]
+        }
+      ],
+      "common_seconds": 20.0,
+      "receiver_common_mbps": 792.825368617388,
+      "minimum_weighted_common_second_mbps": 762.031967402087,
+      "seconds_below_8000": 20,
+      "nominal_rate_not_used_as_goodput": true,
+      "exact_synchronized_acceptance": false,
+      "raw_sha256": {
+        "client-0.json": "31687835895fe234e1e768390c84f6b6d2aab86f10cb166759a5751075dea995",
+        "server-0.json": "bd4a29ffc3dbfad86fa4e5574f1e1296ef2bf55187a819c7aa44b90952f205a7"
+      },
+      "ip_fragment_deltas": {
+        "edge": {
+          "ReasmTimeout": 0,
+          "ReasmReqds": 0,
+          "ReasmOKs": 0,
+          "ReasmFails": 0,
+          "FragOKs": 0,
+          "FragFails": 0,
+          "FragCreates": 0
+        },
+        "exit": {
+          "ReasmTimeout": 0,
+          "ReasmReqds": 0,
+          "ReasmOKs": 0,
+          "ReasmFails": 0,
+          "FragOKs": 0,
+          "FragFails": 0,
+          "FragCreates": 0
+        }
+      },
+      "actual_interface_mtu": {
+        "edge": {
+          "lo": 65536,
+          "eth0": 65535,
+          "wg-tg": 1420
+        },
+        "exit": {
+          "lo": 65536,
+          "eth0": 65535,
+          "wg-tg": 1420
+        }
+      }
+    },
+    "native-60000": {
+      "kind": "native",
+      "mtu": 60000,
+      "generators": 1,
+      "streams": 8,
+      "individual": [
+        {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 30.00046,
+          "received_mbps": 11999.719748297193,
+          "minimum_window_mbps": 10449.606502133804,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 10449.445643173447,
+          "complete_one_second_intervals": 30,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": []
+        }
+      ],
+      "common_seconds": 20.0,
+      "receiver_common_mbps": 12000.302108149335,
+      "minimum_weighted_common_second_mbps": 11858.597281536408,
+      "seconds_below_8000": 0,
+      "nominal_rate_not_used_as_goodput": true,
+      "exact_synchronized_acceptance": false,
+      "raw_sha256": {
+        "client-0.json": "a85f517ce2cd34dbba38d0fcba0d9ed7d90d56e995d647e982de53caea28880e",
+        "server-0.json": "035825a69326653476cea623f96b84102db7c9ba3f6ffb0ef3cbd9165e1c97ad"
+      },
+      "ip_fragment_deltas": {
+        "edge": {
+          "ReasmTimeout": 0,
+          "ReasmReqds": 0,
+          "ReasmOKs": 0,
+          "ReasmFails": 0,
+          "FragOKs": 0,
+          "FragFails": 0,
+          "FragCreates": 0
+        },
+        "exit": {
+          "ReasmTimeout": 0,
+          "ReasmReqds": 0,
+          "ReasmOKs": 0,
+          "ReasmFails": 0,
+          "FragOKs": 0,
+          "FragFails": 0,
+          "FragCreates": 0
+        }
+      },
+      "actual_interface_mtu": {
+        "edge": {
+          "lo": 65536,
+          "eth0": 65535,
+          "wg-tg": 60000
+        },
+        "exit": {
+          "lo": 65536,
+          "eth0": 65535,
+          "wg-tg": 60000
+        }
+      }
+    }
+  },
+  "native_scope": "Native WG60000 control used an OWN65535-MTU Docker bridge; it is not TG throughput or an Internet-sized packet test. Actual TG60000 probe observed eth1500/loopback65536 and zero cumulative IP-fragment counters at a live observation.",
+  "failed_setup": {
+    "case": "tg-packet-tuning/proxy-only-https",
+    "reason": "Redundant protocol needs two configured carriers. No speed trial ran; private resources cleaned. Replacement isolated HTTPS by blocking UDP with both carriers configured."
+  },
+  "prototype_peak": {
+    "mbps": 4853.228653656188,
+    "scope": "Disposable4-record TLS wrapper, HTTPS-only45s, not reproduced in subsequent ABBA, not released stable capacity."
+  },
+  "soak": {
+    "runtime_commit": "d44c4836c84a13e79735e8c3594f074b57c3876f",
+    "scope": "two isolated network namespaces on one Linux Docker VM; kernel WireGuard and TG; no WAN or DPI",
+    "primary_target_mbps": 800,
+    "original_milestone_target_mbps": 300,
+    "original_user_goal_mbps": 8000,
+    "goal_8000_accepted": false,
+    "harness_summary_passed": false,
+    "phases": {
+      "steady": {
+        "primary": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 1800.000932,
+          "received_mbps": 1000.0007648529373,
+          "minimum_window_mbps": 457.7070526577148,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 457.70705265773677,
+          "complete_one_second_intervals": 1800,
+          "complete_one_second_below_target": 29,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "original_milestone": {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 1800.000932,
+          "received_mbps": 1000.0007648529373,
+          "minimum_window_mbps": 457.7070526577148,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 457.70705265773677,
+          "complete_one_second_intervals": 1800,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": []
+        },
+        "independent_receiver_matches": true,
+        "complete_one_second_resolution_passed": true,
+        "sender_retransmissions": 70082,
+        "timing_observation": {
+          "host_elapsed_seconds": 1820.9631764888763,
+          "receiver_elapsed_seconds": 1800.000932,
+          "host_minus_receiver_seconds": 20.962244488876422,
+          "scope": "Host pre-launch/end timestamps include launch, polling and completion overhead and can diverge from guest receiver timing. This observation does not establish the cause of throughput dips. Per-cut alignment is diagnostic, not cycle-exact."
+        }
+      },
+      "faults": {
+        "primary": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.001743,
+          "received_mbps": 1000.0053630147347,
+          "minimum_window_mbps": 520.3785964291401,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 520.3785964291399,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 6,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "original_milestone": {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.001743,
+          "received_mbps": 1000.0053630147347,
+          "minimum_window_mbps": 520.3785964291401,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 520.3785964291399,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": []
+        },
+        "independent_receiver_matches": true,
+        "complete_one_second_resolution_passed": true,
+        "sender_retransmissions": 10145,
+        "timing_observation": {
+          "host_elapsed_seconds": 180.69158697128296,
+          "receiver_elapsed_seconds": 180.001743,
+          "host_minus_receiver_seconds": 0.6898439712829543,
+          "scope": "Host pre-launch/end timestamps include launch, polling and completion overhead and can diverge from guest receiver timing. This observation does not establish the cause of throughput dips. Per-cut alignment is diagnostic, not cycle-exact."
+        },
+        "recovery_passed": true
+      },
+      "all-path-faults": {
+        "primary": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.003677,
+          "received_mbps": 988.6727191689534,
+          "minimum_window_mbps": 0.0,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 0.0,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 13,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "original_milestone": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.003677,
+          "received_mbps": 988.6727191689534,
+          "minimum_window_mbps": 0.0,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 0.0,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 7,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "independent_receiver_matches": true,
+        "complete_one_second_resolution_passed": true,
+        "sender_retransmissions": 29526,
+        "timing_observation": {
+          "host_elapsed_seconds": 180.8491313457489,
+          "receiver_elapsed_seconds": 180.003677,
+          "host_minus_receiver_seconds": 0.845454345748891,
+          "scope": "Host pre-launch/end timestamps include launch, polling and completion overhead and can diverge from guest receiver timing. This observation does not establish the cause of throughput dips. Per-cut alignment is diagnostic, not cycle-exact."
+        },
+        "all_path_recoveries": {
+          "800": [
+            {
+              "clear_elapsed_seconds": 43.331323862075806,
+              "passed": true,
+              "five_interval_recovery_seconds": 6.668696137924194,
+              "deadline_seconds": 15,
+              "target_mbps": 800
+            },
+            {
+              "clear_elapsed_seconds": 103.23341703414917,
+              "passed": true,
+              "five_interval_recovery_seconds": 6.76664496585083,
+              "deadline_seconds": 15,
+              "target_mbps": 800
+            },
+            {
+              "clear_elapsed_seconds": 163.30342292785645,
+              "passed": true,
+              "five_interval_recovery_seconds": 6.696922072143565,
+              "deadline_seconds": 15,
+              "target_mbps": 800
+            }
+          ],
+          "300": [
+            {
+              "clear_elapsed_seconds": 43.331323862075806,
+              "passed": true,
+              "five_interval_recovery_seconds": 6.668696137924194,
+              "deadline_seconds": 15,
+              "target_mbps": 300
+            },
+            {
+              "clear_elapsed_seconds": 103.23341703414917,
+              "passed": true,
+              "five_interval_recovery_seconds": 6.76664496585083,
+              "deadline_seconds": 15,
+              "target_mbps": 300
+            },
+            {
+              "clear_elapsed_seconds": 163.30342292785645,
+              "passed": true,
+              "five_interval_recovery_seconds": 6.696922072143565,
+              "deadline_seconds": 15,
+              "target_mbps": 300
+            }
+          ]
+        },
+        "final_both_healthy": true,
+        "recovery_passed": true
+      }
+    },
+    "memory": {
+      "edge": {
+        "passed": true,
+        "failures": [],
+        "sample_count": 355,
+        "rss_early_median_mib": 24.4140625,
+        "rss_late_median_mib": 24.458984375,
+        "pss_early_median_mib": 20.505859375,
+        "pss_late_median_mib": 20.51953125,
+        "rss_peak_mib": 49.72265625,
+        "pss_peak_mib": 45.828125,
+        "rss_growth_mib": 0.044921875,
+        "pss_growth_mib": 0.013671875,
+        "pss_slope_mib_per_minute": 0.00600191051292411,
+        "rss_slope_mib_per_minute": 0.006279435467615284,
+        "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+      },
+      "exit": {
+        "passed": true,
+        "failures": [],
+        "sample_count": 355,
+        "rss_early_median_mib": 23.42578125,
+        "rss_late_median_mib": 23.12890625,
+        "pss_early_median_mib": 19.490234375,
+        "pss_late_median_mib": 19.189453125,
+        "rss_peak_mib": 32.40625,
+        "pss_peak_mib": 28.470703125,
+        "rss_growth_mib": -0.296875,
+        "pss_growth_mib": -0.30078125,
+        "pss_slope_mib_per_minute": -0.02458891695634692,
+        "rss_slope_mib_per_minute": -0.024311412712501295,
+        "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+      }
+    },
+    "per_cut_timing_scope": "Host-timed path restoration mapped to receiver intervals using pre-launch time; one-second conservative exclusion, not cycle-exact outage latency.",
+    "continuity": {
+      "edge": {
+        "process_stable": true,
+        "app_socket_stable": true,
+        "observed_wireguard_handshakes": 19
+      },
+      "exit": {
+        "process_stable": true,
+        "app_socket_stable": true,
+        "observed_wireguard_handshakes": 19
+      }
+    },
+    "fault_memory": {
+      "edge": {
+        "growth_mib": {
+          "rss_kib": 1.2734375,
+          "pss_kib": 1.2734375
+        },
+        "passed": true,
+        "rss_peak_mib": 49.72265625
+      },
+      "exit": {
+        "growth_mib": {
+          "rss_kib": 2.30078125,
+          "pss_kib": 2.30078125
+        },
+        "passed": true,
+        "rss_peak_mib": 32.40625
+      }
+    },
+    "container_memory_observation": {
+      "edge": {
+        "early_median_mib": 42.8359375,
+        "late_median_mib": 62.27734375,
+        "peak_mib": 93.68359375,
+        "scope": "Container charged memory including monitored processes and charged kernel/socket memory; not physical host memory or a leak-free proof."
+      },
+      "exit": {
+        "early_median_mib": 48.45703125,
+        "late_median_mib": 62.40625,
+        "peak_mib": 78.3046875,
+        "scope": "Container charged memory including monitored processes and charged kernel/socket memory; not physical host memory or a leak-free proof."
+      }
+    },
+    "qos_activity_passed": true,
+    "loaded_latency": {
+      "scope": "1500 ICMP probes at 1Hz through the actual kernel WireGuard/TG path during bulk TCP; secondary latency observation, not WAN/DPI evidence",
+      "samples": 1500,
+      "transmitted": 1500,
+      "received": 1500,
+      "loss_percent": 0.0,
+      "minimum_ms": 0.417,
+      "mean_ms": 5.558765333333334,
+      "median_ms": 1.755,
+      "maximum_ms": 193.0,
+      "p95_ms": 27.0,
+      "percentile_method": "nearest rank of 1500 rounded reply RTT samples",
+      "target_median_ms": 20,
+      "target_p95_ms": 30,
+      "raw_log_sha256": "3fa278fe0b00fd42aa321c83f766b9c24c210c25aaef61ba919cf311619aec4f",
+      "metadata_sha256": "768b407209e962ebff27de039d46abce19636bf5d745d3cfc0bd97c1ebb5a1e4",
+      "start": 1792709364.8430505,
+      "end": 1792710892.0694568,
+      "low_latency_target_passed": true,
+      "rtt_stddev_ms": 13.3933087615022,
+      "adjacent_rtt_delta_mean_ms": 3.943376917945297,
+      "adjacent_rtt_delta_p95_ms": 16.985,
+      "variation_scope": "Population RTT standard deviation and absolute adjacent 1Hz ICMP RTT differences; a round-trip variation proxy, not one-way IP delay variation or RTP/UDP stream jitter.",
+      "within_requested_load": true,
+      "load_case": "steady",
+      "within_steady_load": true,
+      "numeric_latency_target_passed": true,
+      "passed": true,
+      "conservative_steady_coverage": true
+    },
+    "auxiliary_fault_latency": {
+      "faults": {
+        "scope": "Prospective auxiliary diagnostic; primary soak gate unchanged. Intentional all-path blocks may fail the normal zero-loss latency target.",
+        "samples": 170,
+        "transmitted": 170,
+        "received": 170,
+        "loss_percent": 0.0,
+        "minimum_ms": 0.467,
+        "mean_ms": 4.812088235294118,
+        "median_ms": 1.78,
+        "maximum_ms": 45.1,
+        "p95_ms": 22.2,
+        "percentile_method": "nearest rank of 170 rounded reply RTT samples",
+        "target_median_ms": 20,
+        "target_p95_ms": 30,
+        "raw_log_sha256": "7144cd19482d28c56283235a87e1ee3cfd5e817dba7a5995d026116bbc185fc2",
+        "metadata_sha256": "4c81e62a737e3ce88f1195b6d6dec965e47b7a767260be851f87b1d906782d37",
+        "start": 1792711187.181984,
+        "end": 1792711358.0118873,
+        "low_latency_target_passed": true,
+        "rtt_stddev_ms": 7.5727163079340185,
+        "adjacent_rtt_delta_mean_ms": 3.280887573964497,
+        "adjacent_rtt_delta_p95_ms": 20.31,
+        "variation_scope": "Population RTT standard deviation and absolute adjacent 1Hz ICMP RTT differences; a round-trip variation proxy, not one-way IP delay variation or RTP/UDP stream jitter.",
+        "within_requested_load": true,
+        "load_case": "faults",
+        "numeric_latency_target_passed": true
+      },
+      "all-path-faults": {
+        "scope": "Prospective auxiliary diagnostic; primary soak gate unchanged. Intentional all-path blocks may fail the normal zero-loss latency target.",
+        "samples": 170,
+        "transmitted": 170,
+        "received": 170,
+        "loss_percent": 0.0,
+        "minimum_ms": 0.472,
+        "mean_ms": 74.60813529411764,
+        "median_ms": 1.585,
+        "maximum_ms": 2677.0,
+        "p95_ms": 28.2,
+        "percentile_method": "nearest rank of 170 rounded reply RTT samples",
+        "target_median_ms": 20,
+        "target_p95_ms": 30,
+        "raw_log_sha256": "d60234a92910e09a0a36097b23a3c5bc1c1eb71f84692fac6185799e6591579c",
+        "metadata_sha256": "2ae4e994186f0387a43692f723e328a4fb388442ad0a2599fbc2a5097fd70dd1",
+        "start": 1792711369.0538752,
+        "end": 1792711539.2683942,
+        "low_latency_target_passed": true,
+        "rtt_stddev_ms": 359.91895509523584,
+        "adjacent_rtt_delta_mean_ms": 85.84112426035503,
+        "adjacent_rtt_delta_p95_ms": 964.7,
+        "variation_scope": "Population RTT standard deviation and absolute adjacent 1Hz ICMP RTT differences; a round-trip variation proxy, not one-way IP delay variation or RTP/UDP stream jitter.",
+        "within_requested_load": true,
+        "load_case": "all-path-faults",
+        "numeric_latency_target_passed": true
+      }
+    },
+    "cleanup_passed": true,
+    "speed_memory_recovery_passed": false,
+    "passed": false,
+    "original_300_milestone_passed": true,
+    "receipt_sha256": {
+      "all-path-faults-acceptance.json": "1811e469fd8343faf81908f6a6ae8ea7e54dc99c8cc52c611b10acf9f26550da",
+      "all-path-faults-client.json": "715cb98fcbe029b544203e6736e9be4a46e20f97d5fa0e23dc5e97f2ba18734c",
+      "all-path-faults-server.json": "b49fae945e9ff3832969a94f6919414dea3f5a875d375c8e432f17aeff19e646",
+      "cleanup.json": "7e3dca7704c3410b4b489f40b9f9e81818241d72e27c49284c522a136ee7b5a9",
+      "cpu-analysis.json": "2d0e90c1d4b14aa77708feb7b533d688c24fec507a019673231c1fc0e9351bd6",
+      "edge-monitor.jsonl": "2058b5d40685cdc08b182724f2e1b412d63fdde3b65038a2295a4a04ccfe32a1",
+      "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "edge-qos-start.json": "86cf20691a915ba616ba8ae61cbcefa6b3f981b7f06a34bf5b13db05d3be18a6",
+      "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+      "edge-udp-socket-memory.txt": "165a364825d62d470ab5624aefa3620259415ffa6b848bc840a11433d7ed280d",
+      "events.json": "35baf794ee9b86ed2571b9124dd0480b42218b834298f2a23b8c1000cbff787a",
+      "exit-monitor.jsonl": "0dec7543843fe0c639036a387f5b70987dedd8c026d803e27dc7f1222fea32fa",
+      "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "exit-qos-start.json": "86cf20691a915ba616ba8ae61cbcefa6b3f981b7f06a34bf5b13db05d3be18a6",
+      "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+      "exit-udp-socket-memory.txt": "86bb71b6513f30961e9ec9d8353294dc4accb839f390b2fcd4d4ac1d5cd6ef6f",
+      "fault-ping-prospective-plan.json": "03e9ad36b0bd013f8c07726e8b875126a845272219b115da3f93bbe2a046fb2f",
+      "faults-acceptance.json": "1fb6d2ddab959b628a0b6f8820ca38130856abc789f915f44e5b96a85ef736e9",
+      "faults-client.json": "f51bb68fcd222b7e66011fff9b5c7e94c974defedfaa226ef25a08473234b839",
+      "faults-server.json": "6efe65db38e6abc79205854f0553025259ec32708c5449904fefef6c7e0e5c07",
+      "lab-config-summary.json": "46e8ce3b85db6f114887f8e898354979ec0e5a5ad6a52ef05adb442dde7a9680",
+      "live-receiver-io.jsonl": "58e3773323b5a0ca05f362bc562d6d0f0de2449de7eac3942c58ba9178e2b1ed",
+      "loaded-ping-analysis.json": "4f1c3323129623fb6abc4fbe982e69267d1694f9dcb11325fcb2af0f6c53122f",
+      "manifest.json": "d3d397091c81fd5e4db7cfb54684fb06a7dfc0b0c5527d38979d25d5e8f34103",
+      "ping-under-all-path-cuts-analysis.json": "cce95b0c12a52bd3e6b2588b55e5012d0e3a36b58ab4b736d882449d8257d74f",
+      "ping-under-all-path-cuts-driver.log": "20cab6b0a29a43c1d146240747a10d418d709c5c476a7f0bd89f29b28bb0ddb0",
+      "ping-under-all-path-cuts-plan.json": "375966ff74750cd8b7b372219cc0670e72210d8a0560a31f1103e117240f4b10",
+      "ping-under-all-path-cuts.json": "2ae4e994186f0387a43692f723e328a4fb388442ad0a2599fbc2a5097fd70dd1",
+      "ping-under-all-path-cuts.log": "d60234a92910e09a0a36097b23a3c5bc1c1eb71f84692fac6185799e6591579c",
+      "ping-under-bulk-load-plan.json": "ea89fb8db573fd666ee477246f78df0640ea6dad77a42ee76dcbaa3a7d5e2bc4",
+      "ping-under-bulk-load.json": "768b407209e962ebff27de039d46abce19636bf5d745d3cfc0bd97c1ebb5a1e4",
+      "ping-under-bulk-load.log": "3fa278fe0b00fd42aa321c83f766b9c24c210c25aaef61ba919cf311619aec4f",
+      "ping-under-single-path-cuts-analysis.json": "fbe18d78f9c7bcfb4f126c9bb375058b3d665434e760dfcabc5d1249651329a2",
+      "ping-under-single-path-cuts-driver.log": "cc2717ed7a9c85571c0a52b519177c40c0e6653aac6d38b2fa18c63cd8c78bd7",
+      "ping-under-single-path-cuts-plan.json": "c21d4ed9c617c954c39ac8a9bc1a828815ac5e2062babb7226630309ee973ab9",
+      "ping-under-single-path-cuts.json": "4c81e62a737e3ce88f1195b6d6dec965e47b7a767260be851f87b1d906782d37",
+      "ping-under-single-path-cuts.log": "7144cd19482d28c56283235a87e1ee3cfd5e817dba7a5995d026116bbc185fc2",
+      "progress.json": "4960411a72e6d991716ca6c0797814f3b0f00e6f06f02e48a0d627ae59bf4057",
+      "prospective-control-plan.json": "564f60ed373cccd35e73ed6e85560b612febb91a9b86181d064d1314c62d32b5",
+      "steady-acceptance.json": "49beaaad099443106e195a13e218e69a432dbd475e621f96bcb98c63bde049b9",
+      "steady-client.json": "f6126d720d1b64dd6a9e6f33704572ad42181a0ca8d4c6a5d91fc1e7c53cd9a8",
+      "steady-server.json": "224734cdcf45dfd6ea9390f32ab0abed41105279efbfba5a754c73e6cfbcc822",
+      "summary.json": "f29abb6917389820cd4c8c1444875129c92dc0988435862dbc81b82d8d11fb6e"
+    }
+  },
+  "soak_cpu": {
+    "begin": 1792709659.3396237,
+    "end": 1792711154.3396237,
+    "seconds": 1495.0,
+    "receiver_gbit": 1494.999179151033,
+    "roles": {
+      "edge": {
+        "cpu_seconds": 2017.2222316126383,
+        "average_cores": 1.3493125295067814,
+        "cpu_seconds_per_gbit": 1.3493132703645767
+      },
+      "exit": {
+        "cpu_seconds": 2168.217106258846,
+        "average_cores": 1.450312445658091,
+        "cpu_seconds_per_gbit": 1.4503132419712188
+      }
+    },
+    "phase_host_elapsed_seconds": 1820.9631764888763,
+    "phase_receiver_elapsed_seconds": 1800.000932,
+    "host_minus_receiver_elapsed_seconds": 20.962244488876422,
+    "scope": "TG /proc PID CPU ticks after first five minutes; receiver bytes are mapped to monitor wall-clock times using pre-launch time. Launch/end overhead and guest/host clock divergence are not corrected; inspect the recorded whole-phase timing difference. This is an approximate diagnostic, not exact cycle attribution. Global Linux CPU counted once includes kernel/iperf/foreign work; not physical Windows-host CPU. No CPU comparison is inferred against a different packet/profile experiment.",
+    "tg_cpu_seconds_per_gbit": 2.7996265123357955,
+    "tg_average_cores": 2.799624975164872,
+    "shared_vm_average_busy_cores": 6.375845090459272,
+    "receipt_sha256": {
+      "manifest.json": "d3d397091c81fd5e4db7cfb54684fb06a7dfc0b0c5527d38979d25d5e8f34103",
+      "steady-server.json": "224734cdcf45dfd6ea9390f32ab0abed41105279efbfba5a754c73e6cfbcc822",
+      "steady-acceptance.json": "49beaaad099443106e195a13e218e69a432dbd475e621f96bcb98c63bde049b9",
+      "edge-monitor.jsonl": "2058b5d40685cdc08b182724f2e1b412d63fdde3b65038a2295a4a04ccfe32a1",
+      "exit-monitor.jsonl": "0dec7543843fe0c639036a387f5b70987dedd8c026d803e27dc7f1222fea32fa"
+    }
+  },
+  "verification": {
+    "runtime_commit": "d44c4836c84a13e79735e8c3594f074b57c3876f",
+    "performance_analysis_passed": false,
+    "source_and_binary_identity_passed": true,
+    "correctness_checks": [
+      {
+        "check": "go-race",
+        "exit_code": 0
+      },
+      {
+        "check": "go-vet",
+        "exit_code": 0
+      },
+      {
+        "check": "python-acceptance",
+        "exit_code": 0
+      },
+      {
+        "check": "python-wgsoak",
+        "exit_code": 0
+      },
+      {
+        "check": "diff-check",
+        "exit_code": 0
+      }
+    ]
+  },
+  "historical_scope": "Earlier accepted300Mbps milestones and b772 failed latency-coverage/later speed control remain in their existing reports; they do not certify this revision.",
+  "remaining": "Stable8Gbps/10Gbps for ordinary IP and proxy traffic is unachieved. Current local results do not establish a physical-server ceiling or filtering resilience. Long test offers1Gbps and gates800Mbps plus the separately predeclared original 300 Mbps milestone."
+}

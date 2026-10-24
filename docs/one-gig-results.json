@@ -1,0 +1,3117 @@
+{
+  "runtime_commit": "e9feb4fb4cb91f5b878f041dfe52edc362295102",
+  "runtime_sources_unchanged": true,
+  "current_goal": "About1Gbps aggregate with low gamingRTT/variation and bounded whole-stack resources; current priority supersedes prior8Gbps milestone.",
+  "plan": {
+    "receiver_floor_mbps": 950,
+    "expected_offered_mbps": 1050,
+    "ordered": false,
+    "replica_delay_ms": 0,
+    "gomaxprocs": 2,
+    "charged_pair_growth_limit_mib": 64,
+    "charged_pair_slope_limit_mib_min": 1,
+    "icmp_median_ms": 20,
+    "icmp_p95_ms": 30,
+    "icmp_adjacent_delta_p95_ms": 10,
+    "loss_percent": 0,
+    "source_sha256": "2252065c7de26c5dc0ecc59f14aa4e7a19fd419ae97fdccce61de556ff5e667f"
+  },
+  "configuration": {
+    "edge": {
+      "auto_upgrade": false,
+      "redundant": true,
+      "ordered_output": false,
+      "replica_delay_ms": 0,
+      "app_pacing_mbps": 0,
+      "app_udp_gro": false,
+      "queue_frames": 1024,
+      "max_packet_bytes": 2048,
+      "probe_interval_ms": 1000,
+      "probe_timeout_ms": 4000,
+      "hold_down_ms": 5000,
+      "carriers": [
+        {
+          "name": "web",
+          "kind": "https-connect",
+          "cost_ms": 0
+        },
+        {
+          "name": "udp",
+          "kind": "quic-stream",
+          "cost_ms": 20
+        }
+      ],
+      "retained_packets": 8192,
+      "stream_window_bytes": 0,
+      "stream_packets": true,
+      "tls_record_batch": true
+    },
+    "exit": {
+      "auto_upgrade": false,
+      "redundant": true,
+      "ordered_output": false,
+      "replica_delay_ms": 0,
+      "app_pacing_mbps": 0,
+      "app_udp_gro": false,
+      "queue_frames": 1024,
+      "max_packet_bytes": 2048,
+      "probe_interval_ms": 1000,
+      "probe_timeout_ms": 4000,
+      "hold_down_ms": 5000,
+      "carriers": [
+        {
+          "name": "web",
+          "kind": "https-connect",
+          "cost_ms": 0
+        },
+        {
+          "name": "udp",
+          "kind": "quic-stream",
+          "cost_ms": 20
+        }
+      ],
+      "retained_packets": 8192,
+      "stream_window_bytes": 0,
+      "stream_packets": true,
+      "tls_record_batch": true
+    }
+  },
+  "phases": {
+    "steady": {
+      "receiver": {
+        "passed": false,
+        "protocol": "TCP",
+        "scope": "receiver_application_goodput",
+        "seconds": 1800.003327,
+        "received_mbps": 1050.0001058986932,
+        "minimum_window_mbps": 300.6640550654297,
+        "window_seconds": 1,
+        "maximum_udp_interval_loss_percent": null,
+        "minimum_complete_one_second_mbps": 298.3390296808005,
+        "complete_one_second_intervals": 1800,
+        "complete_one_second_below_target": 253,
+        "maximum_udp_interval_jitter_ms": null,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "latency": {
+        "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+        "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+        "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+        "requested": 1700,
+        "transmitted": 1700,
+        "received": 1698,
+        "loss_percent": 0.11764705882352941,
+        "monotonic_elapsed_seconds": 1699.822559888,
+        "wall_elapsed_seconds": 1728.482419306,
+        "wall_minus_monotonic_elapsed_seconds": 28.659859418,
+        "start_monotonic_ns": 113609484844167,
+        "end_monotonic_ns": 115309307404055,
+        "start_wall_ns": 1792727965062234809,
+        "end_wall_ns": 1792729693544654115,
+        "interval_seconds": 1,
+        "reply_timeout_seconds": 5,
+        "median_ms": 8.3003065,
+        "p95_ms": 30.843256,
+        "maximum_ms": 90.547026,
+        "rtt_stddev_ms": 10.662627088166312,
+        "adjacent_rtt_delta_p95_ms": 20.702649,
+        "ignored": 0,
+        "duplicates": 0,
+        "late_after_timeout": 0,
+        "numeric_latency_and_variation_passed": false,
+        "within_requested_load": true,
+        "low_latency_target_passed": false
+      },
+      "roles": {
+        "edge": {
+          "tg_average_cores": 1.2819097771497685,
+          "all_container_average_cores": 1.43293896779107,
+          "charged_memory_median_mib": 76.3828125,
+          "charged_memory_peak_mib": 110.00390625,
+          "tg_rss_median_mib": 24.5859375,
+          "tg_retained_peak": 2479,
+          "process_stable": true,
+          "app_errors": 0,
+          "dropped": 0,
+          "app_udp_kernel_drops": 49090,
+          "app_udp_socket_inode_stable": true,
+          "udp_receive_buffer_errors": 49090
+        },
+        "exit": {
+          "tg_average_cores": 1.3941280239666884,
+          "all_container_average_cores": 1.6562534896600094,
+          "charged_memory_median_mib": 61.67578125,
+          "charged_memory_peak_mib": 76.27734375,
+          "tg_rss_median_mib": 24.0,
+          "tg_retained_peak": 210,
+          "process_stable": true,
+          "app_errors": 0,
+          "dropped": 0,
+          "app_udp_kernel_drops": 0,
+          "app_udp_socket_inode_stable": true,
+          "udp_receive_buffer_errors": 0
+        }
+      },
+      "all_container_average_cores": 3.0891924574510794,
+      "shared_vm_average_busy_cores": 7.054149824561139,
+      "pair_charged_memory_median_sum_mib": 138.05859375,
+      "cpu_span_seconds": 1782.0,
+      "cpu_clock": "Linux MONOTONIC",
+      "cleanup_passed": true,
+      "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+      "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+      "profile": {
+        "gomaxprocs": 2,
+        "replica_delay_ms": 0,
+        "wg_qos_mbps": 0,
+        "application_pacing_mbps": 0,
+        "mtu": 1500,
+        "offered_aggregate_mbps": 1050.0
+      },
+      "local_short_acceptance_passed": false,
+      "whole_shared_vm_memory": {
+        "total_mib": 20000.63671875,
+        "used_median_mib": 2500.134765625,
+        "used_peak_mib": 5699.66015625,
+        "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+      },
+      "tg_monotonic_memory": {
+        "edge": {
+          "passed": true,
+          "failures": [],
+          "sample_count": 358,
+          "rss_early_median_mib": 24.5,
+          "rss_late_median_mib": 25.37109375,
+          "pss_early_median_mib": 20.751953125,
+          "pss_late_median_mib": 21.6015625,
+          "rss_peak_mib": 30.83984375,
+          "pss_peak_mib": 27.0703125,
+          "rss_growth_mib": 0.87109375,
+          "pss_growth_mib": 0.849609375,
+          "pss_slope_mib_per_minute": 0.024665212327378096,
+          "rss_slope_mib_per_minute": 0.02554467545446705,
+          "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+        },
+        "exit": {
+          "passed": true,
+          "failures": [],
+          "sample_count": 359,
+          "rss_early_median_mib": 23.892578125,
+          "rss_late_median_mib": 24.767578125,
+          "pss_early_median_mib": 20.14453125,
+          "pss_late_median_mib": 20.998046875,
+          "rss_peak_mib": 28.3515625,
+          "pss_peak_mib": 24.58203125,
+          "rss_growth_mib": 0.875,
+          "pss_growth_mib": 0.853515625,
+          "pss_slope_mib_per_minute": 0.034123459080331875,
+          "rss_slope_mib_per_minute": 0.03499821600755234,
+          "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+        }
+      },
+      "whole_pair_charged_memory": {
+        "early_median_mib": 123.94208564197599,
+        "late_median_mib": 167.48607052397165,
+        "growth_mib": 43.543984881995655,
+        "slope_mib_per_minute": 1.7946511044865214,
+        "peak_after_warmup_mib": 181.1824284766962,
+        "sample_count": 301,
+        "passed": false,
+        "scope": "Sum of two private cgroup memory.current samples, interpolated on a common monotonic5s grid. Includes TG, iperf, monitor, charged kernel and sockets; uncharged global kernel allocations are not attributable."
+      },
+      "local_long_acceptance_passed": false,
+      "game": {
+        "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+        "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+        "requested_seconds": 1788,
+        "start_monotonic_ns": 113609488659794,
+        "end_monotonic_ns": 115397495412397,
+        "sent": 87311,
+        "received": 87244,
+        "lost": 67,
+        "send_errors": 0,
+        "ignored": 0,
+        "loss_percent": 0.07673718088213398,
+        "missed_scheduler_slots": 223,
+        "maximum_pending": 7,
+        "maximum_reply_gap_ms": 161.471318,
+        "median_ms": 8.577947000000002,
+        "p95_ms": 31.019632,
+        "maximum_ms": 143.800977,
+        "adjacent_rtt_delta_p95_ms": 13.390003,
+        "probe_hz": 50,
+        "payload_bytes": 128,
+        "gaming_gate_passed": false,
+        "within_requested_load": true,
+        "independent_rows_verified": true,
+        "actual_average_send_hz": 48.83155344376354,
+        "send_interval_median_ms": 20.165247,
+        "send_interval_p95_ms": 21.492093,
+        "send_interval_maximum_ms": 164.953664,
+        "adjacent_variation_samples": 87189,
+        "out_of_order_replies": 0,
+        "all_gaming_gates_passed": false,
+        "row_sha256": "8a71077c897663e8037be3039280a68ddae3923791c781d2633c89b95766e3c1",
+        "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+      },
+      "original_300_secondary": {
+        "passed": false,
+        "protocol": "TCP",
+        "scope": "receiver_application_goodput",
+        "seconds": 1800.003327,
+        "received_mbps": 1050.0001058986932,
+        "minimum_window_mbps": 300.6640550654297,
+        "window_seconds": 1,
+        "maximum_udp_interval_loss_percent": null,
+        "minimum_complete_one_second_mbps": 298.3390296808005,
+        "complete_one_second_intervals": 1800,
+        "complete_one_second_below_target": 1,
+        "maximum_udp_interval_jitter_ms": null,
+        "failures": [
+          "complete one-second receiver interval below target or absent"
+        ]
+      },
+      "end_to_end_gaming_passed": false
+    },
+    "faults": {
+      "receiver": {
+        "passed": false,
+        "protocol": "TCP",
+        "scope": "receiver_application_goodput",
+        "seconds": 180.01916,
+        "received_mbps": 1046.7954270645414,
+        "minimum_window_mbps": 335.7813107288666,
+        "window_seconds": 1,
+        "maximum_udp_interval_loss_percent": null,
+        "minimum_complete_one_second_mbps": 335.5885424744311,
+        "complete_one_second_intervals": 180,
+        "complete_one_second_below_target": 45,
+        "maximum_udp_interval_jitter_ms": null,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "latency": {
+        "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+        "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+        "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+        "requested": 168,
+        "transmitted": 168,
+        "received": 165,
+        "loss_percent": 1.7857142857142858,
+        "monotonic_elapsed_seconds": 167.114828618,
+        "wall_elapsed_seconds": 169.030753715,
+        "wall_minus_monotonic_elapsed_seconds": 1.915925097,
+        "start_monotonic_ns": 115411234614062,
+        "end_monotonic_ns": 115578349442680,
+        "start_wall_ns": 1792729795467113298,
+        "end_wall_ns": 1792729964497867013,
+        "interval_seconds": 1,
+        "reply_timeout_seconds": 5,
+        "median_ms": 14.0562,
+        "p95_ms": 44.60134,
+        "maximum_ms": 68.437284,
+        "rtt_stddev_ms": 13.665629697710148,
+        "adjacent_rtt_delta_p95_ms": 24.475322,
+        "ignored": 0,
+        "duplicates": 0,
+        "late_after_timeout": 0,
+        "numeric_latency_and_variation_passed": false,
+        "within_requested_load": true,
+        "low_latency_target_passed": false
+      },
+      "roles": {
+        "edge": {
+          "tg_average_cores": 1.197097779827018,
+          "all_container_average_cores": 1.3513925407745957,
+          "charged_memory_median_mib": 71.716796875,
+          "charged_memory_peak_mib": 83.33203125,
+          "tg_rss_median_mib": 26.14453125,
+          "tg_retained_peak": 2440,
+          "process_stable": true,
+          "app_errors": 0,
+          "dropped": 0,
+          "app_udp_kernel_drops": 4003,
+          "app_udp_socket_inode_stable": true,
+          "udp_receive_buffer_errors": 4003
+        },
+        "exit": {
+          "tg_average_cores": 1.2881739688207925,
+          "all_container_average_cores": 1.5547910790190844,
+          "charged_memory_median_mib": 52.427734375,
+          "charged_memory_peak_mib": 57.9609375,
+          "tg_rss_median_mib": 24.421875,
+          "tg_retained_peak": 216,
+          "process_stable": true,
+          "app_errors": 0,
+          "dropped": 0,
+          "app_udp_kernel_drops": 0,
+          "app_udp_socket_inode_stable": true,
+          "udp_receive_buffer_errors": 0
+        }
+      },
+      "all_container_average_cores": 2.90618361979368,
+      "shared_vm_average_busy_cores": 7.11743949878455,
+      "pair_charged_memory_median_sum_mib": 124.14453125,
+      "cpu_span_seconds": 162.0,
+      "cpu_clock": "Linux MONOTONIC",
+      "cleanup_passed": true,
+      "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+      "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+      "profile": {
+        "gomaxprocs": 2,
+        "replica_delay_ms": 0,
+        "wg_qos_mbps": 0,
+        "application_pacing_mbps": 0,
+        "mtu": 1500,
+        "offered_aggregate_mbps": 1050.0
+      },
+      "local_short_acceptance_passed": false,
+      "whole_shared_vm_memory": {
+        "total_mib": 20000.63671875,
+        "used_median_mib": 2710.0390625,
+        "used_peak_mib": 4604.1875,
+        "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+      },
+      "game": {
+        "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+        "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+        "requested_seconds": 168,
+        "start_monotonic_ns": 115411243194776,
+        "end_monotonic_ns": 115579265778078,
+        "sent": 8120,
+        "received": 8111,
+        "lost": 9,
+        "send_errors": 0,
+        "ignored": 0,
+        "loss_percent": 0.11083743842364532,
+        "missed_scheduler_slots": 42,
+        "maximum_pending": 7,
+        "maximum_reply_gap_ms": 126.974133,
+        "median_ms": 13.999721,
+        "p95_ms": 44.019429,
+        "maximum_ms": 181.145699,
+        "adjacent_rtt_delta_p95_ms": 15.855813999999999,
+        "probe_hz": 50,
+        "payload_bytes": 128,
+        "gaming_gate_passed": false,
+        "within_requested_load": true,
+        "independent_rows_verified": true,
+        "actual_average_send_hz": 48.33016974183662,
+        "send_interval_median_ms": 20.17469,
+        "send_interval_p95_ms": 22.231173,
+        "send_interval_maximum_ms": 92.467698,
+        "adjacent_variation_samples": 8102,
+        "out_of_order_replies": 0,
+        "all_gaming_gates_passed": false,
+        "row_sha256": "66852ba51eae977e401d027e6e80c45391b4490f5935ac59a19846141894bf7b",
+        "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+      },
+      "original_300_secondary": {
+        "passed": true,
+        "protocol": "TCP",
+        "scope": "receiver_application_goodput",
+        "seconds": 180.01916,
+        "received_mbps": 1046.7954270645414,
+        "minimum_window_mbps": 335.7813107288666,
+        "window_seconds": 1,
+        "maximum_udp_interval_loss_percent": null,
+        "minimum_complete_one_second_mbps": 335.5885424744311,
+        "complete_one_second_intervals": 180,
+        "complete_one_second_below_target": 0,
+        "maximum_udp_interval_jitter_ms": null,
+        "failures": []
+      },
+      "end_to_end_gaming_passed": false
+    },
+    "all-path-faults": {
+      "receiver": {
+        "passed": false,
+        "protocol": "TCP",
+        "scope": "receiver_application_goodput",
+        "seconds": 180.004171,
+        "received_mbps": 1049.9963071189056,
+        "minimum_window_mbps": 0.0,
+        "window_seconds": 1,
+        "maximum_udp_interval_loss_percent": null,
+        "minimum_complete_one_second_mbps": 0.0,
+        "complete_one_second_intervals": 180,
+        "complete_one_second_below_target": 23,
+        "maximum_udp_interval_jitter_ms": null,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "latency": {
+        "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+        "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+        "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+        "requested": 168,
+        "transmitted": 168,
+        "received": 168,
+        "loss_percent": 0.0,
+        "monotonic_elapsed_seconds": 167.086091376,
+        "wall_elapsed_seconds": 170.386403072,
+        "wall_minus_monotonic_elapsed_seconds": 3.300311696,
+        "start_monotonic_ns": 115592886548181,
+        "end_monotonic_ns": 115759972639557,
+        "start_wall_ns": 1792729979034979898,
+        "end_wall_ns": 1792730149421382970,
+        "interval_seconds": 1,
+        "reply_timeout_seconds": 5,
+        "median_ms": 6.4320295000000005,
+        "p95_ms": 444.340775,
+        "maximum_ms": 2774.98428,
+        "rtt_stddev_ms": 410.21103030095935,
+        "adjacent_rtt_delta_p95_ms": 999.5567309999999,
+        "ignored": 0,
+        "duplicates": 0,
+        "late_after_timeout": 0,
+        "numeric_latency_and_variation_passed": false,
+        "within_requested_load": true,
+        "low_latency_target_passed": false
+      },
+      "roles": {
+        "edge": {
+          "tg_average_cores": 1.1471430007248677,
+          "all_container_average_cores": 1.2968417545739603,
+          "charged_memory_median_mib": 57.837890625,
+          "charged_memory_peak_mib": 93.78515625,
+          "tg_rss_median_mib": 25.115234375,
+          "tg_retained_peak": 4988,
+          "process_stable": true,
+          "app_errors": 0,
+          "dropped": 0,
+          "app_udp_kernel_drops": 11167,
+          "app_udp_socket_inode_stable": true,
+          "udp_receive_buffer_errors": 11167
+        },
+        "exit": {
+          "tg_average_cores": 1.2331194153438785,
+          "all_container_average_cores": 1.4780162939797539,
+          "charged_memory_median_mib": 51.4375,
+          "charged_memory_peak_mib": 55.47265625,
+          "tg_rss_median_mib": 23.9609375,
+          "tg_retained_peak": 683,
+          "process_stable": true,
+          "app_errors": 0,
+          "dropped": 0,
+          "app_udp_kernel_drops": 0,
+          "app_udp_socket_inode_stable": true,
+          "udp_receive_buffer_errors": 0
+        }
+      },
+      "all_container_average_cores": 2.774858048553714,
+      "shared_vm_average_busy_cores": 6.2540035167504335,
+      "pair_charged_memory_median_sum_mib": 109.275390625,
+      "cpu_span_seconds": 162.0,
+      "cpu_clock": "Linux MONOTONIC",
+      "cleanup_passed": true,
+      "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+      "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+      "profile": {
+        "gomaxprocs": 2,
+        "replica_delay_ms": 0,
+        "wg_qos_mbps": 0,
+        "application_pacing_mbps": 0,
+        "mtu": 1500,
+        "offered_aggregate_mbps": 1050.0
+      },
+      "local_short_acceptance_passed": false,
+      "whole_shared_vm_memory": {
+        "total_mib": 20000.63671875,
+        "used_median_mib": 2630.49609375,
+        "used_peak_mib": 5284.63671875,
+        "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+      },
+      "game": {
+        "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+        "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+        "requested_seconds": 168,
+        "start_monotonic_ns": 115592904232202,
+        "end_monotonic_ns": 115760919237440,
+        "sent": 8249,
+        "received": 7949,
+        "lost": 300,
+        "send_errors": 0,
+        "ignored": 300,
+        "loss_percent": 3.636804461146806,
+        "missed_scheduler_slots": 8,
+        "maximum_pending": 50,
+        "maximum_reply_gap_ms": 3165.931121,
+        "median_ms": 5.882712,
+        "p95_ms": 41.695115,
+        "maximum_ms": 996.320982,
+        "adjacent_rtt_delta_p95_ms": 13.122754000000004,
+        "probe_hz": 50,
+        "payload_bytes": 128,
+        "gaming_gate_passed": false,
+        "within_requested_load": true,
+        "independent_rows_verified": true,
+        "actual_average_send_hz": 49.097510759685,
+        "send_interval_median_ms": 20.1503675,
+        "send_interval_p95_ms": 21.117691,
+        "send_interval_maximum_ms": 55.287106,
+        "adjacent_variation_samples": 7945,
+        "out_of_order_replies": 0,
+        "all_gaming_gates_passed": false,
+        "row_sha256": "573e3f627e2c44caf1383cfa0ea285b6fff57aa8f840b9bb04de9a5fcf484d58",
+        "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+      },
+      "original_300_secondary": {
+        "passed": false,
+        "protocol": "TCP",
+        "scope": "receiver_application_goodput",
+        "seconds": 180.004171,
+        "received_mbps": 1049.9963071189056,
+        "minimum_window_mbps": 0.0,
+        "window_seconds": 1,
+        "maximum_udp_interval_loss_percent": null,
+        "minimum_complete_one_second_mbps": 0.0,
+        "complete_one_second_intervals": 180,
+        "complete_one_second_below_target": 7,
+        "maximum_udp_interval_jitter_ms": null,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "end_to_end_gaming_passed": false
+    }
+  },
+  "actual_faults": {
+    "faults": {
+      "cuts": [
+        {
+          "protocol": "udp",
+          "block_start_after_launch_seconds": 10.206748859010986,
+          "unblock_after_launch_seconds": 20.14982852600224,
+          "probe_metrics": {
+            "sent": 493,
+            "received": 493,
+            "lost": 0,
+            "median_ms": 2.04381,
+            "p95_ms": 5.249627,
+            "maximum_ms": 29.919639
+          }
+        },
+        {
+          "protocol": "tcp",
+          "block_start_after_launch_seconds": 35.32571322900185,
+          "unblock_after_launch_seconds": 45.43779909600562,
+          "probe_metrics": {
+            "sent": 453,
+            "received": 452,
+            "lost": 1,
+            "median_ms": 23.035385499999997,
+            "p95_ms": 49.990946,
+            "maximum_ms": 91.980076
+          }
+        },
+        {
+          "protocol": "udp",
+          "block_start_after_launch_seconds": 70.18638284200279,
+          "unblock_after_launch_seconds": 80.19410567299929,
+          "probe_metrics": {
+            "sent": 495,
+            "received": 495,
+            "lost": 0,
+            "median_ms": 12.038449,
+            "p95_ms": 18.415272,
+            "maximum_ms": 33.667547
+          }
+        },
+        {
+          "protocol": "tcp",
+          "block_start_after_launch_seconds": 95.17693589700502,
+          "unblock_after_launch_seconds": 105.27013118800824,
+          "probe_metrics": {
+            "sent": 471,
+            "received": 470,
+            "lost": 1,
+            "median_ms": 41.320576,
+            "p95_ms": 103.691769,
+            "maximum_ms": 181.145699
+          }
+        },
+        {
+          "protocol": "udp",
+          "block_start_after_launch_seconds": 129.7747341790091,
+          "unblock_after_launch_seconds": 139.2382188860065,
+          "probe_metrics": {
+            "sent": 468,
+            "received": 468,
+            "lost": 0,
+            "median_ms": 10.388781999999999,
+            "p95_ms": 18.333062,
+            "maximum_ms": 23.796147
+          }
+        },
+        {
+          "protocol": "tcp",
+          "block_start_after_launch_seconds": 154.1677894780005,
+          "unblock_after_launch_seconds": 164.150600649009,
+          "probe_metrics": {
+            "sent": 493,
+            "received": 493,
+            "lost": 0,
+            "median_ms": 5.511813,
+            "p95_ms": 67.850447,
+            "maximum_ms": 93.773581
+          }
+        }
+      ],
+      "all_path_outages": [],
+      "phase_udp": {
+        "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+        "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+        "requested_seconds": 168,
+        "start_monotonic_ns": 115411243194776,
+        "end_monotonic_ns": 115579265778078,
+        "sent": 8120,
+        "received": 8111,
+        "lost": 9,
+        "send_errors": 0,
+        "ignored": 0,
+        "loss_percent": 0.11083743842364532,
+        "missed_scheduler_slots": 42,
+        "maximum_pending": 7,
+        "maximum_reply_gap_ms": 126.974133,
+        "median_ms": 13.999721,
+        "p95_ms": 44.019429,
+        "maximum_ms": 181.145699,
+        "adjacent_rtt_delta_p95_ms": 15.855813999999999,
+        "probe_hz": 50,
+        "payload_bytes": 128,
+        "gaming_gate_passed": false
+      },
+      "scope": "LinuxMONO operation before/after bounds bracket iptables execution. SameVM monotonic clock asUDPclient. UDP recovery requires5consecutive replies sent after firstunblock withRTT<30ms; not a throughput recovery guarantee."
+    },
+    "all-path-faults": {
+      "cuts": [
+        {
+          "protocol": "udp",
+          "block_start_after_launch_seconds": 9.605963052003062,
+          "unblock_after_launch_seconds": 15.178198993002297,
+          "probe_metrics": {
+            "sent": 276,
+            "received": 276,
+            "lost": 0,
+            "median_ms": 3.3304,
+            "p95_ms": 14.123726,
+            "maximum_ms": 31.073043
+          }
+        },
+        {
+          "protocol": "tcp",
+          "block_start_after_launch_seconds": 24.088556835005875,
+          "unblock_after_launch_seconds": 29.4983540050016,
+          "probe_metrics": {
+            "sent": 269,
+            "received": 269,
+            "lost": 0,
+            "median_ms": 2.743058,
+            "p95_ms": 6.231094,
+            "maximum_ms": 8.185759
+          }
+        },
+        {
+          "protocol": "udp",
+          "block_start_after_launch_seconds": 38.255338110000594,
+          "unblock_after_launch_seconds": 40.990151018006145,
+          "probe_metrics": {
+            "sent": 134,
+            "received": 29,
+            "lost": 105,
+            "median_ms": 5.466434,
+            "p95_ms": 976.290561,
+            "maximum_ms": 996.320982
+          }
+        },
+        {
+          "protocol": "tcp",
+          "block_start_after_launch_seconds": 38.5565400270134,
+          "unblock_after_launch_seconds": 41.239109649002785,
+          "probe_metrics": {
+            "sent": 131,
+            "received": 26,
+            "lost": 105,
+            "median_ms": 744.2482620000001,
+            "p95_ms": 976.290561,
+            "maximum_ms": 996.320982
+          }
+        },
+        {
+          "protocol": "udp",
+          "block_start_after_launch_seconds": 68.03735808400961,
+          "unblock_after_launch_seconds": 74.1221854690084,
+          "probe_metrics": {
+            "sent": 302,
+            "received": 302,
+            "lost": 0,
+            "median_ms": 1.7854205,
+            "p95_ms": 4.758151,
+            "maximum_ms": 6.320982
+          }
+        },
+        {
+          "protocol": "tcp",
+          "block_start_after_launch_seconds": 83.03104079900368,
+          "unblock_after_launch_seconds": 89.13825641700532,
+          "probe_metrics": {
+            "sent": 303,
+            "received": 303,
+            "lost": 0,
+            "median_ms": 2.967963,
+            "p95_ms": 5.997855,
+            "maximum_ms": 8.470022
+          }
+        },
+        {
+          "protocol": "udp",
+          "block_start_after_launch_seconds": 98.27560737800377,
+          "unblock_after_launch_seconds": 101.01811634001206,
+          "probe_metrics": {
+            "sent": 129,
+            "received": 32,
+            "lost": 97,
+            "median_ms": 26.120041,
+            "p95_ms": 961.916601,
+            "maximum_ms": 981.932518
+          }
+        },
+        {
+          "protocol": "tcp",
+          "block_start_after_launch_seconds": 98.90598818899889,
+          "unblock_after_launch_seconds": 101.29421430900402,
+          "probe_metrics": {
+            "sent": 117,
+            "received": 20,
+            "lost": 97,
+            "median_ms": 791.4634994999999,
+            "p95_ms": 961.916601,
+            "maximum_ms": 981.932518
+          }
+        },
+        {
+          "protocol": "udp",
+          "block_start_after_launch_seconds": 127.28115753500606,
+          "unblock_after_launch_seconds": 133.1024865750078,
+          "probe_metrics": {
+            "sent": 283,
+            "received": 283,
+            "lost": 0,
+            "median_ms": 15.775798,
+            "p95_ms": 25.986514,
+            "maximum_ms": 57.193861
+          }
+        },
+        {
+          "protocol": "tcp",
+          "block_start_after_launch_seconds": 142.03287955401174,
+          "unblock_after_launch_seconds": 147.75456996601133,
+          "probe_metrics": {
+            "sent": 282,
+            "received": 282,
+            "lost": 0,
+            "median_ms": 18.536784,
+            "p95_ms": 49.497384,
+            "maximum_ms": 81.186952
+          }
+        },
+        {
+          "protocol": "udp",
+          "block_start_after_launch_seconds": 156.3157972390036,
+          "unblock_after_launch_seconds": 159.16614110600494,
+          "probe_metrics": {
+            "sent": 140,
+            "received": 42,
+            "lost": 98,
+            "median_ms": 581.6755155000001,
+            "p95_ms": 948.680054,
+            "maximum_ms": 988.845187
+          }
+        },
+        {
+          "protocol": "tcp",
+          "block_start_after_launch_seconds": 156.59534508301294,
+          "unblock_after_launch_seconds": 159.43416505100322,
+          "probe_metrics": {
+            "sent": 139,
+            "received": 41,
+            "lost": 98,
+            "median_ms": 591.694125,
+            "p95_ms": 948.680054,
+            "maximum_ms": 988.845187
+          }
+        }
+      ],
+      "all_path_outages": [
+        {
+          "guaranteed_both_blocked_start": 115626.386968756,
+          "guaranteed_both_blocked_end": 115628.791023421,
+          "guaranteed_duration_seconds": 2.4040546649921453,
+          "first_unblock_complete": 115628.820579747,
+          "five_consecutive_sub30ms_reply_recovery_seconds": 0.8550269849947654,
+          "recovery_under15s_passed": true
+        },
+        {
+          "guaranteed_both_blocked_start": 115686.736416918,
+          "guaranteed_both_blocked_end": 115688.826634204,
+          "guaranteed_duration_seconds": 2.090217286007828,
+          "first_unblock_complete": 115688.848545069,
+          "five_consecutive_sub30ms_reply_recovery_seconds": 1.009978254995076,
+          "recovery_under15s_passed": true
+        },
+        {
+          "guaranteed_both_blocked_start": 115744.425773812,
+          "guaranteed_both_blocked_end": 115746.979041525,
+          "guaranteed_duration_seconds": 2.5532677129958756,
+          "first_unblock_complete": 115746.996569835,
+          "five_consecutive_sub30ms_reply_recovery_seconds": 5.265426929006935,
+          "recovery_under15s_passed": true
+        }
+      ],
+      "phase_udp": {
+        "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+        "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+        "requested_seconds": 168,
+        "start_monotonic_ns": 115592904232202,
+        "end_monotonic_ns": 115760919237440,
+        "sent": 8249,
+        "received": 7949,
+        "lost": 300,
+        "send_errors": 0,
+        "ignored": 300,
+        "loss_percent": 3.636804461146806,
+        "missed_scheduler_slots": 8,
+        "maximum_pending": 50,
+        "maximum_reply_gap_ms": 3165.931121,
+        "median_ms": 5.882712,
+        "p95_ms": 41.695115,
+        "maximum_ms": 996.320982,
+        "adjacent_rtt_delta_p95_ms": 13.122754000000004,
+        "probe_hz": 50,
+        "payload_bytes": 128,
+        "gaming_gate_passed": false
+      },
+      "scope": "LinuxMONO operation before/after bounds bracket iptables execution. SameVM monotonic clock asUDPclient. UDP recovery requires5consecutive replies sent after firstunblock withRTT<30ms; not a throughput recovery guarantee."
+    }
+  },
+  "continuity": {
+    "edge": {
+      "process_stable": true,
+      "app_address_stable": true,
+      "final_charged_memory_mib": 29.93359375,
+      "final_tg_rss_mib": 24.78515625,
+      "whole_test_kernel_udp_receive_errors": 67255
+    },
+    "exit": {
+      "process_stable": true,
+      "app_address_stable": true,
+      "final_charged_memory_mib": 46.59765625,
+      "final_tg_rss_mib": 23.73046875,
+      "whole_test_kernel_udp_receive_errors": 0
+    }
+  },
+  "process_memory_snapshots": {
+    "edge": {
+      "tg": {
+        "mid_pss_mib": 22.306640625,
+        "late_pss_mib": 19.87890625,
+        "growth_mib": -2.427734375
+      },
+      "iperf3": {
+        "mid_pss_mib": 14.9658203125,
+        "late_pss_mib": 30.1787109375,
+        "growth_mib": 15.212890625
+      }
+    },
+    "exit": {
+      "tg": {
+        "mid_pss_mib": 20.978515625,
+        "late_pss_mib": 20.15625,
+        "growth_mib": -0.822265625
+      },
+      "iperf3": {
+        "mid_pss_mib": 10.908203125,
+        "late_pss_mib": 21.337890625,
+        "growth_mib": 10.4296875
+      }
+    }
+  },
+  "background_vm_control": {
+    "start": {
+      "monotonic": 113570.264226713,
+      "cpu": [
+        10158860,
+        331758,
+        13635559,
+        104813857,
+        914623,
+        0,
+        5203314,
+        0
+      ]
+    },
+    "end": {
+      "monotonic": 113590.264508921,
+      "cpu": [
+        10162710,
+        331758,
+        13637059,
+        104829188,
+        917562,
+        0,
+        5203601,
+        0
+      ]
+    },
+    "seconds": 20.00028220799868,
+    "busy_cores": 2.818460230398951,
+    "scope": "Entire sharedLinuxVM; background only,no tunnel,not a precise subtractable attribution."
+  },
+  "background_vm_after": {
+    "start": {
+      "monotonic": 115788.643413237,
+      "cpu": [
+        10661983,
+        341858,
+        14374144,
+        105878352,
+        934253,
+        0,
+        5483008,
+        0
+      ]
+    },
+    "end": {
+      "monotonic": 115808.643698576,
+      "cpu": [
+        10663028,
+        341858,
+        14374968,
+        105900177,
+        934375,
+        0,
+        5483155,
+        0
+      ]
+    },
+    "seconds": 20.00028533898876,
+    "busy_cores": 1.0079856191201377,
+    "scope": "Entire sharedLinuxVM; background only,no tunnel,not a precise subtractable attribution."
+  },
+  "short_controls": {
+    "baseline": {
+      "both-probe": {
+        "receiver": {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 90.003332,
+          "received_mbps": 1050.0280326510579,
+          "minimum_window_mbps": 1042.3178670281973,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 1042.3177875889387,
+          "complete_one_second_intervals": 90,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": []
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 78,
+          "transmitted": 78,
+          "received": 78,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 77.024829575,
+          "wall_elapsed_seconds": 77.021031587,
+          "wall_minus_monotonic_elapsed_seconds": -0.003797988,
+          "start_monotonic_ns": 111809792677935,
+          "end_monotonic_ns": 111886817507510,
+          "start_wall_ns": 1792726145541612593,
+          "end_wall_ns": 1792726222562644180,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 2.1028685,
+          "p95_ms": 4.848529,
+          "maximum_ms": 8.291262,
+          "rtt_stddev_ms": 1.5765058303108548,
+          "adjacent_rtt_delta_p95_ms": 3.5516849999999995,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": true,
+          "within_requested_load": true,
+          "low_latency_target_passed": true
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 0.9192142663703317,
+            "all_container_average_cores": 1.070591452594756,
+            "charged_memory_median_mib": 39.51171875,
+            "charged_memory_peak_mib": 41.7890625,
+            "tg_rss_median_mib": 21.876953125,
+            "tg_retained_peak": 273,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          },
+          "exit": {
+            "tg_average_cores": 0.9645664252948019,
+            "all_container_average_cores": 1.2035706822546275,
+            "charged_memory_median_mib": 40.0859375,
+            "charged_memory_peak_mib": 40.921875,
+            "tg_rss_median_mib": 19.74609375,
+            "tg_retained_peak": 27,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.2741621348493837,
+        "shared_vm_average_busy_cores": 4.474596338667907,
+        "pair_charged_memory_median_sum_mib": 79.59765625,
+        "cpu_span_seconds": 72.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 10,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": true
+      }
+    },
+    "procs1": {
+      "both-probe": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 90.076851,
+          "received_mbps": 794.0318649016715,
+          "minimum_window_mbps": 430.4490064490595,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 429.87729269778106,
+          "complete_one_second_intervals": 90,
+          "complete_one_second_below_target": 84,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "aggregate receiver bitrate below target",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 78,
+          "transmitted": 78,
+          "received": 78,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 77.17543814,
+          "wall_elapsed_seconds": 79.083314398,
+          "wall_minus_monotonic_elapsed_seconds": 1.907876258,
+          "start_monotonic_ns": 111930303161543,
+          "end_monotonic_ns": 112007478599683,
+          "start_wall_ns": 1792726266865359640,
+          "end_wall_ns": 1792726345948674038,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 86.8738335,
+          "p95_ms": 134.46443,
+          "maximum_ms": 154.655913,
+          "rtt_stddev_ms": 38.0181066487986,
+          "adjacent_rtt_delta_p95_ms": 45.031195,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 0.7936753510847313,
+            "all_container_average_cores": 0.8697147881910072,
+            "charged_memory_median_mib": 82.298828125,
+            "charged_memory_peak_mib": 93.80859375,
+            "tg_rss_median_mib": 40.33984375,
+            "tg_retained_peak": 8192,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 866,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 866
+          },
+          "exit": {
+            "tg_average_cores": 1.0170162720230127,
+            "all_container_average_cores": 1.2654121190217844,
+            "charged_memory_median_mib": 47.8828125,
+            "charged_memory_peak_mib": 48.984375,
+            "tg_rss_median_mib": 23.6015625,
+            "tg_retained_peak": 148,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.1351269072127916,
+        "shared_vm_average_busy_cores": 5.480607481468469,
+        "pair_charged_memory_median_sum_mib": 130.181640625,
+        "cpu_span_seconds": 72.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 1,
+          "replica_delay_ms": 10,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false
+      }
+    },
+    "fault-preflight": {
+      "steady": {
+        "receiver": {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 90.004062,
+          "received_mbps": 1050.0195829828212,
+          "minimum_window_mbps": 1037.1848357990684,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 1037.184835799068,
+          "complete_one_second_intervals": 90,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": []
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 78,
+          "transmitted": 78,
+          "received": 78,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 77.029568381,
+          "wall_elapsed_seconds": 77.028863093,
+          "wall_minus_monotonic_elapsed_seconds": -0.000705288,
+          "start_monotonic_ns": 112094935503005,
+          "end_monotonic_ns": 112171965071386,
+          "start_wall_ns": 1792726433461675855,
+          "end_wall_ns": 1792726510490538948,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 2.442531,
+          "p95_ms": 7.364904,
+          "maximum_ms": 12.330292,
+          "rtt_stddev_ms": 2.231811430442377,
+          "adjacent_rtt_delta_p95_ms": 6.423681,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": true,
+          "within_requested_load": true,
+          "low_latency_target_passed": true
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 0.9841056425071337,
+            "all_container_average_cores": 1.1424138346563248,
+            "charged_memory_median_mib": 44.09765625,
+            "charged_memory_peak_mib": 45.16796875,
+            "tg_rss_median_mib": 22.232421875,
+            "tg_retained_peak": 344,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 515,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 515
+          },
+          "exit": {
+            "tg_average_cores": 1.0327346915755757,
+            "all_container_average_cores": 1.287530427894744,
+            "charged_memory_median_mib": 40.76953125,
+            "charged_memory_peak_mib": 41.21484375,
+            "tg_rss_median_mib": 20.4609375,
+            "tg_retained_peak": 30,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.4299442625510688,
+        "shared_vm_average_busy_cores": 4.858533259001043,
+        "pair_charged_memory_median_sum_mib": 84.8671875,
+        "cpu_span_seconds": 72.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 10,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": true,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 2562.748046875,
+          "used_peak_mib": 2805.8203125,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        }
+      },
+      "faults": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.002028,
+          "received_mbps": 1050.0087409237412,
+          "minimum_window_mbps": 436.966749935051,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 436.96674993505115,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 21,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 168,
+          "transmitted": 168,
+          "received": 168,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 167.07221315,
+          "wall_elapsed_seconds": 168.248312379,
+          "wall_minus_monotonic_elapsed_seconds": 1.176099229,
+          "start_monotonic_ns": 112186397284311,
+          "end_monotonic_ns": 112353469497461,
+          "start_wall_ns": 1792726524921713990,
+          "end_wall_ns": 1792726693170026369,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 3.6287825,
+          "p95_ms": 35.793474,
+          "maximum_ms": 59.454117,
+          "rtt_stddev_ms": 12.632680892769528,
+          "adjacent_rtt_delta_p95_ms": 17.572056,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 0.987536711772577,
+            "all_container_average_cores": 1.1214213629709753,
+            "charged_memory_median_mib": 47.64453125,
+            "charged_memory_peak_mib": 69.125,
+            "tg_rss_median_mib": 22.96484375,
+            "tg_retained_peak": 2224,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 2236,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 2236
+          },
+          "exit": {
+            "tg_average_cores": 1.0379712113872797,
+            "all_container_average_cores": 1.2827068146717548,
+            "charged_memory_median_mib": 42.32421875,
+            "charged_memory_peak_mib": 47.359375,
+            "tg_rss_median_mib": 21.2109375,
+            "tg_retained_peak": 190,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.40412817764273,
+        "shared_vm_average_busy_cores": 5.705204762150016,
+        "pair_charged_memory_median_sum_mib": 89.96875,
+        "cpu_span_seconds": 162.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 10,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 2422.40625,
+          "used_peak_mib": 4500.04296875,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        }
+      },
+      "all-path-faults": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.006744,
+          "received_mbps": 1047.2135228000125,
+          "minimum_window_mbps": 0.0,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 0.0,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 14,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 168,
+          "transmitted": 168,
+          "received": 168,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 167.08219193,
+          "wall_elapsed_seconds": 167.886727713,
+          "wall_minus_monotonic_elapsed_seconds": 0.804535783,
+          "start_monotonic_ns": 112367829353993,
+          "end_monotonic_ns": 112534911545923,
+          "start_wall_ns": 1792726707521411650,
+          "end_wall_ns": 1792726875408139363,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 4.637877,
+          "p95_ms": 362.884442,
+          "maximum_ms": 2603.166966,
+          "rtt_stddev_ms": 382.17646637587296,
+          "adjacent_rtt_delta_p95_ms": 1000.186012,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 1.0011471197965416,
+            "all_container_average_cores": 1.1419808311776725,
+            "charged_memory_median_mib": 49.41015625,
+            "charged_memory_peak_mib": 99.76171875,
+            "tg_rss_median_mib": 23.65625,
+            "tg_retained_peak": 7435,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 1,
+            "app_udp_kernel_drops": 9987,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 9987
+          },
+          "exit": {
+            "tg_average_cores": 1.057499252216332,
+            "all_container_average_cores": 1.3063899883051717,
+            "charged_memory_median_mib": 42.86328125,
+            "charged_memory_peak_mib": 52.16796875,
+            "tg_rss_median_mib": 21.6328125,
+            "tg_retained_peak": 844,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.448370819482844,
+        "shared_vm_average_busy_cores": 5.403929795626505,
+        "pair_charged_memory_median_sum_mib": 92.2734375,
+        "cpu_span_seconds": 162.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 10,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 2384.7109375,
+          "used_peak_mib": 4101.2109375,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        }
+      }
+    },
+    "eager-copies": {
+      "steady": {
+        "receiver": {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 90.005565,
+          "received_mbps": 1050.0019818996745,
+          "minimum_window_mbps": 1044.459953787675,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 1044.4592440874321,
+          "complete_one_second_intervals": 90,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": []
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 78,
+          "transmitted": 78,
+          "received": 78,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 77.025177546,
+          "wall_elapsed_seconds": 77.020283587,
+          "wall_minus_monotonic_elapsed_seconds": -0.004893959,
+          "start_monotonic_ns": 112631659333752,
+          "end_monotonic_ns": 112708684511298,
+          "start_wall_ns": 1792726972148230818,
+          "end_wall_ns": 1792727049168514405,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 2.298744,
+          "p95_ms": 5.620945,
+          "maximum_ms": 5.926228,
+          "rtt_stddev_ms": 1.7425108485819996,
+          "adjacent_rtt_delta_p95_ms": 4.928381,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": true,
+          "within_requested_load": true,
+          "low_latency_target_passed": true
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 1.1842560933746455,
+            "all_container_average_cores": 1.3372764629502714,
+            "charged_memory_median_mib": 52.099609375,
+            "charged_memory_peak_mib": 53.33984375,
+            "tg_rss_median_mib": 22.5703125,
+            "tg_retained_peak": 570,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          },
+          "exit": {
+            "tg_average_cores": 1.2663969281023908,
+            "all_container_average_cores": 1.502345395238484,
+            "charged_memory_median_mib": 49.55859375,
+            "charged_memory_peak_mib": 51.10546875,
+            "tg_rss_median_mib": 22.43359375,
+            "tg_retained_peak": 31,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.8396218581887553,
+        "shared_vm_average_busy_cores": 5.181662655017442,
+        "pair_charged_memory_median_sum_mib": 101.658203125,
+        "cpu_span_seconds": 72.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 0,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": true,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 2459.904296875,
+          "used_peak_mib": 2593.30859375,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        },
+        "game": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+          "requested_seconds": 78,
+          "start_monotonic_ns": 112631660257001,
+          "end_monotonic_ns": 112709673210575,
+          "sent": 3871,
+          "received": 3871,
+          "lost": 0,
+          "send_errors": 0,
+          "ignored": 0,
+          "loss_percent": 0.0,
+          "missed_scheduler_slots": 0,
+          "maximum_pending": 1,
+          "maximum_reply_gap_ms": 31.860201,
+          "median_ms": 2.720139,
+          "p95_ms": 6.051095,
+          "maximum_ms": 14.68109,
+          "adjacent_rtt_delta_p95_ms": 5.254837,
+          "probe_hz": 50,
+          "payload_bytes": 128,
+          "gaming_gate_passed": true,
+          "within_requested_load": true,
+          "independent_rows_verified": true,
+          "actual_average_send_hz": 49.624354693380276,
+          "send_interval_median_ms": 20.1378715,
+          "send_interval_p95_ms": 20.224249,
+          "send_interval_maximum_ms": 23.636763,
+          "adjacent_variation_samples": 3870,
+          "out_of_order_replies": 0,
+          "all_gaming_gates_passed": true,
+          "row_sha256": "12267e9291e46609e5ce0d94679a7046345ff8af81c42b7a13a5ef3fbb81247b",
+          "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+        }
+      },
+      "faults": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.004347,
+          "received_mbps": 1049.995280480643,
+          "minimum_window_mbps": 767.5148408251342,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 767.5148408251397,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 1,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 168,
+          "transmitted": 168,
+          "received": 168,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 167.054530191,
+          "wall_elapsed_seconds": 168.97010931,
+          "wall_minus_monotonic_elapsed_seconds": 1.915579119,
+          "start_monotonic_ns": 112723063117362,
+          "end_monotonic_ns": 112890117647553,
+          "start_wall_ns": 1792727063547126360,
+          "end_wall_ns": 1792727232517235670,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 3.234619,
+          "p95_ms": 16.779776,
+          "maximum_ms": 46.170521,
+          "rtt_stddev_ms": 6.830690676869369,
+          "adjacent_rtt_delta_p95_ms": 15.199940999999999,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 1.143804111235752,
+            "all_container_average_cores": 1.3063966230092288,
+            "charged_memory_median_mib": 54.88671875,
+            "charged_memory_peak_mib": 102.9921875,
+            "tg_rss_median_mib": 23.62890625,
+            "tg_retained_peak": 6906,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 12067,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 12067
+          },
+          "exit": {
+            "tg_average_cores": 1.2148282038066271,
+            "all_container_average_cores": 1.4541659992535694,
+            "charged_memory_median_mib": 50.57421875,
+            "charged_memory_peak_mib": 79.0234375,
+            "tg_rss_median_mib": 23.125,
+            "tg_retained_peak": 49,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.760562622262798,
+        "shared_vm_average_busy_cores": 5.67433174725231,
+        "pair_charged_memory_median_sum_mib": 105.4609375,
+        "cpu_span_seconds": 162.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 0,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 2418.328125,
+          "used_peak_mib": 5088.2109375,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        },
+        "game": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+          "requested_seconds": 168,
+          "start_monotonic_ns": 112723072407119,
+          "end_monotonic_ns": 112891086070864,
+          "sent": 8316,
+          "received": 8315,
+          "lost": 1,
+          "send_errors": 0,
+          "ignored": 0,
+          "loss_percent": 0.012025012025012025,
+          "missed_scheduler_slots": 1,
+          "maximum_pending": 9,
+          "maximum_reply_gap_ms": 59.531355,
+          "median_ms": 3.307999,
+          "p95_ms": 14.122417,
+          "maximum_ms": 183.992584,
+          "adjacent_rtt_delta_p95_ms": 6.850496999999999,
+          "probe_hz": 50,
+          "payload_bytes": 128,
+          "gaming_gate_passed": false,
+          "within_requested_load": true,
+          "independent_rows_verified": true,
+          "actual_average_send_hz": 49.49671208421603,
+          "send_interval_median_ms": 20.139481,
+          "send_interval_p95_ms": 20.323387,
+          "send_interval_maximum_ms": 44.6836,
+          "adjacent_variation_samples": 8313,
+          "out_of_order_replies": 0,
+          "all_gaming_gates_passed": false,
+          "row_sha256": "de3b25707fabe084b76466d4487a4b24c1e2f8220b23f9b9690d82339308659a",
+          "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+        }
+      },
+      "actual_faults": {
+        "faults": {
+          "cuts": [
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 10.083506013994338,
+              "unblock_after_launch_seconds": 20.194916132997605,
+              "probe_metrics": {
+                "sent": 502,
+                "received": 502,
+                "lost": 0,
+                "median_ms": 1.762638,
+                "p95_ms": 4.544278,
+                "maximum_ms": 10.557093
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 35.08272027099156,
+              "unblock_after_launch_seconds": 45.191260687992326,
+              "probe_metrics": {
+                "sent": 502,
+                "received": 502,
+                "lost": 0,
+                "median_ms": 2.659147,
+                "p95_ms": 5.880951,
+                "maximum_ms": 10.384489
+              }
+            },
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 70.12816873299016,
+              "unblock_after_launch_seconds": 80.22291617200244,
+              "probe_metrics": {
+                "sent": 502,
+                "received": 502,
+                "lost": 0,
+                "median_ms": 1.5764230000000001,
+                "p95_ms": 4.47868,
+                "maximum_ms": 7.222751
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 95.11031805099628,
+              "unblock_after_launch_seconds": 105.31082387900096,
+              "probe_metrics": {
+                "sent": 504,
+                "received": 504,
+                "lost": 0,
+                "median_ms": 3.7556085,
+                "p95_ms": 53.0857,
+                "maximum_ms": 181.985801
+              }
+            },
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 129.21614429900364,
+              "unblock_after_launch_seconds": 138.98552970399032,
+              "probe_metrics": {
+                "sent": 483,
+                "received": 483,
+                "lost": 0,
+                "median_ms": 2.715442,
+                "p95_ms": 9.763883,
+                "maximum_ms": 36.226504
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 153.40490261399827,
+              "unblock_after_launch_seconds": 163.10695289299474,
+              "probe_metrics": {
+                "sent": 481,
+                "received": 481,
+                "lost": 0,
+                "median_ms": 5.061048,
+                "p95_ms": 14.217704,
+                "maximum_ms": 37.457049
+              }
+            }
+          ],
+          "all_path_outages": [],
+          "phase_udp": {
+            "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+            "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+            "requested_seconds": 168,
+            "start_monotonic_ns": 112723072407119,
+            "end_monotonic_ns": 112891086070864,
+            "sent": 8316,
+            "received": 8315,
+            "lost": 1,
+            "send_errors": 0,
+            "ignored": 0,
+            "loss_percent": 0.012025012025012025,
+            "missed_scheduler_slots": 1,
+            "maximum_pending": 9,
+            "maximum_reply_gap_ms": 59.531355,
+            "median_ms": 3.307999,
+            "p95_ms": 14.122417,
+            "maximum_ms": 183.992584,
+            "adjacent_rtt_delta_p95_ms": 6.850496999999999,
+            "probe_hz": 50,
+            "payload_bytes": 128,
+            "gaming_gate_passed": false
+          },
+          "scope": "LinuxMONO operation before/after bounds bracket iptables execution. SameVM monotonic clock asUDPclient. UDP recovery requires5consecutive replies sent after firstunblock withRTT<30ms; not a throughput recovery guarantee."
+        }
+      }
+    },
+    "grace2": {
+      "steady": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 90.00962,
+          "received_mbps": 1049.954879045151,
+          "minimum_window_mbps": 558.4057014565238,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 558.4057014565246,
+          "complete_one_second_intervals": 90,
+          "complete_one_second_below_target": 12,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 78,
+          "transmitted": 78,
+          "received": 78,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 77.030945761,
+          "wall_elapsed_seconds": 78.176668008,
+          "wall_minus_monotonic_elapsed_seconds": 1.145722247,
+          "start_monotonic_ns": 112946788834722,
+          "end_monotonic_ns": 113023819780483,
+          "start_wall_ns": 1792727289881424984,
+          "end_wall_ns": 1792727368058092992,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 14.891282499999999,
+          "p95_ms": 31.417179,
+          "maximum_ms": 47.248391,
+          "rtt_stddev_ms": 10.326148060479966,
+          "adjacent_rtt_delta_p95_ms": 24.465798,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 1.1714092270440393,
+            "all_container_average_cores": 1.3171336343855942,
+            "charged_memory_median_mib": 60.396484375,
+            "charged_memory_peak_mib": 70.171875,
+            "tg_rss_median_mib": 24.119140625,
+            "tg_retained_peak": 1664,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 2486,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 2486
+          },
+          "exit": {
+            "tg_average_cores": 1.2569183143261204,
+            "all_container_average_cores": 1.507476621435015,
+            "charged_memory_median_mib": 51.49609375,
+            "charged_memory_peak_mib": 54.10546875,
+            "tg_rss_median_mib": 24.0078125,
+            "tg_retained_peak": 96,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.824610255820609,
+        "shared_vm_average_busy_cores": 7.469368960115954,
+        "pair_charged_memory_median_sum_mib": 111.892578125,
+        "cpu_span_seconds": 72.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 2,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 2979.140625,
+          "used_peak_mib": 4901.85546875,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        },
+        "game": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+          "requested_seconds": 78,
+          "start_monotonic_ns": 112946833393988,
+          "end_monotonic_ns": 113024839496335,
+          "sent": 3781,
+          "received": 3781,
+          "lost": 0,
+          "send_errors": 0,
+          "ignored": 0,
+          "loss_percent": 0.0,
+          "missed_scheduler_slots": 35,
+          "maximum_pending": 4,
+          "maximum_reply_gap_ms": 447.785534,
+          "median_ms": 13.4326,
+          "p95_ms": 32.239015,
+          "maximum_ms": 83.024261,
+          "adjacent_rtt_delta_p95_ms": 13.927257,
+          "probe_hz": 50,
+          "payload_bytes": 128,
+          "gaming_gate_passed": false,
+          "within_requested_load": true,
+          "independent_rows_verified": true,
+          "actual_average_send_hz": 48.475516376064014,
+          "send_interval_median_ms": 20.180657,
+          "send_interval_p95_ms": 21.642343,
+          "send_interval_maximum_ms": 453.101292,
+          "adjacent_variation_samples": 3780,
+          "out_of_order_replies": 0,
+          "all_gaming_gates_passed": false,
+          "row_sha256": "72fd7be3ee1e1dc86ac43469517578fd0bb962f4b9837bbc741941162547c85c",
+          "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+        }
+      },
+      "faults": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.001643,
+          "received_mbps": 1050.0111204429395,
+          "minimum_window_mbps": 488.10886244815066,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 488.10886244813844,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 29,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 168,
+          "transmitted": 168,
+          "received": 168,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 167.096874051,
+          "wall_elapsed_seconds": 169.637213454,
+          "wall_minus_monotonic_elapsed_seconds": 2.540339403,
+          "start_monotonic_ns": 113038183624868,
+          "end_monotonic_ns": 113205280498919,
+          "start_wall_ns": 1792727382461312947,
+          "end_wall_ns": 1792727552098526401,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 6.431149,
+          "p95_ms": 35.141987,
+          "maximum_ms": 94.822363,
+          "rtt_stddev_ms": 12.51395024905526,
+          "adjacent_rtt_delta_p95_ms": 19.657987000000002,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 1.0856162388904143,
+            "all_container_average_cores": 1.2435766572169353,
+            "charged_memory_median_mib": 55.9296875,
+            "charged_memory_peak_mib": 83.28125,
+            "tg_rss_median_mib": 24.6875,
+            "tg_retained_peak": 2534,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 3759,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 3759
+          },
+          "exit": {
+            "tg_average_cores": 1.1554201083596156,
+            "all_container_average_cores": 1.4030079698096314,
+            "charged_memory_median_mib": 50.30078125,
+            "charged_memory_peak_mib": 54.48828125,
+            "tg_rss_median_mib": 22.859375,
+            "tg_retained_peak": 122,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.6465846270265665,
+        "shared_vm_average_busy_cores": 6.68491626948923,
+        "pair_charged_memory_median_sum_mib": 106.23046875,
+        "cpu_span_seconds": 162.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 2,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 2468.9375,
+          "used_peak_mib": 5101.65625,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        },
+        "game": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+          "requested_seconds": 168,
+          "start_monotonic_ns": 113038198760239,
+          "end_monotonic_ns": 113206200187610,
+          "sent": 8221,
+          "received": 8220,
+          "lost": 1,
+          "send_errors": 0,
+          "ignored": 0,
+          "loss_percent": 0.012163970319912419,
+          "missed_scheduler_slots": 24,
+          "maximum_pending": 6,
+          "maximum_reply_gap_ms": 112.668043,
+          "median_ms": 5.566948,
+          "p95_ms": 33.695117,
+          "maximum_ms": 167.863992,
+          "adjacent_rtt_delta_p95_ms": 12.532691999999999,
+          "probe_hz": 50,
+          "payload_bytes": 128,
+          "gaming_gate_passed": false,
+          "within_requested_load": true,
+          "independent_rows_verified": true,
+          "actual_average_send_hz": 48.929330703149176,
+          "send_interval_median_ms": 20.159157999999998,
+          "send_interval_p95_ms": 21.219702,
+          "send_interval_maximum_ms": 179.363701,
+          "adjacent_variation_samples": 8218,
+          "out_of_order_replies": 0,
+          "all_gaming_gates_passed": false,
+          "row_sha256": "741fc0b31f96b680cfecea705e1b9076fe42c5e740acb7d49f67c31917939d9d",
+          "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+        }
+      },
+      "actual_faults": {
+        "faults": {
+          "cuts": [
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 10.061743073005346,
+              "unblock_after_launch_seconds": 20.23258717500721,
+              "probe_metrics": {
+                "sent": 505,
+                "received": 505,
+                "lost": 0,
+                "median_ms": 2.306902,
+                "p95_ms": 5.366447,
+                "maximum_ms": 9.453828
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 35.173396901998785,
+              "unblock_after_launch_seconds": 45.100781123997876,
+              "probe_metrics": {
+                "sent": 492,
+                "received": 492,
+                "lost": 0,
+                "median_ms": 5.3986425,
+                "p95_ms": 11.302737,
+                "maximum_ms": 25.56737
+              }
+            },
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 70.08248134300811,
+              "unblock_after_launch_seconds": 80.20906034100335,
+              "probe_metrics": {
+                "sent": 503,
+                "received": 503,
+                "lost": 0,
+                "median_ms": 2.279098,
+                "p95_ms": 5.53161,
+                "maximum_ms": 18.454022
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 95.02605599400704,
+              "unblock_after_launch_seconds": 104.39338073400722,
+              "probe_metrics": {
+                "sent": 461,
+                "received": 461,
+                "lost": 0,
+                "median_ms": 30.592525,
+                "p95_ms": 43.850214,
+                "maximum_ms": 53.520862
+              }
+            },
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 129.00309467400075,
+              "unblock_after_launch_seconds": 138.76439276400197,
+              "probe_metrics": {
+                "sent": 481,
+                "received": 481,
+                "lost": 0,
+                "median_ms": 9.662646,
+                "p95_ms": 18.78439,
+                "maximum_ms": 29.709518
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 153.19127904799825,
+              "unblock_after_launch_seconds": 162.9371941020072,
+              "probe_metrics": {
+                "sent": 446,
+                "received": 446,
+                "lost": 0,
+                "median_ms": 19.1251895,
+                "p95_ms": 50.522425,
+                "maximum_ms": 167.863992
+              }
+            }
+          ],
+          "all_path_outages": [],
+          "phase_udp": {
+            "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+            "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+            "requested_seconds": 168,
+            "start_monotonic_ns": 113038198760239,
+            "end_monotonic_ns": 113206200187610,
+            "sent": 8221,
+            "received": 8220,
+            "lost": 1,
+            "send_errors": 0,
+            "ignored": 0,
+            "loss_percent": 0.012163970319912419,
+            "missed_scheduler_slots": 24,
+            "maximum_pending": 6,
+            "maximum_reply_gap_ms": 112.668043,
+            "median_ms": 5.566948,
+            "p95_ms": 33.695117,
+            "maximum_ms": 167.863992,
+            "adjacent_rtt_delta_p95_ms": 12.532691999999999,
+            "probe_hz": 50,
+            "payload_bytes": 128,
+            "gaming_gate_passed": false
+          },
+          "scope": "LinuxMONO operation before/after bounds bracket iptables execution. SameVM monotonic clock asUDPclient. UDP recovery requires5consecutive replies sent after firstunblock withRTT<30ms; not a throughput recovery guarantee."
+        }
+      }
+    },
+    "ordered": {
+      "steady": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 90.004083,
+          "received_mbps": 1050.0194048307787,
+          "minimum_window_mbps": 595.9137648953057,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 595.9137648953064,
+          "complete_one_second_intervals": 90,
+          "complete_one_second_below_target": 6,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 78,
+          "transmitted": 78,
+          "received": 78,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 77.032774525,
+          "wall_elapsed_seconds": 79.130888788,
+          "wall_minus_monotonic_elapsed_seconds": 2.098114263,
+          "start_monotonic_ns": 113254443613767,
+          "end_monotonic_ns": 113331476388292,
+          "start_wall_ns": 1792727602111306470,
+          "end_wall_ns": 1792727681242195258,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 3.357826,
+          "p95_ms": 24.278521,
+          "maximum_ms": 27.842572,
+          "rtt_stddev_ms": 6.906470631627839,
+          "adjacent_rtt_delta_p95_ms": 14.300476,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 0.9624417684773865,
+            "all_container_average_cores": 1.1288706168593654,
+            "charged_memory_median_mib": 51.9375,
+            "charged_memory_peak_mib": 71.8203125,
+            "tg_rss_median_mib": 22.33203125,
+            "tg_retained_peak": 1216,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 977,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 977
+          },
+          "exit": {
+            "tg_average_cores": 1.0135047657035898,
+            "all_container_average_cores": 1.258792304063982,
+            "charged_memory_median_mib": 48.10546875,
+            "charged_memory_peak_mib": 51.80859375,
+            "tg_rss_median_mib": 21.03515625,
+            "tg_retained_peak": 99,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.387662920923347,
+        "shared_vm_average_busy_cores": 6.516200158858362,
+        "pair_charged_memory_median_sum_mib": 100.04296875,
+        "cpu_span_seconds": 72.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 10,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 3593.1015625,
+          "used_peak_mib": 5427.37890625,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        },
+        "game": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+          "requested_seconds": 78,
+          "start_monotonic_ns": 113254465895168,
+          "end_monotonic_ns": 113332474117697,
+          "sent": 3841,
+          "received": 3840,
+          "lost": 1,
+          "send_errors": 0,
+          "ignored": 0,
+          "loss_percent": 0.026034886748242645,
+          "missed_scheduler_slots": 4,
+          "maximum_pending": 4,
+          "maximum_reply_gap_ms": 77.404665,
+          "median_ms": 3.5369105000000003,
+          "p95_ms": 26.115549,
+          "maximum_ms": 75.793153,
+          "adjacent_rtt_delta_p95_ms": 11.079658000000002,
+          "probe_hz": 50,
+          "payload_bytes": 128,
+          "gaming_gate_passed": false,
+          "within_requested_load": true,
+          "independent_rows_verified": true,
+          "actual_average_send_hz": 49.24041129619791,
+          "send_interval_median_ms": 20.143505,
+          "send_interval_p95_ms": 20.693227,
+          "send_interval_maximum_ms": 70.262906,
+          "adjacent_variation_samples": 3838,
+          "out_of_order_replies": 0,
+          "all_gaming_gates_passed": false,
+          "row_sha256": "c523cebb644b3ecadd884268a8d4521f971ab44829d893c07563a35188c3d043",
+          "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+        }
+      },
+      "faults": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.02273,
+          "received_mbps": 1044.1276581462796,
+          "minimum_window_mbps": 696.2905661207581,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 696.2905661207524,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 21,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 168,
+          "transmitted": 168,
+          "received": 168,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 167.061751249,
+          "wall_elapsed_seconds": 170.372573576,
+          "wall_minus_monotonic_elapsed_seconds": 3.310822327,
+          "start_monotonic_ns": 113345839605168,
+          "end_monotonic_ns": 113512901356417,
+          "start_wall_ns": 1792727695605418183,
+          "end_wall_ns": 1792727865977991759,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 3.470701,
+          "p95_ms": 28.27568,
+          "maximum_ms": 50.688425,
+          "rtt_stddev_ms": 10.203745204881416,
+          "adjacent_rtt_delta_p95_ms": 20.050753999999998,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 0.9635812117550898,
+            "all_container_average_cores": 1.1249157548494566,
+            "charged_memory_median_mib": 54.01953125,
+            "charged_memory_peak_mib": 80.90234375,
+            "tg_rss_median_mib": 22.6796875,
+            "tg_retained_peak": 2741,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 3549,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 3549
+          },
+          "exit": {
+            "tg_average_cores": 1.0178616395661144,
+            "all_container_average_cores": 1.254916549422194,
+            "charged_memory_median_mib": 48.8359375,
+            "charged_memory_peak_mib": 53.3359375,
+            "tg_rss_median_mib": 21.40625,
+            "tg_retained_peak": 92,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.379832304271651,
+        "shared_vm_average_busy_cores": 6.274823618857995,
+        "pair_charged_memory_median_sum_mib": 102.85546875,
+        "cpu_span_seconds": 162.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 10,
+          "wg_qos_mbps": 0,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 2497.49609375,
+          "used_peak_mib": 5105.8984375,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        },
+        "game": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+          "requested_seconds": 168,
+          "start_monotonic_ns": 113345850890730,
+          "end_monotonic_ns": 113513870900103,
+          "sent": 8242,
+          "received": 8240,
+          "lost": 2,
+          "send_errors": 0,
+          "ignored": 0,
+          "loss_percent": 0.02426595486532395,
+          "missed_scheduler_slots": 41,
+          "maximum_pending": 5,
+          "maximum_reply_gap_ms": 379.100778,
+          "median_ms": 3.7329049999999997,
+          "p95_ms": 29.283107,
+          "maximum_ms": 94.595608,
+          "adjacent_rtt_delta_p95_ms": 9.652061000000002,
+          "probe_hz": 50,
+          "payload_bytes": 128,
+          "gaming_gate_passed": false,
+          "within_requested_load": true,
+          "independent_rows_verified": true,
+          "actual_average_send_hz": 49.05974199354646,
+          "send_interval_median_ms": 20.151962,
+          "send_interval_p95_ms": 20.688802,
+          "send_interval_maximum_ms": 371.516999,
+          "adjacent_variation_samples": 8237,
+          "out_of_order_replies": 0,
+          "all_gaming_gates_passed": false,
+          "row_sha256": "363bf8ef8819f571023d163ae0f29af035b5370bb5f2b8cb86ec7bb1957b0a8e",
+          "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+        }
+      },
+      "actual_faults": {
+        "faults": {
+          "cuts": [
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 10.013800536005874,
+              "unblock_after_launch_seconds": 20.326119928999105,
+              "probe_metrics": {
+                "sent": 512,
+                "received": 512,
+                "lost": 0,
+                "median_ms": 1.7638004999999999,
+                "p95_ms": 4.555846,
+                "maximum_ms": 6.272065
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 35.2024083360011,
+              "unblock_after_launch_seconds": 45.37028437200934,
+              "probe_metrics": {
+                "sent": 504,
+                "received": 504,
+                "lost": 0,
+                "median_ms": 5.0727145,
+                "p95_ms": 25.173246,
+                "maximum_ms": 39.267385
+              }
+            },
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 70.43049812900426,
+              "unblock_after_launch_seconds": 80.50042355000915,
+              "probe_metrics": {
+                "sent": 485,
+                "received": 485,
+                "lost": 0,
+                "median_ms": 17.306794,
+                "p95_ms": 40.646743,
+                "maximum_ms": 68.054
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 95.25911041699874,
+              "unblock_after_launch_seconds": 105.14625686399813,
+              "probe_metrics": {
+                "sent": 489,
+                "received": 489,
+                "lost": 0,
+                "median_ms": 8.735258,
+                "p95_ms": 36.565021,
+                "maximum_ms": 56.726513
+              }
+            },
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 128.79490249900846,
+              "unblock_after_launch_seconds": 139.43841743101075,
+              "probe_metrics": {
+                "sent": 514,
+                "received": 512,
+                "lost": 2,
+                "median_ms": 8.772479,
+                "p95_ms": 31.77829,
+                "maximum_ms": 80.565247
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 153.95674956400762,
+              "unblock_after_launch_seconds": 162.95817345700925,
+              "probe_metrics": {
+                "sent": 442,
+                "received": 442,
+                "lost": 0,
+                "median_ms": 26.630646,
+                "p95_ms": 43.059445,
+                "maximum_ms": 88.148893
+              }
+            }
+          ],
+          "all_path_outages": [],
+          "phase_udp": {
+            "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+            "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+            "requested_seconds": 168,
+            "start_monotonic_ns": 113345850890730,
+            "end_monotonic_ns": 113513870900103,
+            "sent": 8242,
+            "received": 8240,
+            "lost": 2,
+            "send_errors": 0,
+            "ignored": 0,
+            "loss_percent": 0.02426595486532395,
+            "missed_scheduler_slots": 41,
+            "maximum_pending": 5,
+            "maximum_reply_gap_ms": 379.100778,
+            "median_ms": 3.7329049999999997,
+            "p95_ms": 29.283107,
+            "maximum_ms": 94.595608,
+            "adjacent_rtt_delta_p95_ms": 9.652061000000002,
+            "probe_hz": 50,
+            "payload_bytes": 128,
+            "gaming_gate_passed": false
+          },
+          "scope": "LinuxMONO operation before/after bounds bracket iptables execution. SameVM monotonic clock asUDPclient. UDP recovery requires5consecutive replies sent after firstunblock withRTT<30ms; not a throughput recovery guarantee."
+        }
+      }
+    },
+    "qos1050": {
+      "steady": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 90.001619,
+          "received_mbps": 996.4025558251346,
+          "minimum_window_mbps": 652.5292173119965,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 652.3646981712664,
+          "complete_one_second_intervals": 90,
+          "complete_one_second_below_target": 6,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 78,
+          "transmitted": 78,
+          "received": 78,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 77.034020945,
+          "wall_elapsed_seconds": 77.041378516,
+          "wall_minus_monotonic_elapsed_seconds": 0.007357571,
+          "start_monotonic_ns": 115859743033560,
+          "end_monotonic_ns": 115936777054505,
+          "start_wall_ns": 1792730250873174224,
+          "end_wall_ns": 1792730327914552740,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 1.351129,
+          "p95_ms": 7.701607,
+          "maximum_ms": 17.142322,
+          "rtt_stddev_ms": 2.7737308438124737,
+          "adjacent_rtt_delta_p95_ms": 12.351405,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 1.1927382199370984,
+            "all_container_average_cores": 1.295549305833382,
+            "charged_memory_median_mib": 57.328125,
+            "charged_memory_peak_mib": 59.4375,
+            "tg_rss_median_mib": 21.26171875,
+            "tg_retained_peak": 580,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          },
+          "exit": {
+            "tg_average_cores": 1.2289726078592063,
+            "all_container_average_cores": 1.5162617811910242,
+            "charged_memory_median_mib": 47.21484375,
+            "charged_memory_peak_mib": 48.796875,
+            "tg_rss_median_mib": 20.0703125,
+            "tg_retained_peak": 32,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.811811087024406,
+        "shared_vm_average_busy_cores": 5.450987072719467,
+        "pair_charged_memory_median_sum_mib": 104.54296875,
+        "cpu_span_seconds": 72.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 10,
+          "wg_qos_mbps": 1050,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 2494.501953125,
+          "used_peak_mib": 2578.73828125,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        },
+        "game": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+          "requested_seconds": 78,
+          "start_monotonic_ns": 115859752576261,
+          "end_monotonic_ns": 115937753306274,
+          "sent": 3847,
+          "received": 3847,
+          "lost": 0,
+          "send_errors": 0,
+          "ignored": 0,
+          "loss_percent": 0.0,
+          "missed_scheduler_slots": 4,
+          "maximum_pending": 2,
+          "maximum_reply_gap_ms": 77.40746,
+          "median_ms": 1.483869,
+          "p95_ms": 8.303219,
+          "maximum_ms": 41.547664,
+          "adjacent_rtt_delta_p95_ms": 5.062299,
+          "probe_hz": 50,
+          "payload_bytes": 128,
+          "gaming_gate_passed": false,
+          "within_requested_load": true,
+          "independent_rows_verified": true,
+          "actual_average_send_hz": 49.30999428471844,
+          "send_interval_median_ms": 20.164725500000003,
+          "send_interval_p95_ms": 20.44845,
+          "send_interval_maximum_ms": 84.317128,
+          "adjacent_variation_samples": 3846,
+          "out_of_order_replies": 0,
+          "all_gaming_gates_passed": false,
+          "row_sha256": "9b97ec027e1999d66e3325300568494b6bd5e89dd0db37e2750e8cdd2bf32d44",
+          "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+        }
+      },
+      "faults": {
+        "receiver": {
+          "passed": false,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 180.005801,
+          "received_mbps": 891.8046674729111,
+          "minimum_window_mbps": 264.07440819833374,
+          "window_seconds": 1,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 264.0709765678147,
+          "complete_one_second_intervals": 180,
+          "complete_one_second_below_target": 73,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [
+            "complete one-second receiver interval below target or absent",
+            "aggregate receiver bitrate below target",
+            "rolling receiver window below target or absent"
+          ]
+        },
+        "latency": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "clock_implementation": "clock_gettime(CLOCK_MONOTONIC)",
+          "scope": "Private namespace ICMP56-byte payload over actual kernelWG/TG. Observed user-space RTT includes scheduler delay; not one-way or RTP/UDP jitter. No wall-clock arithmetic in RTT.",
+          "requested": 168,
+          "transmitted": 168,
+          "received": 168,
+          "loss_percent": 0.0,
+          "monotonic_elapsed_seconds": 167.130818285,
+          "wall_elapsed_seconds": 171.068849593,
+          "wall_minus_monotonic_elapsed_seconds": 3.938031308,
+          "start_monotonic_ns": 115951275317342,
+          "end_monotonic_ns": 116118406135627,
+          "start_wall_ns": 1792730342412822793,
+          "end_wall_ns": 1792730513481672386,
+          "interval_seconds": 1,
+          "reply_timeout_seconds": 5,
+          "median_ms": 2.467422,
+          "p95_ms": 32.051743,
+          "maximum_ms": 55.42239,
+          "rtt_stddev_ms": 11.365104956444934,
+          "adjacent_rtt_delta_p95_ms": 23.5396,
+          "ignored": 0,
+          "duplicates": 0,
+          "late_after_timeout": 0,
+          "numeric_latency_and_variation_passed": false,
+          "within_requested_load": true,
+          "low_latency_target_passed": false
+        },
+        "roles": {
+          "edge": {
+            "tg_average_cores": 1.0517383948690615,
+            "all_container_average_cores": 1.1605222788339242,
+            "charged_memory_median_mib": 64.33984375,
+            "charged_memory_peak_mib": 72.15234375,
+            "tg_rss_median_mib": 22.55859375,
+            "tg_retained_peak": 1160,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          },
+          "exit": {
+            "tg_average_cores": 1.0738191654649878,
+            "all_container_average_cores": 1.3128433603328453,
+            "charged_memory_median_mib": 49.328125,
+            "charged_memory_peak_mib": 53.1328125,
+            "tg_rss_median_mib": 21.30078125,
+            "tg_retained_peak": 96,
+            "process_stable": true,
+            "app_errors": 0,
+            "dropped": 0,
+            "app_udp_kernel_drops": 0,
+            "app_udp_socket_inode_stable": true,
+            "udp_receive_buffer_errors": 0
+          }
+        },
+        "all_container_average_cores": 2.4733656391667695,
+        "shared_vm_average_busy_cores": 7.156439910092748,
+        "pair_charged_memory_median_sum_mib": 113.66796875,
+        "cpu_span_seconds": 162.0,
+        "cpu_clock": "Linux MONOTONIC",
+        "cleanup_passed": true,
+        "resource_scope": "VM CPU includes kernel WireGuard, TG, iperf, monitors and unrelated Linux workloads; counted once. Container CPU omits uncharged kernel workers. Charged RAM covers the two private containers plus charged kernel/socket memory, not all global kernel memory. Not physical-host totals.",
+        "diagnostic_alignment": "Linux launch stamp before iperf setup; interior10s/8s exclusions. Receiver-clock offset is not hardware calibrated.",
+        "profile": {
+          "gomaxprocs": 2,
+          "replica_delay_ms": 10,
+          "wg_qos_mbps": 1050,
+          "application_pacing_mbps": 0,
+          "mtu": 1500,
+          "offered_aggregate_mbps": 1050.0
+        },
+        "local_short_acceptance_passed": false,
+        "whole_shared_vm_memory": {
+          "total_mib": 20000.63671875,
+          "used_median_mib": 4051.28125,
+          "used_peak_mib": 5462.5,
+          "scope": "MemTotal minus MemAvailable for entire shared Linux VM, including unrelated workloads; not tunnel attribution or Windows physical-host RAM."
+        },
+        "game": {
+          "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+          "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+          "requested_seconds": 168,
+          "start_monotonic_ns": 115951280443339,
+          "end_monotonic_ns": 116119289709260,
+          "sent": 8170,
+          "received": 8167,
+          "lost": 3,
+          "send_errors": 0,
+          "ignored": 0,
+          "loss_percent": 0.03671970624235006,
+          "missed_scheduler_slots": 36,
+          "maximum_pending": 6,
+          "maximum_reply_gap_ms": 101.97217,
+          "median_ms": 2.481434,
+          "p95_ms": 29.272836,
+          "maximum_ms": 133.118156,
+          "adjacent_rtt_delta_p95_ms": 14.22974,
+          "probe_hz": 50,
+          "payload_bytes": 128,
+          "gaming_gate_passed": false,
+          "within_requested_load": true,
+          "independent_rows_verified": true,
+          "actual_average_send_hz": 48.6275189821874,
+          "send_interval_median_ms": 20.153924,
+          "send_interval_p95_ms": 21.615938,
+          "send_interval_maximum_ms": 79.265183,
+          "adjacent_variation_samples": 8163,
+          "out_of_order_replies": 0,
+          "all_gaming_gates_passed": false,
+          "row_sha256": "40012afaad76cc9fb2bc2b6d47873fde126078a5020a72808606cbd3e3636c39",
+          "observer_sha256": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59"
+        }
+      },
+      "actual_faults": {
+        "faults": {
+          "cuts": [
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 10.119609456989565,
+              "unblock_after_launch_seconds": 20.29604919499252,
+              "probe_metrics": {
+                "sent": 505,
+                "received": 505,
+                "lost": 0,
+                "median_ms": 1.196431,
+                "p95_ms": 2.493666,
+                "maximum_ms": 7.65977
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 35.26680673199007,
+              "unblock_after_launch_seconds": 45.20767435099697,
+              "probe_metrics": {
+                "sent": 493,
+                "received": 493,
+                "lost": 0,
+                "median_ms": 2.822575,
+                "p95_ms": 23.758434,
+                "maximum_ms": 31.555321
+              }
+            },
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 69.63332900899695,
+              "unblock_after_launch_seconds": 79.24775498500094,
+              "probe_metrics": {
+                "sent": 465,
+                "received": 464,
+                "lost": 1,
+                "median_ms": 6.787760499999999,
+                "p95_ms": 31.540453,
+                "maximum_ms": 76.216468
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 93.81362726399675,
+              "unblock_after_launch_seconds": 103.59181094799715,
+              "probe_metrics": {
+                "sent": 485,
+                "received": 485,
+                "lost": 0,
+                "median_ms": 2.523205,
+                "p95_ms": 23.134566,
+                "maximum_ms": 24.670692
+              }
+            },
+            {
+              "protocol": "udp",
+              "block_start_after_launch_seconds": 128.1855066959979,
+              "unblock_after_launch_seconds": 137.95971701499366,
+              "probe_metrics": {
+                "sent": 463,
+                "received": 463,
+                "lost": 0,
+                "median_ms": 4.990661,
+                "p95_ms": 35.202593,
+                "maximum_ms": 78.479567
+              }
+            },
+            {
+              "protocol": "tcp",
+              "block_start_after_launch_seconds": 152.51331170999038,
+              "unblock_after_launch_seconds": 162.31373391099623,
+              "probe_metrics": {
+                "sent": 484,
+                "received": 484,
+                "lost": 0,
+                "median_ms": 17.1500845,
+                "p95_ms": 25.449999,
+                "maximum_ms": 119.748589
+              }
+            }
+          ],
+          "all_path_outages": [],
+          "phase_udp": {
+            "clock": "CLOCK_MONOTONIC via time.monotonic_ns",
+            "scope": "Private kernelWG/TG128-byte UDP echo50Hz; user-space RTT includes scheduling, not one-way/RTP jitter.",
+            "requested_seconds": 168,
+            "start_monotonic_ns": 115951280443339,
+            "end_monotonic_ns": 116119289709260,
+            "sent": 8170,
+            "received": 8167,
+            "lost": 3,
+            "send_errors": 0,
+            "ignored": 0,
+            "loss_percent": 0.03671970624235006,
+            "missed_scheduler_slots": 36,
+            "maximum_pending": 6,
+            "maximum_reply_gap_ms": 101.97217,
+            "median_ms": 2.481434,
+            "p95_ms": 29.272836,
+            "maximum_ms": 133.118156,
+            "adjacent_rtt_delta_p95_ms": 14.22974,
+            "probe_hz": 50,
+            "payload_bytes": 128,
+            "gaming_gate_passed": false
+          },
+          "scope": "LinuxMONO operation before/after bounds bracket iptables execution. SameVM monotonic clock asUDPclient. UDP recovery requires5consecutive replies sent after firstunblock withRTT<30ms; not a throughput recovery guarantee."
+        }
+      }
+    }
+  },
+  "cleanup_passed": true,
+  "steady_tg_memory_passed": true,
+  "steady_charged_pair_memory_passed": false,
+  "steady_speed_and_gaming_passed": false,
+  "single_path_speed_and_gaming_passed": false,
+  "scope": "One kernelWG/TG pair,ordinary1500IP,8pacedTCPstreams plus128byteUDPecho~50Hz,localshared12CPUWSL2DockerVM. No realIranWAN/DPI, physicalportor1GbpsbulkUDP proof. AdjacentRTTdifference is not one-way/RTPjitter. VMCPUincludesWG+unrelated, countedonce;CGCPUomitsunchargedworkers;CGmemoryincludesiperfandprobes.20sidle is not subtracted.",
+  "resource_timing": "CommonLinuxMONOinterior10s/8s span; launchstamp beforeiperfsetup, nothardwarepacketcalibration. Resourceallocationandclock/runnableCPUwaitcausesareunresolved.",
+  "no_runtime_change_in_this_stage": true,
+  "receipt_sha256": {
+    "actual-fault-analysis.json": "98d4376c944ca07ba739fd1f8484b1a775b4786c0beadd87f58b5b3944b94e3a",
+    "all-path-faults-acceptance.json": "16f841877573d0c50f9c0eb04f6b60b68675f0f05c6647c64dba59c1241814d2",
+    "all-path-faults-client.json": "7344e0721608bfda6daaeb9cce341949b29fd27e75fa7f325911a56da9f87996",
+    "all-path-faults-game-analysis.json": "bfe4dab584b1e645b324ab3185cfc655ba178a9a0463ed976a63f6b5a8a74460",
+    "all-path-faults-game-driver.log": "d4fe7f8e5c08fc5e212a0e7146995c7af25d0e167b2547375c9a87b958e4bc34",
+    "all-path-faults-game-rows.jsonl": "573e3f627e2c44caf1383cfa0ea285b6fff57aa8f840b9bb04de9a5fcf484d58",
+    "all-path-faults-game.json": "7f1d2b64a586ca3f20cfb4a4f4cafaca6313bda8994d10996d33b38066f5bc55",
+    "all-path-faults-load-clock.json": "ffa42ae09efbaaf0196d787e4ffd58bccf82e841305a68eae501ae0485d7a221",
+    "all-path-faults-monotonic-driver.log": "94e153b38fcc952cde861c6d6c61b46a4c84a9a7289efc7022aece4088ccca6c",
+    "all-path-faults-monotonic.json": "0861878cdec1362a2be4f2158dccf9fe0ed008f7ee4425d31c26170cb34269ea",
+    "all-path-faults-one-gig-analysis.json": "dacfbf8f857f4164ae729d5fddcb5982db309ee4f013b89089c6ac090eaac263",
+    "all-path-faults-server.json": "408434cfbdfd58b0dbe898496e429c9d1a57a655a8afd6b3cfe23ce52edd291e",
+    "cleanup.json": "2be8b5f60147320c0ebf36eb25fa3e6f8ba5001bb7e135071aebca75c3e6e727",
+    "declared-plan.json": "3ae76cc58b5837e10c41d5ac338ec69903c28a578f3121d42de5e6430b3ed0ba",
+    "edge-monitor.jsonl": "f30c5e62f9c33027f83831a15460b692b3faf0a08fa1c1323f56a61e14615516",
+    "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "edge-receive-buffer-live.txt": "0fc0cce2023ab884f0fb9b9918ae4e17e08ac236338a0b2cf453c17ca9732e25",
+    "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+    "edge-udp-socket-memory.txt": "0e399763093ffeff19ed89e806ca3240ed93efd32020fb09fef8a002a22949a0",
+    "events.json": "d1e671f213bac146465d3b57b6203f1ac37a5d0f6f69dfc1ea29a4791c445fed",
+    "exit-monitor.jsonl": "c698a3c34b2cc33b53f69df9e21c81461772ccd68a07ef219b52745f8b76d8f9",
+    "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+    "exit-udp-socket-memory.txt": "3ccc931c67b84fa66df09a2a728c78acb2e589f97ae3a0c800ceaf207113598d",
+    "fault-operations.jsonl": "d53290b6b96b8c95b57fec1a0f10b02b935af38dca9865ce46db8d09c72bff78",
+    "faults-acceptance.json": "73b6f8e32b2785ef2b8d4f19e062c866ddf56819b848a19e77c98510e0466e85",
+    "faults-client.json": "f92f2148b4a0d8ab997561e6f0bd802cf90d6abe8e345e5ba524ea761db17f20",
+    "faults-game-analysis.json": "fa2a3b85a06696c0fab55fb6d6b891c4bcae7956108131254404a93e3b6d1046",
+    "faults-game-driver.log": "3cebeea0c35bc6f9abc9eedc9c106e8f99e83cac224e0ec5e690a16e0819eed1",
+    "faults-game-rows.jsonl": "66852ba51eae977e401d027e6e80c45391b4490f5935ac59a19846141894bf7b",
+    "faults-game.json": "892364b769ab8a738afe603b47356809096b14aff512b70510ce767d327f269b",
+    "faults-load-clock.json": "8f741b99bc5d8c103fc39283922cb1d002329e8fa8ab492a52c49be611138007",
+    "faults-monotonic-driver.log": "d95d071bcf30fed9628cf868be11ddd748985c2555fc25b5d93ab38783b6a598",
+    "faults-monotonic.json": "8f6b84cf336a5c09bc413f4daf48fba25c28f07f3f0f477f63928fb1c9bedd9e",
+    "faults-one-gig-analysis.json": "656637c64fbaeb4f7f8f2fb4102974e6b149a119364414d9b797540e67200a39",
+    "faults-server.json": "e9a57e14c6516f2ec3866237a3110ff7592198617e98aa99d79d779dc95b5f13",
+    "game-server-ready.json": "87336c7c0867ccaf72c8ea61891422e5b782e4311795773435cc8166e0576b81",
+    "game-server-result.json": "fa4aebbe8454cb61a54bb01ff731064e6e7b7ef4dcb366b3dd606853f73a751a",
+    "game-server.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "game-udp-frozen.py": "11c034c30c909819d809c8505d1da11516d24fac85e39217716fd3e632962d59",
+    "lab-config-summary.json": "fb94f6b68ffc33a919c717013733718bf6e033e012d9d75e45831b304de93f02",
+    "live-receiver-io.jsonl": "61dd758665d2d01986c65087bd3d50fcb5e120f29cf7f4fe275922ed46fefcb1",
+    "manifest.json": "085ebec19c61e31a6ad2294ae66dc57e01b8e56c455942150b33f415cec9cb7f",
+    "one-gig-driver-frozen.py": "2252065c7de26c5dc0ecc59f14aa4e7a19fd419ae97fdccce61de556ff5e667f",
+    "one-gig-plan.json": "b9db19ba9f835bf63c54962d05f4ffeaea66fe4e898b8159f6334149d4f6dc01",
+    "progress.json": "ae6f96fbbe78cf322220a33d9668597d1b6c986c8e4b7ca70073e55e1c1aa4a2",
+    "read-only-process-memory-late.json": "8df6a4d8553097eee0012ecbb9b4420ba78edb50d1108789ab652fff6f0c0604",
+    "read-only-process-memory-midrun.json": "56aabf7cb803550345fd6d904cbf9937bbe5112b38a5939789c283fc266f8db6",
+    "read-only-schedstat.json": "8f50f3ac95115c762ff914e1fb3cafbb72d6a452f48bec7710bb733a41b96158",
+    "steady-acceptance.json": "bdddfd690e00d15126441b9ba9bd596fe0993086f585d05840d4290a136acaea",
+    "steady-client.json": "ad17f5c58fe55d8bed65aadb8c8bd6bdd3fee4d1000f497c094b8d1eb7f6f9b8",
+    "steady-game-analysis.json": "dfbaba9de01305f0929d813aecbb87cce94af8bae5ed51194e959331c9c65a5c",
+    "steady-game-driver.log": "3afe1336bc9ddb3ed79e226200e72e94872e658ee6d5916903cb307726c8ca0b",
+    "steady-game-rows.jsonl": "8a71077c897663e8037be3039280a68ddae3923791c781d2633c89b95766e3c1",
+    "steady-game.json": "cfb2591c330440c3ae4885d7541bb8e5bd260575259718b6c371652762ee93cb",
+    "steady-load-clock.json": "a97f2e4841fc38530b7c071e5da2a91cbbe9e4e61bc146cf7417916a659a0503",
+    "steady-monotonic-driver.log": "8cb2d1759e0c8015b1fa16982e8fffecfa50fee742c76e905f56d9249dccf551",
+    "steady-monotonic.json": "23d380b69578578127074921772a706169661c275f2c0bb3edeaf137e100cec2",
+    "steady-one-gig-analysis.json": "48d6ab35207b335c5e8e9311dfc8f1b490b497d06f4f2942e19d1e89163d3ede",
+    "steady-server.json": "6368eaac32f32bfeb0429bc70a88e320da353cbfbc9b23e1d96f7aae520dd715",
+    "summary.json": "ffb321463481e2f8a114aa87adeb864a4399b02c6dcdf6ec91fcc753db94ab64",
+    "whole-vm-memory.jsonl": "83f2e95a0c8cd839b3f8d7cf396d1f9cd084b2aa2d59bfc4fd31e21eac1bc5f1",
+    "whole-vm-sampler.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "whole-vm-sampler.py": "1bd157de55325892b684368025a2182bbf6fdb0504c8b6019f4f20b087165f2c",
+    "whole-vm-stop": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  },
+  "overall_local_acceptance_passed": false
+}

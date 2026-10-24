@@ -1,0 +1,998 @@
+{
+  "required_aggregate_mbps": 10000,
+  "achieved": false,
+  "cpu_scope": "TG process CPU seconds per independently received Gbit. Small launch offsets not corrected; shared-VM diagnostic, not physical-host/all-kernel CPU or a universal statistical guarantee.",
+  "read_ahead_abba": {
+    "plan": {
+      "declared_at": 1792697597.8611476,
+      "seconds": 120,
+      "offered_mbps": 800,
+      "target_mbps": 300,
+      "order": [
+        "old-1",
+        "buffered-1",
+        "buffered-2",
+        "old-2"
+      ],
+      "cpu_tick_hz": 100,
+      "cpu_span": "exclude first10s/final5s prospectively; common monitor-covered span for both PIDs; speed uses ALL receiver intervals",
+      "cpu_scope": "TG user+system process CPU from /proc; shared kernel/iperf/cgroup totals separate",
+      "caveat": "One shared VM, two runs per binary; order-balanced diagnostic, no statistical or hardware capacity certification"
+    },
+    "comparison": {
+      "old": {
+        "cpu_seconds_per_gbit": 4.567327119672994,
+        "cpu_seconds": 721.9987158424118,
+        "receiver_gbit": 158.07904643670554,
+        "all_300mbps_speed_passed": true
+      },
+      "buffered": {
+        "cpu_seconds_per_gbit": 3.7408512160761,
+        "cpu_seconds": 599.6630093046605,
+        "receiver_gbit": 160.30121880486507,
+        "all_300mbps_speed_passed": true
+      },
+      "cpu_cost_reduction_percent": 18.09539544555475
+    },
+    "cases": {
+      "old-1": {
+        "runtime_commit": "bba3467e17a1ff29e37ae1214de8073b886fe614",
+        "binary_sha256": "8c616a6b44e44d2c54b192b853fd38529ee87b57ce028a105ce3456c81fbe130",
+        "receiver": {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 120.035354,
+          "received_mbps": 794.3195519546683,
+          "minimum_window_mbps": 498.4891613321075,
+          "window_seconds": 1.0,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 498.4741515791279,
+          "complete_one_second_intervals": 120,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [],
+          "target_mbps": 300.0,
+          "start": 1792697607.8717556,
+          "end": 1792697728.9593232,
+          "case": "both-probe",
+          "reverse": false
+        },
+        "cpu_span": {
+          "start": 1792697620.8487504,
+          "end": 1792697721.1816115,
+          "seconds": 100.33286118507385,
+          "receiver_gbit": 78.23793239843886,
+          "timing_scope": "monitor wall clock relative to pre-client launch; small launch offset not subtracted"
+        },
+        "roles": {
+          "edge": {
+            "cpu_seconds": 158.551258775288,
+            "average_cores": 1.5802525404196794,
+            "cpu_seconds_per_gbit": 2.026526697661705,
+            "rss_median_mib": 23.3046875,
+            "rss_peak_mib": 48.6328125,
+            "gro_enabled": false,
+            "gro_packets": 0,
+            "gro_bundles": 0,
+            "gso_packets": 787189,
+            "gso_bundles": 196240,
+            "extra_copies": 1630361,
+            "frame_sent_bytes": 12463339768,
+            "dropped_packets": 0,
+            "app_errors": 0
+          },
+          "exit": {
+            "cpu_seconds": 209.67801708047278,
+            "average_cores": 2.0898239580121314,
+            "cpu_seconds_per_gbit": 2.6800045790148803,
+            "rss_median_mib": 25.970703125,
+            "rss_peak_mib": 30.7109375,
+            "gro_enabled": false,
+            "gro_packets": 0,
+            "gro_bundles": 0,
+            "gso_packets": 7278478,
+            "gso_bundles": 732481,
+            "extra_copies": 13987,
+            "frame_sent_bytes": 125005688,
+            "dropped_packets": 0,
+            "app_errors": 0
+          }
+        },
+        "tg_cpu_seconds_per_gbit": 4.706531276676585,
+        "cleanup_passed": true,
+        "receipt_sha256": {
+          "both-probe-acceptance.json": "28d8586c73c7643e68ecefbd3dd0b9ee4ecb00892adee7c1de1a3ef74e963866",
+          "both-probe-client.json": "6e73a335d31610a924af8ecdfa75e123e4b7c7c9e4427db0d20c2500b73c8658",
+          "both-probe-server.json": "7543ce9f4bdf99f8111211ce70d49c1d4a3b7d680332c0de48a41c83da0096cb",
+          "cleanup.json": "8387ffc30f264eb2c836322862b1691438dc33342396bc196bc2d5297b2fe8aa",
+          "edge-monitor.jsonl": "0b343238662f002ccfa7d9b9ef36a91602c26eecbbad8b745068061abf627c56",
+          "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+          "edge-udp-socket-memory.txt": "51b2c93bc5e11c02bd6708a9af2833222cb24e190abaff1fe132b0d7e9dd61e2",
+          "exit-monitor.jsonl": "ec0bc25235d81bbcb3b9d69453d76750cd4af22f32c9206967e2b93065186354",
+          "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+          "exit-udp-socket-memory.txt": "46d9b434e94faba1ec1dbad1756ae1e7fb8da2d70f5cda5ab8df70abbada374b",
+          "lab-config-summary.json": "87b07f4db3127193ff89e1120bbc6e781b16ab9330517b425a2fdf3b8fc9ed42",
+          "live-receiver-io.jsonl": "3aea7fa1762b5b31b369295ca349e2ed97d2ed4b4ee07fd61452e6820b965682",
+          "manifest.json": "4ae109d5a8034d6592261ddb3fb37f321a8e584bca119e020125be31f44df6e6",
+          "progress.json": "6f72fa636686b9af2a4f2b1bac5f88d9046bca22c1abb56b03432971e894fece"
+        }
+      },
+      "buffered-1": {
+        "runtime_commit": "cdb5b6fe4474c6cf9802ec98cdcd2526ddacaece",
+        "binary_sha256": "1c9dd881e87f0a6a2132d0e857f8540e135279983d0caca4b418199ea1f07d9d",
+        "receiver": {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 120.009183,
+          "received_mbps": 800.0017857300137,
+          "minimum_window_mbps": 796.884290859787,
+          "window_seconds": 1.0,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 796.8842908597892,
+          "complete_one_second_intervals": 120,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [],
+          "target_mbps": 300.0,
+          "start": 1792697749.532626,
+          "end": 1792697869.998741,
+          "case": "both-probe",
+          "reverse": false
+        },
+        "cpu_span": {
+          "start": 1792697762.529132,
+          "end": 1792697862.465748,
+          "seconds": 99.93661618232727,
+          "receiver_gbit": 79.94679289704003,
+          "timing_scope": "monitor wall clock relative to pre-client launch; small launch offset not subtracted"
+        },
+        "roles": {
+          "edge": {
+            "cpu_seconds": 137.80373584673256,
+            "average_cores": 1.37891136513287,
+            "cpu_seconds_per_gbit": 1.7236931070418793,
+            "rss_median_mib": 22.328125,
+            "rss_peak_mib": 22.99609375,
+            "gro_enabled": false,
+            "gro_packets": 0,
+            "gro_bundles": 0,
+            "gso_packets": 653270,
+            "gso_bundles": 175118,
+            "extra_copies": 23846,
+            "frame_sent_bytes": 10473993192,
+            "dropped_packets": 0,
+            "app_errors": 0
+          },
+          "exit": {
+            "cpu_seconds": 154.3040906941987,
+            "average_cores": 1.5440195654882072,
+            "cpu_seconds_per_gbit": 1.9300848114435332,
+            "rss_median_mib": 22.837890625,
+            "rss_peak_mib": 24.1171875,
+            "gro_enabled": false,
+            "gro_packets": 0,
+            "gro_bundles": 0,
+            "gso_packets": 7754183,
+            "gso_bundles": 496039,
+            "extra_copies": 5,
+            "frame_sent_bytes": 106741888,
+            "dropped_packets": 0,
+            "app_errors": 0
+          }
+        },
+        "tg_cpu_seconds_per_gbit": 3.653777918485412,
+        "cleanup_passed": true,
+        "receipt_sha256": {
+          "both-probe-acceptance.json": "5edc370c3e4b4a4549e4243522d16a7303c7cf4f0195d496641d3bfc63be645e",
+          "both-probe-client.json": "55098afef2144912491819488eeda1b716a66ed1a1ca5ba2c327f87b4be84077",
+          "both-probe-server.json": "e3436697ff7868eb9e5c6dbd0d9a86ca7f1331b13900fbb38c6db03393de4e9f",
+          "cleanup.json": "e67187d8ee2f052f6e1d62cc83ad7d4bfea15551c72335ed155fd83cc79385f6",
+          "edge-monitor.jsonl": "0b8194ff6639d54e6a6766413a9dfc4a04f2f09854098bac4e9629e8b67bf878",
+          "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+          "edge-udp-socket-memory.txt": "ccd9262ef50deaf177207f5d451b56b97b350cc71908ff796dd6e4e3fd44e00b",
+          "exit-monitor.jsonl": "4575f071d7ce703fa21404d1500db07acf11ea7f13244bd4ae255f19d3651530",
+          "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+          "exit-udp-socket-memory.txt": "152d798911a3dfaa7056fc3c1d92ba98ca2f47975330bf2599ad89ea7bd8eec9",
+          "lab-config-summary.json": "df93cfde8ae156763759e345cb1b3462169c819c21616cd2d256666a1f5e107f",
+          "live-receiver-io.jsonl": "ee8abaf8170af704e835c52f11f1836bc9b59fc9da6a464c431f36b0388c91bc",
+          "manifest.json": "2892a5c1724064b283ec94243e6bc0e044da0bbb4616dbfe14f48d151281e2e6",
+          "progress.json": "d04f90451dbf01d11624192dd762792abc7f071ccf2de0da23ead17e7c608a82"
+        }
+      },
+      "buffered-2": {
+        "runtime_commit": "cdb5b6fe4474c6cf9802ec98cdcd2526ddacaece",
+        "binary_sha256": "1c9dd881e87f0a6a2132d0e857f8540e135279983d0caca4b418199ea1f07d9d",
+        "receiver": {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 120.008635,
+          "received_mbps": 800.0055593332929,
+          "minimum_window_mbps": 458.1281053418522,
+          "window_seconds": 1.0,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 458.1080338338273,
+          "complete_one_second_intervals": 120,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [],
+          "target_mbps": 300.0,
+          "start": 1792697882.3545446,
+          "end": 1792698002.6783035,
+          "case": "both-probe",
+          "reverse": false
+        },
+        "cpu_span": {
+          "start": 1792697895.4489563,
+          "end": 1792697995.3472981,
+          "seconds": 99.89834189414978,
+          "receiver_gbit": 80.35442590782503,
+          "timing_scope": "monitor wall clock relative to pre-client launch; small launch offset not subtracted"
+        },
+        "roles": {
+          "edge": {
+            "cpu_seconds": 145.5373608451039,
+            "average_cores": 1.4568546192619722,
+            "cpu_seconds_per_gbit": 1.811192839732942,
+            "rss_median_mib": 22.845703125,
+            "rss_peak_mib": 28.8671875,
+            "gro_enabled": false,
+            "gro_packets": 0,
+            "gro_bundles": 0,
+            "gso_packets": 636970,
+            "gso_bundles": 160477,
+            "extra_copies": 848508,
+            "frame_sent_bytes": 11654645464,
+            "dropped_packets": 0,
+            "app_errors": 0
+          },
+          "exit": {
+            "cpu_seconds": 162.01782191862534,
+            "average_cores": 1.6218269377313197,
+            "cpu_seconds_per_gbit": 2.01628995650441,
+            "rss_median_mib": 23.38671875,
+            "rss_peak_mib": 28.87890625,
+            "gro_enabled": false,
+            "gro_packets": 0,
+            "gro_bundles": 0,
+            "gso_packets": 7768045,
+            "gso_bundles": 469444,
+            "extra_copies": 2499,
+            "frame_sent_bytes": 103821832,
+            "dropped_packets": 0,
+            "app_errors": 0
+          }
+        },
+        "tg_cpu_seconds_per_gbit": 3.827482796237352,
+        "cleanup_passed": true,
+        "receipt_sha256": {
+          "both-probe-acceptance.json": "1618b90910b46350664d2effb8a59cde49b7d69a7f3ba3abfb32ccecad97d498",
+          "both-probe-client.json": "a1e20537c678fbc0b5da9a368d440b3cbe09dced55f53159bc914fccd94bfa0e",
+          "both-probe-server.json": "ac6b9cb81b75446be94091cbdbc59f25e406bf108ffd0523703acf7cf32a3f0a",
+          "cleanup.json": "ada60c30f1dac96c92bc6fb530baa90a90f42f0e61c22b7607e80877f89adc8e",
+          "edge-monitor.jsonl": "51accc19fe1584c483d306f21949b3fcb366e1e4842dacca04418f826238ec97",
+          "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+          "edge-udp-socket-memory.txt": "8cfb25920ee10983adce14029c76356747a3c7f3a2f9ff27714549eaaf732554",
+          "exit-monitor.jsonl": "7c4cf4a9a72126a9543161cf1b20db7b1d30f50c682c29c252503214fa7de9e8",
+          "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+          "exit-udp-socket-memory.txt": "a637b29686d44e688649020e7f501d6a85c8213652edc4bd6e46e52ce61a57bd",
+          "lab-config-summary.json": "df93cfde8ae156763759e345cb1b3462169c819c21616cd2d256666a1f5e107f",
+          "live-receiver-io.jsonl": "1a32dd8bd2a87612c7fc5f95fb69caad7ef89f61bdf47ebb62c87249d48f6a55",
+          "manifest.json": "e72fa8eb98558edc12ae06503131eefbe5b010492c9eaa23ad0682ad11b554d0",
+          "progress.json": "571835c42572419940553a5510ca9c4d69b8fa3fb75731f78c2e5ac215442995"
+        }
+      },
+      "old-2": {
+        "runtime_commit": "bba3467e17a1ff29e37ae1214de8073b886fe614",
+        "binary_sha256": "8c616a6b44e44d2c54b192b853fd38529ee87b57ce028a105ce3456c81fbe130",
+        "receiver": {
+          "passed": true,
+          "protocol": "TCP",
+          "scope": "receiver_application_goodput",
+          "seconds": 120.00863,
+          "received_mbps": 800.0059542384577,
+          "minimum_window_mbps": 765.0059675225982,
+          "window_seconds": 1.0,
+          "maximum_udp_interval_loss_percent": null,
+          "minimum_complete_one_second_mbps": 765.0059675225981,
+          "complete_one_second_intervals": 120,
+          "complete_one_second_below_target": 0,
+          "maximum_udp_interval_jitter_ms": null,
+          "failures": [],
+          "target_mbps": 300.0,
+          "start": 1792698021.97506,
+          "end": 1792698142.4465878,
+          "case": "both-probe",
+          "reverse": false
+        },
+        "cpu_span": {
+          "start": 1792698034.7290392,
+          "end": 1792698134.5293067,
+          "seconds": 99.80026745796204,
+          "receiver_gbit": 79.8411140382667,
+          "timing_scope": "monitor wall clock relative to pre-client launch; small launch offset not subtracted"
+        },
+        "roles": {
+          "edge": {
+            "cpu_seconds": 150.48847409362733,
+            "average_cores": 1.50789650094892,
+            "cpu_seconds_per_gbit": 1.8848493774961654,
+            "rss_median_mib": 22.8203125,
+            "rss_peak_mib": 34.19140625,
+            "gro_enabled": false,
+            "gro_packets": 0,
+            "gro_bundles": 0,
+            "gso_packets": 840090,
+            "gso_bundles": 224885,
+            "extra_copies": 590362,
+            "frame_sent_bytes": 11237607808,
+            "dropped_packets": 0,
+            "app_errors": 0
+          },
+          "exit": {
+            "cpu_seconds": 203.28096589302368,
+            "average_cores": 2.036877967072081,
+            "cpu_seconds_per_gbit": 2.5460687559493977,
+            "rss_median_mib": 24.431640625,
+            "rss_peak_mib": 28.69140625,
+            "gro_enabled": false,
+            "gro_packets": 0,
+            "gro_bundles": 0,
+            "gso_packets": 7400894,
+            "gso_bundles": 861910,
+            "extra_copies": 547,
+            "frame_sent_bytes": 133161696,
+            "dropped_packets": 0,
+            "app_errors": 0
+          }
+        },
+        "tg_cpu_seconds_per_gbit": 4.430918133445563,
+        "cleanup_passed": true,
+        "receipt_sha256": {
+          "both-probe-acceptance.json": "183aeb8cdab3a8891c7a07e704e7722921032cd9785e3f536667c8fef5839b42",
+          "both-probe-client.json": "1a6a24c722027455f469adfc35e98bc579e6e78284085d53efcd0e379785bdc7",
+          "both-probe-server.json": "1cbb118e5822e6d4eb0bf1d37ac93f353ae5ee1723de510278fbca49b69ecdbb",
+          "cleanup.json": "fae7c14d06efb7f8abd0ce3f1586d4bc84f40ecb75347ad10bead8fe2f06d887",
+          "edge-monitor.jsonl": "991b5806e6f13c1f1b766beb891003d26069250500682b055718cd0f7e42877f",
+          "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+          "edge-udp-socket-memory.txt": "b8873c027a2cc8f71f0e7dd19db61fa0bfabbd772a3d9af02166c2f9f05e7a18",
+          "exit-monitor.jsonl": "040bcdc1f8e61a942495d10eb10bf11b8e6f5ff1ba930c70d76090f3b74641b6",
+          "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+          "exit-udp-socket-memory.txt": "2df6acacb3a2fd7d661217efcaf914aed4b7bf3e1194043cc574db155ceaf1d8",
+          "lab-config-summary.json": "87b07f4db3127193ff89e1120bbc6e781b16ab9330517b425a2fdf3b8fc9ed42",
+          "live-receiver-io.jsonl": "18677e07abc74edb2acfc806ad6c73865c17d763b85b9943fb8c696ad3b0f99d",
+          "manifest.json": "6bab4b1b54774fb46169d920c9748355a5a733f6921a61c835cfb813f6bdbe7c",
+          "progress.json": "ef016c30d0b8bf9741065effc1a8db6bc98144d8800541adf5c035a93950e1e9"
+        }
+      }
+    }
+  },
+  "gro_abba": {
+    "comparison": {
+      "old": {
+        "cpu_seconds_per_gbit": 4.568225225241477,
+        "cpu_seconds": 732.4056653686821,
+        "receiver_gbit": 160.3260849140745,
+        "all_300mbps_speed_passed": true
+      },
+      "gro": {
+        "cpu_seconds_per_gbit": 4.480293408715755,
+        "cpu_seconds": 718.7714720614545,
+        "receiver_gbit": 160.42955371252913,
+        "all_300mbps_speed_passed": true
+      },
+      "cpu_cost_reduction_percent": 1.9248572955610777
+    },
+    "attributed_cpu_gain": false,
+    "actual_kernel_wg_gro_packets": 0
+  },
+  "explicit_windows": {
+    "native-defaults": {
+      "receiver": {
+        "passed": false,
+        "protocol": "TCP",
+        "scope": "receiver_application_goodput",
+        "seconds": 60.12889,
+        "received_mbps": 2309.2476865613185,
+        "minimum_window_mbps": 845.3948070778961,
+        "window_seconds": 1.0,
+        "maximum_udp_interval_loss_percent": null,
+        "minimum_complete_one_second_mbps": 845.3948070778957,
+        "complete_one_second_intervals": 60,
+        "complete_one_second_below_target": 60,
+        "maximum_udp_interval_jitter_ms": null,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "aggregate receiver bitrate below target",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "profile": {
+        "mtu": 7168,
+        "max_packet_bytes": 8192,
+        "stream_window_bytes": 0,
+        "retained_packets": 8192,
+        "replica_delay_ms": 10,
+        "gomaxprocs": 4,
+        "application_udp_gro": false,
+        "preferred_carrier": "https"
+      },
+      "binary_sha256": "1713b80a13cb9918570ed864b133b718e344d841342089164dc41593de6bfeaa",
+      "roles": {
+        "edge": {
+          "cpu_seconds": 92.80393143670524,
+          "average_cores": 2.268823653214782,
+          "cpu_seconds_per_gbit": 0.9907977013142145,
+          "rss_median_mib": 76.03515625,
+          "rss_peak_mib": 77.23828125,
+          "extra_copies": 918197,
+          "frame_sent_bytes": 18094286296,
+          "dropped": 0,
+          "app_errors": 0,
+          "gro_packets": 0,
+          "retained_peak": 3122
+        },
+        "exit": {
+          "cpu_seconds": 95.31416566336553,
+          "average_cores": 2.330192592012817,
+          "cpu_seconds_per_gbit": 1.0175975821277938,
+          "rss_median_mib": 27.150390625,
+          "rss_peak_mib": 30.72265625,
+          "extra_copies": 1514,
+          "frame_sent_bytes": 34458672,
+          "dropped": 0,
+          "app_errors": 0,
+          "gro_packets": 0,
+          "retained_peak": 29
+        }
+      },
+      "tg_cpu_seconds_per_gbit": 2.0083952834420082,
+      "shared_vm_average_busy_cores": 8.201800717920477,
+      "cleanup_passed": true,
+      "receipt_sha256": {
+        "both-probe-acceptance.json": "f77527637e1335eab4d2dbd835d354a9b8054366dd46ac0fb5b8dcd4aa28562e",
+        "both-probe-client.json": "a0527c853ff4934608da19c7b36fd29d086d28550bdc497eb456f49a09dd71da",
+        "both-probe-server.json": "3fbc324044fb4e6320e0fcfdbcc3a5de279ad59f3f2dd1c04549a764651c60f3",
+        "cleanup.json": "d278904bded83218f234d68f4e8c18e9b63379740d76ca8cc09090915e4ef811",
+        "edge-monitor.jsonl": "efd9bdcb78f4f60531490836a40a814911d2be3c8df5ecb3285057e88c94c45e",
+        "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+        "edge-udp-socket-memory.txt": "f21b5352a32907d1f6dc7b71c568982b1d3b061e6785978c660dc3dd0ce4caaa",
+        "exit-monitor.jsonl": "fd593615b6497b25b989f2621621ac9506ea5a9821df57f0eefb8d81462a652a",
+        "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+        "exit-udp-socket-memory.txt": "fd29d21092f307ad9fe9ae93504ddce357d1595ca7b8c7cbda6890c2387f911b",
+        "lab-config-summary.json": "6e98746e50d5e561536f77a60ed9fb51f95e0cdb43147959a6d56576bdba9d83",
+        "live-receiver-io.jsonl": "5552f8c29680a36531e3f1338306241f6e3573998bf385e45bbb35751cd59c37",
+        "manifest.json": "4d2605d67c5f079898dabb0792c21799c6a29bbf8c007cd61e65635d06b87c1e",
+        "progress.json": "4652bb7c22222168bfc6581b2c338c6ba0f1d334fc9f9f5e16dfa5fd4c984f99"
+      },
+      "runtime_commit": "9b2690dd24145d5cf09c1e4a23c034a052c99b62"
+    },
+    "window32m": {
+      "receiver": {
+        "passed": false,
+        "protocol": "TCP",
+        "scope": "receiver_application_goodput",
+        "seconds": 60.067364,
+        "received_mbps": 1795.8506031994345,
+        "minimum_window_mbps": 1101.908627654892,
+        "window_seconds": 1.0,
+        "maximum_udp_interval_loss_percent": null,
+        "minimum_complete_one_second_mbps": 1101.9086276548956,
+        "complete_one_second_intervals": 60,
+        "complete_one_second_below_target": 60,
+        "maximum_udp_interval_jitter_ms": null,
+        "failures": [
+          "complete one-second receiver interval below target or absent",
+          "aggregate receiver bitrate below target",
+          "rolling receiver window below target or absent"
+        ]
+      },
+      "profile": {
+        "mtu": 7168,
+        "max_packet_bytes": 8192,
+        "stream_window_bytes": 33554432,
+        "retained_packets": 8192,
+        "replica_delay_ms": 10,
+        "gomaxprocs": 4,
+        "application_udp_gro": false,
+        "preferred_carrier": "https"
+      },
+      "binary_sha256": "1713b80a13cb9918570ed864b133b718e344d841342089164dc41593de6bfeaa",
+      "roles": {
+        "edge": {
+          "cpu_seconds": 82.02531726234695,
+          "average_cores": 2.023023448384576,
+          "cpu_seconds_per_gbit": 1.1598623052598966,
+          "rss_median_mib": 71.421875,
+          "rss_peak_mib": 77.19140625,
+          "extra_copies": 685259,
+          "frame_sent_bytes": 12970419688,
+          "dropped": 0,
+          "app_errors": 0,
+          "gro_packets": 0,
+          "retained_peak": 3125
+        },
+        "exit": {
+          "cpu_seconds": 83.90516860431049,
+          "average_cores": 2.0693869794405564,
+          "cpu_seconds_per_gbit": 1.18644396058056,
+          "rss_median_mib": 31.166015625,
+          "rss_peak_mib": 54.37890625,
+          "extra_copies": 8610,
+          "frame_sent_bytes": 31599208,
+          "dropped": 0,
+          "app_errors": 0,
+          "gro_packets": 0,
+          "retained_peak": 82
+        }
+      },
+      "tg_cpu_seconds_per_gbit": 2.346306265840456,
+      "shared_vm_average_busy_cores": 8.518096936903524,
+      "cleanup_passed": true,
+      "receipt_sha256": {
+        "both-probe-acceptance.json": "bd88a60e8f3972afb0d7717cfb95b9126748b43b2ea3d1c9c5c5c3e5c14796be",
+        "both-probe-client.json": "257bb4c6615351f241b4f2006dea4ff4f502664d25ec70a988d3cdfb041d7f01",
+        "both-probe-server.json": "251d101befb4c9a3e0dade8f88ac2fc848c0e0e323476f284689e97744c5fb93",
+        "cleanup.json": "55eacc56199360461c38914f1f94bb3c94e747cfa6acd65c875208498bca7905",
+        "edge-monitor.jsonl": "57a6c158003f04b25f7ac4e622ea2c0447cea5294d7971d9e994c5619e71ab93",
+        "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+        "edge-udp-socket-memory.txt": "9f291922c9e28d6bf458c57d009e9875b770779f74c001f766b796d9b9a6aac1",
+        "exit-monitor.jsonl": "e7953df7524f72957370a81de91d09f9343e18090135a2a1e5a98afc65ae153e",
+        "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+        "exit-udp-socket-memory.txt": "6cb8ef0d319922a10a8dd454d230875448bfc7a8512571e180a2a2918b7c6852",
+        "lab-config-summary.json": "32c2eb8ff9fa041f4e9881e055760e4e54bf7cb51c30ac507405a489bfd6a1d8",
+        "live-receiver-io.jsonl": "a1a686b314ab57cf0d16ee97ee66ee4be9d22801a7f227b13f77dc938397a4e8",
+        "manifest.json": "0f861e376d9c4f75602e4afa1af91538e7d53a2131a8ca855e5ee2e21477b1cd",
+        "progress.json": "99c3e732aa89babdf227a7a0fb60987043e821612ef6384534efcb57c4b4675d"
+      },
+      "runtime_commit": "9b2690dd24145d5cf09c1e4a23c034a052c99b62"
+    }
+  },
+  "independent_sessions": {
+    "ordinary-one": {
+      "common_span_seconds": 70.0,
+      "average_receiver_mbps": 1288.6599720132724,
+      "minimum_common_weighted_second_mbps": 558.0453508401687,
+      "common_seconds_below_10000": 70,
+      "tg_average_cores": 3.8890581760498484,
+      "tg_cpu_seconds_per_gbit": 3.0179087272913243,
+      "shared_vm_average_busy_cores": 8.751978171667352,
+      "global_cpu_counted_once": true,
+      "cleanup_passed": true,
+      "exact_synchronized_acceptance": false,
+      "notes": "Short shared-VM capacity diagnostics. Separate independent WireGuard/TG sessions; no arbitrary encrypted-packet striping. Common receiver span uses pre-launch wall clock; launch offset not corrected, so not exact synchronized 10G acceptance.",
+      "all_instances": [
+        {
+          "receiver": {
+            "passed": true,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 90.080636,
+            "received_mbps": 1348.6129791534777,
+            "minimum_window_mbps": 558.061875925766,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 557.9811283003467,
+            "complete_one_second_intervals": 90,
+            "complete_one_second_below_target": 0,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": []
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "1713b80a13cb9918570ed864b133b718e344d841342089164dc41593de6bfeaa",
+          "roles": {
+            "edge": {
+              "cpu_seconds": 133.54733709633535,
+              "average_cores": 1.8853811662034876,
+              "cpu_seconds_per_gbit": 1.471163015220588,
+              "rss_median_mib": 50.744140625,
+              "rss_peak_mib": 53.125,
+              "extra_copies": 5555640,
+              "frame_sent_bytes": 19907493744,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 8192
+            },
+            "exit": {
+              "cpu_seconds": 140.52364509923135,
+              "average_cores": 1.9838705857926386,
+              "cpu_seconds_per_gbit": 1.5480143140918226,
+              "rss_median_mib": 29.498046875,
+              "rss_peak_mib": 30.96875,
+              "extra_copies": 14786,
+              "frame_sent_bytes": 88862120,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 86
+            }
+          },
+          "receipt_sha256": {
+            "both-probe-acceptance.json": "d812761988b802858be929f09a2ecde963ab52836723facbed8c8db6ef3761ea",
+            "both-probe-client.json": "2515b87fe78d9940f348ad37011d72e13f78624e2dd85bf00b2d23d3715ccc87",
+            "both-probe-server.json": "569d86b1ea5bd8d3697656587286502955c79bac8763d2d1b36901835ea0d5da",
+            "cleanup.json": "4440b9e54cadd71a7d7c217385721f9b6d4b81645fa1d372b89e4321b39c7ddd",
+            "edge-monitor.jsonl": "b66e49aea0d35c1593839ebb419ceb7048f0a258127b813ca4b3104a00690343",
+            "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+            "edge-udp-socket-memory.txt": "2657aec291596d8e2e7ae9ed590c438107812841dfe455d225925abab72d7999",
+            "exit-monitor.jsonl": "3629111e3446f24c6a4798e2719baa157fe584a09e66b1e3fc982445c9402c6e",
+            "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+            "exit-udp-socket-memory.txt": "1c65d239e4f19a3c45cc88656033bb58a71e53e458d7f41ca3c636160388cc7f",
+            "lab-config-summary.json": "8253bd609c0ff887f7423e8b3a9dd1c03c7c33ee027a4279f58fae1851db86fc",
+            "live-receiver-io.jsonl": "c45956d0b91278fe560f03721a229329b41b63d161c8147c88d0e0611ccbd73d",
+            "manifest.json": "cfa6fa391300e1201172166859d6fd6490b017db15874d4c12901446cf10a993",
+            "progress.json": "9c6966cf5304b213fe081bfe3e5dabf190a9bb2d3c16cf37cb8bf9b5f9e8832d"
+          },
+          "cleanup_passed": true,
+          "runtime_commit": "9b2690dd24145d5cf09c1e4a23c034a052c99b62"
+        }
+      ]
+    },
+    "proxy-two": {
+      "common_span_seconds": 69.98317527770996,
+      "average_receiver_mbps": 2483.85235107104,
+      "minimum_common_weighted_second_mbps": 1966.3586081340065,
+      "common_seconds_below_10000": 69,
+      "tg_average_cores": 6.494797054679745,
+      "tg_cpu_seconds_per_gbit": 2.6148080226585053,
+      "shared_vm_average_busy_cores": 8.975777513835908,
+      "global_cpu_counted_once": true,
+      "cleanup_passed": true,
+      "exact_synchronized_acceptance": false,
+      "notes": "Short shared-VM capacity diagnostics. Separate independent WireGuard/TG sessions; no arbitrary encrypted-packet striping. Common receiver span uses pre-launch wall clock; launch offset not corrected, so not exact synchronized 10G acceptance.",
+      "all_instances": [
+        {
+          "receiver": {
+            "passed": true,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 90.240701,
+            "received_mbps": 1212.8402993677985,
+            "minimum_window_mbps": 649.4872578950043,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 649.48725789501,
+            "complete_one_second_intervals": 90,
+            "complete_one_second_below_target": 0,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": []
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "1713b80a13cb9918570ed864b133b718e344d841342089164dc41593de6bfeaa",
+          "roles": {
+            "edge": {
+              "cpu_seconds": 113.26204702417753,
+              "average_cores": 1.6187384581676971,
+              "cpu_seconds_per_gbit": 1.2952055782922036,
+              "rss_median_mib": 75.529296875,
+              "rss_peak_mib": 78.0234375,
+              "extra_copies": 1158900,
+              "frame_sent_bytes": 18993474256,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3111
+            },
+            "exit": {
+              "cpu_seconds": 114.81407057970657,
+              "average_cores": 1.6409199415800595,
+              "cpu_seconds_per_gbit": 1.3129537085757135,
+              "rss_median_mib": 27.998046875,
+              "rss_peak_mib": 30.01171875,
+              "extra_copies": 788,
+              "frame_sent_bytes": 44866280,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 26
+            }
+          },
+          "receipt_sha256": {
+            "both-probe-acceptance.json": "240fd5dd91139bb83d7c8a1ccddc82174a186c3714b8afff9efc87c3a22a197f",
+            "both-probe-client.json": "6f21f0e5ea158e2134bdd479925c3e0fe53a1427955ea329c5b8dbe1f20ee51d",
+            "both-probe-server.json": "ae9653d0c60d3ca117df9967e1a102683537e26a5c45ca017bd3d55c2ce2b602",
+            "cleanup.json": "149b00b7267aad8c6163b6438ab3d2a628a29ed7a43da11be16c2a91538b86fa",
+            "edge-monitor.jsonl": "8931c192c0151216eb34d6992aa7c028dfbf75963fffb19a59296aa8a2a2c781",
+            "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+            "edge-udp-socket-memory.txt": "c5e272267aed10226cd4182c116db5964e010e3d76c5ebd09579f3abdcbee41f",
+            "exit-monitor.jsonl": "1caa51d9b840da6334a03972e480fa09afefd2945c81eb64b164a24ed3a66ee0",
+            "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+            "exit-udp-socket-memory.txt": "1e3d4c8cf5f9ee7cf0ecb1d4ccd198497eb420c1a061933a20c78888a8242e64",
+            "lab-config-summary.json": "6e98746e50d5e561536f77a60ed9fb51f95e0cdb43147959a6d56576bdba9d83",
+            "live-receiver-io.jsonl": "0d6692fdcc009385c6a20367aa1dc11c420cb477ab020e1984466389c3995101",
+            "manifest.json": "ccb3cb150555dda9a267b7820a4caac9d2b2cbfe94ca1d6966d8b65bc6463390",
+            "progress.json": "b1f0242f43d6dcb98cbcf6e23d06030419bef4f29b1b0d195b1300f8a14ee82f"
+          },
+          "cleanup_passed": true,
+          "runtime_commit": "9b2690dd24145d5cf09c1e4a23c034a052c99b62"
+        },
+        {
+          "receiver": {
+            "passed": true,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 90.280989,
+            "received_mbps": 1213.7293501736008,
+            "minimum_window_mbps": 700.5723964504394,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 700.5723964504358,
+            "complete_one_second_intervals": 90,
+            "complete_one_second_below_target": 0,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": []
+          },
+          "profile": {
+            "mtu": 7168,
+            "max_packet_bytes": 8192,
+            "stream_window_bytes": 0,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "1713b80a13cb9918570ed864b133b718e344d841342089164dc41593de6bfeaa",
+          "roles": {
+            "edge": {
+              "cpu_seconds": 112.94250303521879,
+              "average_cores": 1.6153139600282607,
+              "cpu_seconds_per_gbit": 1.2939334549467465,
+              "rss_median_mib": 75.404296875,
+              "rss_peak_mib": 77.296875,
+              "extra_copies": 1162548,
+              "frame_sent_bytes": 18995902952,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3112
+            },
+            "exit": {
+              "cpu_seconds": 116.05181547306866,
+              "average_cores": 1.6597836295678337,
+              "cpu_seconds_per_gbit": 1.3295555040168066,
+              "rss_median_mib": 28.158203125,
+              "rss_peak_mib": 29.93359375,
+              "extra_copies": 871,
+              "frame_sent_bytes": 43487592,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 23
+            }
+          },
+          "receipt_sha256": {
+            "both-probe-acceptance.json": "f2f9f7989419fb20ad68ea4d75777af72f3fbb81606cecb4a6218f5c8e10a601",
+            "both-probe-client.json": "872b880ba0df25dbc3d4b6e06164bc4275ee58d089085f82db6422ff215ee3cc",
+            "both-probe-server.json": "5d138fad769f9ffc2ce840d2097cb1d656b30fd5204000b560a91f51a3db56ba",
+            "cleanup.json": "82a02d210a3fd94f12bfcfe352279e19c64965e728ab3f8cb21ad577a289ae1d",
+            "edge-monitor.jsonl": "47fde17cad6c386e47eefb3e5181c4176e5c633fd04888545736f049f988eade",
+            "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+            "edge-udp-socket-memory.txt": "d1fc38b35e29b91622988201dabecf66bfc600bc449d073cfce00d37d90e4e87",
+            "exit-monitor.jsonl": "a747cf2bf225530fb65afb6e50c1187f32f926bad7d305f2143d1909f3c4bdab",
+            "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+            "exit-udp-socket-memory.txt": "b3b5d8fc9e9ae4ca23e502ec74afc3a4301fa73d0e035773c852f51ba013172c",
+            "lab-config-summary.json": "6e98746e50d5e561536f77a60ed9fb51f95e0cdb43147959a6d56576bdba9d83",
+            "live-receiver-io.jsonl": "39bfbbda95fc808146289918e58627c4cd8b0d4fef96a8fef747c6026c39cfd0",
+            "manifest.json": "86d2c169b5ea7791ccca4c7350fb7884cae432da8c7343c2cb97c19da9ab4e48",
+            "progress.json": "2875ca75f4c0c4f1e2e72f4074b64c69449a49d6635987235db6f689db20bf6c"
+          },
+          "cleanup_passed": true,
+          "runtime_commit": "9b2690dd24145d5cf09c1e4a23c034a052c99b62"
+        }
+      ]
+    },
+    "ordinary-two": {
+      "common_span_seconds": 69.99067068099976,
+      "average_receiver_mbps": 1033.9271080309663,
+      "minimum_common_weighted_second_mbps": 407.10122511640105,
+      "common_seconds_below_10000": 69,
+      "tg_average_cores": 4.141316129597371,
+      "tg_cpu_seconds_per_gbit": 4.005423687443678,
+      "shared_vm_average_busy_cores": 9.247584263246619,
+      "global_cpu_counted_once": true,
+      "cleanup_passed": true,
+      "exact_synchronized_acceptance": false,
+      "notes": "Short shared-VM capacity diagnostics. Separate independent WireGuard/TG sessions; no arbitrary encrypted-packet striping. Common receiver span uses pre-launch wall clock; launch offset not corrected, so not exact synchronized 10G acceptance.",
+      "all_instances": [
+        {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 90.098714,
+            "received_mbps": 549.4024357328784,
+            "minimum_window_mbps": 193.2816997474289,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 193.2816997474298,
+            "complete_one_second_intervals": 90,
+            "complete_one_second_below_target": 12,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "1713b80a13cb9918570ed864b133b718e344d841342089164dc41593de6bfeaa",
+          "roles": {
+            "edge": {
+              "cpu_seconds": 74.44313750636556,
+              "average_cores": 1.0390400204023582,
+              "cpu_seconds_per_gbit": 1.8983411253997997,
+              "rss_median_mib": 31.544921875,
+              "rss_peak_mib": 49.2578125,
+              "extra_copies": 2118530,
+              "frame_sent_bytes": 7959288492,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 4572
+            },
+            "exit": {
+              "cpu_seconds": 76.92079563408163,
+              "average_cores": 1.0736219313454864,
+              "cpu_seconds_per_gbit": 1.9615227762016925,
+              "rss_median_mib": 29.212890625,
+              "rss_peak_mib": 32.84375,
+              "extra_copies": 57336,
+              "frame_sent_bytes": 46020624,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 70
+            }
+          },
+          "receipt_sha256": {
+            "both-probe-acceptance.json": "acda309cd78d34b135fb1b19e69b546841065325e5d3f98ce986c7c54b701970",
+            "both-probe-client.json": "ea596eadb089b58cff870af89b6020768786bf39317a21c7c8467218df4b3527",
+            "both-probe-server.json": "ef8336f82a3b1b0dae8e36d9d5505b4b0549f9b16aead6a56c4d588b11d54f6f",
+            "cleanup.json": "b4d91848407967d65d8697566ab12f39c5468be071248aeaf657b2aa17e50190",
+            "edge-monitor.jsonl": "842509668cf100c10be1ee02e01d8872ea48a84ce7cfe2b2c1beaed71ab6e3ae",
+            "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+            "edge-udp-socket-memory.txt": "5245891b29f247bd76afc70d48c9d1d83f163efe458d58200cfc4dd127c973e5",
+            "exit-monitor.jsonl": "cdec8fded4bfff719132ce045b4de48b3174899815fb04c5f6cb227c26a0fb9d",
+            "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+            "exit-udp-socket-memory.txt": "774b569d9c18930ce1c775d261c8f622df7ac4cc4804e0745382c45ba7622842",
+            "lab-config-summary.json": "8253bd609c0ff887f7423e8b3a9dd1c03c7c33ee027a4279f58fae1851db86fc",
+            "live-receiver-io.jsonl": "498b63b240f01c3edf840c1816c0431ad4b2018dee38f06283db14ee95e8f7ff",
+            "manifest.json": "b6596e7eaf25829bd65b225c951f4e5eb4a069948df93b06af2fd7e280a942bf",
+            "progress.json": "d23e49db7a9314fc5b2e104f672aab1c3a01620b7bf000714888826cf3065a5c"
+          },
+          "cleanup_passed": true,
+          "runtime_commit": "9b2690dd24145d5cf09c1e4a23c034a052c99b62"
+        },
+        {
+          "receiver": {
+            "passed": false,
+            "protocol": "TCP",
+            "scope": "receiver_application_goodput",
+            "seconds": 90.042996,
+            "received_mbps": 549.59442389056,
+            "minimum_window_mbps": 200.37523599651908,
+            "window_seconds": 1.0,
+            "maximum_udp_interval_loss_percent": null,
+            "minimum_complete_one_second_mbps": 200.33654901403705,
+            "complete_one_second_intervals": 90,
+            "complete_one_second_below_target": 12,
+            "maximum_udp_interval_jitter_ms": null,
+            "failures": [
+              "complete one-second receiver interval below target or absent",
+              "rolling receiver window below target or absent"
+            ]
+          },
+          "profile": {
+            "mtu": 1500,
+            "max_packet_bytes": 2048,
+            "stream_window_bytes": 0,
+            "retained_packets": 8192,
+            "replica_delay_ms": 10,
+            "gomaxprocs": 4,
+            "application_udp_gro": false,
+            "preferred_carrier": "https"
+          },
+          "binary_sha256": "1713b80a13cb9918570ed864b133b718e344d841342089164dc41593de6bfeaa",
+          "roles": {
+            "edge": {
+              "cpu_seconds": 68.14,
+              "average_cores": 1.0100525562241425,
+              "cpu_seconds_per_gbit": 1.9402751689890365,
+              "rss_median_mib": 32.015625,
+              "rss_peak_mib": 39.2265625,
+              "extra_copies": 2113377,
+              "frame_sent_bytes": 7932522916,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 3756
+            },
+            "exit": {
+              "cpu_seconds": 70.92315292861817,
+              "average_cores": 1.0513077767981591,
+              "cpu_seconds_per_gbit": 2.019524985820515,
+              "rss_median_mib": 29.17578125,
+              "rss_peak_mib": 31.82421875,
+              "extra_copies": 56505,
+              "frame_sent_bytes": 41524928,
+              "dropped": 0,
+              "app_errors": 0,
+              "gro_packets": 0,
+              "retained_peak": 161
+            }
+          },
+          "receipt_sha256": {
+            "both-probe-acceptance.json": "0a386ab1e1654db1972c89f974e55ed5c322107cc33af87b88bba3db47950f8c",
+            "both-probe-client.json": "95e1c3a8a83ebec555060baae658a36cc679c7b0b828b73c18088e79ebedfba7",
+            "both-probe-server.json": "210fc11301c877d03c3c9b49dfd657e01ccf8efa9ebcb37b5f0f6c3c2a6a75c5",
+            "cleanup.json": "353e189af5d37f940ea376a95d4634a357d29fb92b502de6288efd2fae8dae8f",
+            "edge-monitor.jsonl": "5a3e53332718e84c175ef367faac64c53f728c578c90afc8f9521492417b9737",
+            "edge-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "edge-tg.log": "bbcce0bad600d9f46614c69e9f8d315ba9175e24aefdfb75129a4afbceab1e43",
+            "edge-udp-socket-memory.txt": "1cc7ee6a613d1352ed8fccc0f9c295f15a54cf155f1feca959cb88c8daf46f4d",
+            "exit-monitor.jsonl": "fd1cd3f04c8d8ed3f549fe41f3a6402d1d24c9af936e121f3f8192b6f512aafd",
+            "exit-node.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "exit-tg.log": "134a07a683d31c50e16328afe591b7cbee0cac2931c46a9f1e11c6ba5690d844",
+            "exit-udp-socket-memory.txt": "a6aab63860c679258c71b04efcae3be0e904a57eec8c3830159ead5cbc0de267",
+            "lab-config-summary.json": "8253bd609c0ff887f7423e8b3a9dd1c03c7c33ee027a4279f58fae1851db86fc",
+            "live-receiver-io.jsonl": "fa76baa34e8beefc889434d1b430a05d120d9af1677dfc7509fbbe6b979cf5df",
+            "manifest.json": "7304cbed0960eb823f15beccfb9c80188a71205bf77c4d03df343257a99adc84",
+            "progress.json": "2638f7f45645bb603326388d2c7a678b02c5141ee07b915a7e7d510140d4450d"
+          },
+          "cleanup_passed": true,
+          "runtime_commit": "9b2690dd24145d5cf09c1e4a23c034a052c99b62"
+        }
+      ]
+    }
+  }
+}

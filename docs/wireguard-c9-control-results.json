@@ -1,0 +1,598 @@
+{
+  "runtime_commit": "c9f634f5d070bd3153c614bc0632428ce01b8040",
+  "scope": "two isolated network namespaces on one Linux Docker VM; kernel WireGuard and TG; no WAN or DPI",
+  "harness_summary_passed": false,
+  "phases": {
+    "steady": {
+      "passed": false,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 1800.179074,
+      "received_mbps": 458.53841965057757,
+      "minimum_window_mbps": 113.6471107593689,
+      "window_seconds": 1,
+      "maximum_udp_interval_loss_percent": null,
+      "minimum_complete_one_second_mbps": 113.64711075936218,
+      "complete_one_second_intervals": 1800,
+      "complete_one_second_below_target": 19,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [
+        "complete one-second receiver interval below target or absent",
+        "rolling receiver window below target or absent"
+      ],
+      "independent_receiver_matches": true,
+      "sender_tcp_retransmissions": 23004,
+      "longest_zero_byte_run_seconds": 0
+    },
+    "faults": {
+      "passed": true,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 180.196774,
+      "received_mbps": 465.13340115622714,
+      "minimum_window_mbps": 397.7891780056152,
+      "window_seconds": 1,
+      "maximum_udp_interval_loss_percent": null,
+      "minimum_complete_one_second_mbps": 397.78917800561436,
+      "complete_one_second_intervals": 180,
+      "complete_one_second_below_target": 0,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [],
+      "independent_receiver_matches": true,
+      "sender_tcp_retransmissions": 3870,
+      "longest_zero_byte_run_seconds": 0,
+      "cycles": [
+        {
+          "cycle": 1,
+          "passed": true,
+          "minimum_mbps": 467.58359103999936
+        },
+        {
+          "cycle": 2,
+          "passed": true,
+          "minimum_mbps": 466.6657853602849
+        },
+        {
+          "cycle": 3,
+          "passed": true,
+          "minimum_mbps": 409.6383814447252
+        }
+      ],
+      "recovery_passed": true
+    },
+    "all-path-faults": {
+      "passed": false,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 180.22172,
+      "received_mbps": 443.2874623990937,
+      "minimum_window_mbps": 0.0,
+      "window_seconds": 1,
+      "maximum_udp_interval_loss_percent": null,
+      "minimum_complete_one_second_mbps": 0.0,
+      "complete_one_second_intervals": 180,
+      "complete_one_second_below_target": 11,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": [
+        "complete one-second receiver interval below target or absent",
+        "rolling receiver window below target or absent"
+      ],
+      "independent_receiver_matches": true,
+      "sender_tcp_retransmissions": 3954,
+      "longest_zero_byte_run_seconds": 2.000247001647949,
+      "cycles": [
+        {
+          "cycle": 1,
+          "passed": true,
+          "minimum_mbps": 466.61395853094604
+        },
+        {
+          "cycle": 2,
+          "passed": true,
+          "minimum_mbps": 466.7766875826596
+        },
+        {
+          "cycle": 3,
+          "passed": true,
+          "minimum_mbps": 466.6580759318369
+        }
+      ],
+      "recovery_passed": true
+    }
+  },
+  "memory": {
+    "edge": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 358,
+      "rss_early_median_mib": 46.8828125,
+      "rss_late_median_mib": 47.49609375,
+      "pss_early_median_mib": 42.951171875,
+      "pss_late_median_mib": 43.537109375,
+      "rss_peak_mib": 47.99609375,
+      "pss_peak_mib": 44.037109375,
+      "rss_growth_mib": 0.61328125,
+      "pss_growth_mib": 0.5859375,
+      "pss_slope_mib_per_minute": 0.03068801906707211,
+      "rss_slope_mib_per_minute": 0.03199942918348828,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    },
+    "exit": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 358,
+      "rss_early_median_mib": 33.54296875,
+      "rss_late_median_mib": 33.6171875,
+      "pss_early_median_mib": 29.611328125,
+      "pss_late_median_mib": 29.658203125,
+      "rss_peak_mib": 34.11328125,
+      "pss_peak_mib": 30.154296875,
+      "rss_growth_mib": 0.07421875,
+      "pss_growth_mib": 0.046875,
+      "pss_slope_mib_per_minute": -0.003421414847665776,
+      "rss_slope_mib_per_minute": -0.0021099413925363924,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    }
+  },
+  "continuity": {
+    "edge": {
+      "process_stable": true,
+      "app_socket_stable": true,
+      "observed_wireguard_handshakes": 18
+    },
+    "exit": {
+      "process_stable": true,
+      "app_socket_stable": true,
+      "observed_wireguard_handshakes": 18
+    }
+  },
+  "phase_counters": {
+    "edge": {
+      "steady": {
+        "last_sample_time": 1792636541.42248,
+        "tg": {
+          "ordered_output": false,
+          "deferred_first_sends": 0,
+          "session_ack_rtt_ms": 171.496329,
+          "session_ack_rtt_variation_ms": 0.433123,
+          "received_contiguous_id": 18820788,
+          "received_highest_id": 18820788,
+          "oldest_unacknowledged_ms": 173.076043,
+          "selectively_received_packets": 0,
+          "completed_output_queue": 0,
+          "retained_packets": 8192,
+          "replayed_packets": 0,
+          "acknowledged_packet_id": 83953585,
+          "redundant": true,
+          "extra_packet_copies": 21027690,
+          "skipped_packet_copies": 0,
+          "out_of_order_packets": 0,
+          "expired_late_packets": 0,
+          "missing_packet_ids_skipped": 0,
+          "peak_reorder_packets": 0,
+          "health_scope": "authenticated_carrier_round_trip",
+          "addresses": {},
+          "app_address": "127.0.0.1:31820",
+          "healthy_carriers": 2,
+          "active_carrier": "redundant",
+          "paths": [
+            {
+              "name": "udp",
+              "healthy": true,
+              "rtt_ms": 27.517771,
+              "rtt_variation_ms": 1.917685,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            },
+            {
+              "name": "web",
+              "healthy": true,
+              "rtt_ms": 80.29962,
+              "rtt_variation_ms": 6.93026,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            }
+          ],
+          "app_input_bytes": 110147812748,
+          "app_queued_bytes": 110147810124,
+          "app_output_bytes": 1807705236,
+          "frame_sent_bytes": 141339794504,
+          "frame_received_bytes": 4578598520,
+          "dropped_packets": 1,
+          "app_errors": 0,
+          "malformed_frames": 0,
+          "reconnect_attempts": 2,
+          "carrier_switches": 0
+        },
+        "udp": {
+          "InDatagrams": 115304129,
+          "NoPorts": 1,
+          "InErrors": 22194,
+          "OutDatagrams": 32798715,
+          "RcvbufErrors": 22194,
+          "SndbufErrors": 0,
+          "InCsumErrors": 0,
+          "IgnoredMulti": 0,
+          "MemErrors": 0
+        },
+        "peak_retained_packets": 8192
+      },
+      "faults": {
+        "last_sample_time": 1792636722.8187182,
+        "tg": {
+          "ordered_output": false,
+          "deferred_first_sends": 0,
+          "session_ack_rtt_ms": 222.968786,
+          "session_ack_rtt_variation_ms": 2.707563,
+          "received_contiguous_id": 20476058,
+          "received_highest_id": 20476058,
+          "oldest_unacknowledged_ms": 225.121875,
+          "selectively_received_packets": 0,
+          "completed_output_queue": 0,
+          "retained_packets": 8192,
+          "replayed_packets": 0,
+          "acknowledged_packet_id": 92420669,
+          "redundant": true,
+          "extra_packet_copies": 22193909,
+          "skipped_packet_copies": 0,
+          "out_of_order_packets": 0,
+          "expired_late_packets": 0,
+          "missing_packet_ids_skipped": 0,
+          "peak_reorder_packets": 0,
+          "health_scope": "authenticated_carrier_round_trip",
+          "addresses": {},
+          "app_address": "127.0.0.1:31820",
+          "healthy_carriers": 2,
+          "active_carrier": "redundant",
+          "paths": [
+            {
+              "name": "udp",
+              "healthy": true,
+              "rtt_ms": 14.73471,
+              "rtt_variation_ms": 3.688168,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            },
+            {
+              "name": "web",
+              "healthy": true,
+              "rtt_ms": 29.65918,
+              "rtt_variation_ms": 16.196497,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            }
+          ],
+          "app_input_bytes": 121255491172,
+          "app_queued_bytes": 121255488548,
+          "app_output_bytes": 1969272060,
+          "frame_sent_bytes": 154309447728,
+          "frame_received_bytes": 4835659828,
+          "dropped_packets": 1,
+          "app_errors": 0,
+          "malformed_frames": 0,
+          "reconnect_attempts": 38,
+          "carrier_switches": 0
+        },
+        "udp": {
+          "InDatagrams": 126570068,
+          "NoPorts": 752,
+          "InErrors": 25070,
+          "OutDatagrams": 35628105,
+          "RcvbufErrors": 25070,
+          "SndbufErrors": 0,
+          "InCsumErrors": 0,
+          "IgnoredMulti": 0,
+          "MemErrors": 0
+        },
+        "peak_retained_packets": 8192
+      },
+      "all-path-faults": {
+        "last_sample_time": 1792636903.5947988,
+        "tg": {
+          "ordered_output": false,
+          "deferred_first_sends": 0,
+          "session_ack_rtt_ms": 173.258093,
+          "session_ack_rtt_variation_ms": 0.638557,
+          "received_contiguous_id": 22062067,
+          "received_highest_id": 22062067,
+          "oldest_unacknowledged_ms": 175.192845,
+          "selectively_received_packets": 0,
+          "completed_output_queue": 0,
+          "retained_packets": 8192,
+          "replayed_packets": 0,
+          "acknowledged_packet_id": 100496020,
+          "redundant": true,
+          "extra_packet_copies": 23511400,
+          "skipped_packet_copies": 0,
+          "out_of_order_packets": 0,
+          "expired_late_packets": 0,
+          "missing_packet_ids_skipped": 0,
+          "peak_reorder_packets": 0,
+          "health_scope": "authenticated_carrier_round_trip",
+          "addresses": {},
+          "app_address": "127.0.0.1:31820",
+          "healthy_carriers": 2,
+          "active_carrier": "redundant",
+          "paths": [
+            {
+              "name": "udp",
+              "healthy": true,
+              "rtt_ms": 8.331568,
+              "rtt_variation_ms": 4.750137,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            },
+            {
+              "name": "web",
+              "healthy": true,
+              "rtt_ms": 134.618823,
+              "rtt_variation_ms": 210.473249,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            }
+          ],
+          "app_input_bytes": 131850344920,
+          "app_queued_bytes": 131850099576,
+          "app_output_bytes": 2121897880,
+          "frame_sent_bytes": 166958779660,
+          "frame_received_bytes": 5090338528,
+          "dropped_packets": 186,
+          "app_errors": 0,
+          "malformed_frames": 0,
+          "reconnect_attempts": 82,
+          "carrier_switches": 0
+        },
+        "udp": {
+          "InDatagrams": 137339475,
+          "NoPorts": 1917,
+          "InErrors": 29889,
+          "OutDatagrams": 38340542,
+          "RcvbufErrors": 29889,
+          "SndbufErrors": 0,
+          "InCsumErrors": 0,
+          "IgnoredMulti": 0,
+          "MemErrors": 0
+        },
+        "peak_retained_packets": 8192
+      }
+    },
+    "exit": {
+      "steady": {
+        "last_sample_time": 1792636540.754437,
+        "tg": {
+          "ordered_output": false,
+          "deferred_first_sends": 0,
+          "session_ack_rtt_ms": 26.23043,
+          "session_ack_rtt_variation_ms": 1.673527,
+          "received_contiguous_id": 83921873,
+          "received_highest_id": 83921873,
+          "oldest_unacknowledged_ms": 26.901276,
+          "selectively_received_packets": 0,
+          "completed_output_queue": 256,
+          "retained_packets": 298,
+          "replayed_packets": 0,
+          "acknowledged_packet_id": 18813020,
+          "redundant": true,
+          "extra_packet_copies": 18338850,
+          "skipped_packet_copies": 0,
+          "out_of_order_packets": 0,
+          "expired_late_packets": 0,
+          "missing_packet_ids_skipped": 0,
+          "peak_reorder_packets": 0,
+          "health_scope": "authenticated_carrier_round_trip",
+          "addresses": {
+            "udp": "[::]:8444",
+            "web": "[::]:8443"
+          },
+          "app_address": "127.0.0.1:47560",
+          "healthy_carriers": 2,
+          "active_carrier": "redundant",
+          "paths": [
+            {
+              "name": "udp",
+              "healthy": true,
+              "rtt_ms": 27.400234,
+              "rtt_variation_ms": 1.990177,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            },
+            {
+              "name": "web",
+              "healthy": true,
+              "rtt_ms": 80.466793,
+              "rtt_variation_ms": 6.975445,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            }
+          ],
+          "app_input_bytes": 1806988116,
+          "app_queued_bytes": 1806988116,
+          "app_output_bytes": 110095081388,
+          "frame_sent_bytes": 4576776952,
+          "frame_received_bytes": 141284814256,
+          "dropped_packets": 0,
+          "app_errors": 0,
+          "malformed_frames": 0,
+          "reconnect_attempts": 0,
+          "carrier_switches": 0
+        },
+        "udp": {
+          "InDatagrams": 189894680,
+          "NoPorts": 0,
+          "InErrors": 0,
+          "OutDatagrams": 96371761,
+          "RcvbufErrors": 0,
+          "SndbufErrors": 0,
+          "InCsumErrors": 0,
+          "IgnoredMulti": 0,
+          "MemErrors": 0
+        },
+        "peak_retained_packets": 427
+      },
+      "faults": {
+        "last_sample_time": 1792636722.057905,
+        "tg": {
+          "ordered_output": false,
+          "deferred_first_sends": 0,
+          "session_ack_rtt_ms": 12.369936,
+          "session_ack_rtt_variation_ms": 2.119117,
+          "received_contiguous_id": 92387454,
+          "received_highest_id": 92387454,
+          "oldest_unacknowledged_ms": 11.410842,
+          "selectively_received_packets": 0,
+          "completed_output_queue": 225,
+          "retained_packets": 99,
+          "replayed_packets": 0,
+          "acknowledged_packet_id": 20469887,
+          "redundant": true,
+          "extra_packet_copies": 18666147,
+          "skipped_packet_copies": 0,
+          "out_of_order_packets": 0,
+          "expired_late_packets": 0,
+          "missing_packet_ids_skipped": 0,
+          "peak_reorder_packets": 0,
+          "health_scope": "authenticated_carrier_round_trip",
+          "addresses": {
+            "udp": "[::]:8444",
+            "web": "[::]:8443"
+          },
+          "app_address": "127.0.0.1:47560",
+          "healthy_carriers": 2,
+          "active_carrier": "redundant",
+          "paths": [
+            {
+              "name": "udp",
+              "healthy": true,
+              "rtt_ms": 14.031116,
+              "rtt_variation_ms": 2.619026,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            },
+            {
+              "name": "web",
+              "healthy": true,
+              "rtt_ms": 40.130399,
+              "rtt_variation_ms": 9.905167,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            }
+          ],
+          "app_input_bytes": 1968689148,
+          "app_queued_bytes": 1968689148,
+          "app_output_bytes": 121200832772,
+          "frame_sent_bytes": 4834740572,
+          "frame_received_bytes": 154243429856,
+          "dropped_packets": 0,
+          "app_errors": 0,
+          "malformed_frames": 0,
+          "reconnect_attempts": 0,
+          "carrier_switches": 0
+        },
+        "udp": {
+          "InDatagrams": 207228968,
+          "NoPorts": 0,
+          "InErrors": 0,
+          "OutDatagrams": 105977475,
+          "RcvbufErrors": 0,
+          "SndbufErrors": 0,
+          "InCsumErrors": 0,
+          "IgnoredMulti": 0,
+          "MemErrors": 0
+        },
+        "peak_retained_packets": 310
+      },
+      "all-path-faults": {
+        "last_sample_time": 1792636907.8024828,
+        "tg": {
+          "ordered_output": false,
+          "deferred_first_sends": 0,
+          "session_ack_rtt_ms": 13.347381,
+          "session_ack_rtt_variation_ms": 0.804635,
+          "received_contiguous_id": 100696468,
+          "received_highest_id": 100696468,
+          "oldest_unacknowledged_ms": 15.654464,
+          "selectively_received_packets": 0,
+          "completed_output_queue": 256,
+          "retained_packets": 142,
+          "replayed_packets": 0,
+          "acknowledged_packet_id": 22099300,
+          "redundant": true,
+          "extra_packet_copies": 19096301,
+          "skipped_packet_copies": 0,
+          "out_of_order_packets": 0,
+          "expired_late_packets": 0,
+          "missing_packet_ids_skipped": 0,
+          "peak_reorder_packets": 0,
+          "health_scope": "authenticated_carrier_round_trip",
+          "addresses": {
+            "udp": "[::]:8444",
+            "web": "[::]:8443"
+          },
+          "app_address": "127.0.0.1:47560",
+          "healthy_carriers": 2,
+          "active_carrier": "redundant",
+          "paths": [
+            {
+              "name": "udp",
+              "healthy": true,
+              "rtt_ms": 10.566835,
+              "rtt_variation_ms": 4.475018,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            },
+            {
+              "name": "web",
+              "healthy": true,
+              "rtt_ms": 107.313721,
+              "rtt_variation_ms": 145.737818,
+              "queued_frames": 0,
+              "repair_queued_frames": 0
+            }
+          ],
+          "app_input_bytes": 2125485972,
+          "app_queued_bytes": 2125485876,
+          "app_output_bytes": 132101957836,
+          "frame_sent_bytes": 5100721952,
+          "frame_received_bytes": 167286918168,
+          "dropped_packets": 0,
+          "app_errors": 0,
+          "malformed_frames": 0,
+          "reconnect_attempts": 0,
+          "carrier_switches": 0
+        },
+        "udp": {
+          "InDatagrams": 224282476,
+          "NoPorts": 0,
+          "InErrors": 0,
+          "OutDatagrams": 115428077,
+          "RcvbufErrors": 0,
+          "SndbufErrors": 0,
+          "InCsumErrors": 0,
+          "IgnoredMulti": 0,
+          "MemErrors": 0
+        },
+        "peak_retained_packets": 194
+      }
+    }
+  },
+  "fault_memory": {
+    "edge": {
+      "growth_mib": {
+        "rss_kib": -0.72265625,
+        "pss_kib": -0.7265625
+      },
+      "passed": true,
+      "peak_rss_mib": 48.484375
+    },
+    "exit": {
+      "growth_mib": {
+        "rss_kib": -3.18359375,
+        "pss_kib": -3.1875
+      },
+      "passed": true,
+      "peak_rss_mib": 34.11328125
+    }
+  },
+  "cleanup_passed": true,
+  "passed": false
+}

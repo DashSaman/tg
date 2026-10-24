@@ -1,0 +1,202 @@
+{
+  "passed": false,
+  "runtime_commit": "bef9e497e62b95638c3a55e2345a136496e6d6df",
+  "memory": {
+    "edge": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 357,
+      "rss_early_median_mib": 21.720703125,
+      "rss_late_median_mib": 21.9296875,
+      "pss_early_median_mib": 17.76953125,
+      "pss_late_median_mib": 17.96484375,
+      "rss_peak_mib": 26.0703125,
+      "pss_peak_mib": 22.130859375,
+      "rss_growth_mib": 0.208984375,
+      "pss_growth_mib": 0.1953125,
+      "pss_slope_mib_per_minute": 0.01495487991562897,
+      "rss_slope_mib_per_minute": 0.015665947023633383,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    },
+    "exit": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 357,
+      "rss_early_median_mib": 23.0859375,
+      "rss_late_median_mib": 23.140625,
+      "pss_early_median_mib": 19.134765625,
+      "pss_late_median_mib": 19.17578125,
+      "rss_peak_mib": 28.9921875,
+      "pss_peak_mib": 25.02734375,
+      "rss_growth_mib": 0.0546875,
+      "pss_growth_mib": 0.041015625,
+      "pss_slope_mib_per_minute": 0.01188396552583392,
+      "rss_slope_mib_per_minute": 0.012595046234203744,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    }
+  },
+  "continuity": {
+    "edge": {
+      "process_stable": true,
+      "app_socket_stable": true,
+      "observed_wireguard_handshakes": 19
+    },
+    "exit": {
+      "process_stable": true,
+      "app_socket_stable": true,
+      "observed_wireguard_handshakes": 19
+    }
+  },
+  "fault_memory": {
+    "edge": {
+      "growth_mib": {
+        "rss_kib": 0.0546875,
+        "pss_kib": 0.046875
+      },
+      "passed": true,
+      "peak_rss_mib": 26.0703125
+    },
+    "exit": {
+      "growth_mib": {
+        "rss_kib": -0.51953125,
+        "pss_kib": -0.52734375
+      },
+      "passed": true,
+      "peak_rss_mib": 28.9921875
+    }
+  },
+  "loaded_latency": {
+    "scope": "1500 ICMP probes at 1Hz through the actual kernel WireGuard/TG path during bulk TCP; secondary latency observation, not WAN/DPI evidence",
+    "samples": 1498,
+    "transmitted": 1500,
+    "received": 1498,
+    "loss_percent": 0.133333,
+    "minimum_ms": 0.436,
+    "mean_ms": 3.532431909212283,
+    "median_ms": 1.5,
+    "maximum_ms": 251.0,
+    "p95_ms": 9.51,
+    "percentile_method": "nearest rank of 1498 rounded reply RTT samples",
+    "target_median_ms": 20,
+    "target_p95_ms": 30,
+    "raw_log_sha256": "ca6ee4487769001793e4a7a5ddc6c20fe8c150017a644bcffb955022730ef996",
+    "metadata_sha256": "9f54eeb1f4fab8befc20643607c2f82f62e00177d39edfe4d641554cb0e0f12d",
+    "start": 1792643609.3300738,
+    "end": 1792645124.773508,
+    "low_latency_target_passed": false,
+    "rtt_stddev_ms": 9.02927377978744,
+    "adjacent_rtt_delta_mean_ms": 3.6828470273881093,
+    "adjacent_rtt_delta_p95_ms": 10.12,
+    "variation_scope": "Population RTT standard deviation and absolute adjacent 1Hz ICMP RTT differences; a round-trip variation proxy, not one-way IP delay variation or RTP/UDP stream jitter.",
+    "within_steady_load": true,
+    "passed": false,
+    "conservative_steady_coverage": true
+  },
+  "udp_offload": {
+    "edge": {
+      "accepted_gso_packets": 8077704,
+      "accepted_gso_batches": 2633056,
+      "fallbacks": 0
+    },
+    "exit": {
+      "accepted_gso_packets": 71704176,
+      "accepted_gso_batches": 10115922,
+      "fallbacks": 0
+    }
+  },
+  "phases": {
+    "steady": {
+      "passed": false,
+      "seconds": 1800.000181,
+      "received_mbps": 350.0006525921566,
+      "minimum_complete_one_second_mbps": 206.03176914367043,
+      "minimum_window_mbps": 206.03534088531495,
+      "complete_one_second_below_target": 9,
+      "failures": [
+        "complete one-second receiver interval below target or absent",
+        "rolling receiver window below target or absent"
+      ]
+    },
+    "faults": {
+      "passed": true,
+      "seconds": 180.008842,
+      "received_mbps": 350.0011356997675,
+      "minimum_complete_one_second_mbps": 328.9379534343224,
+      "minimum_window_mbps": 328.9379534343262,
+      "complete_one_second_below_target": 0,
+      "failures": []
+    },
+    "all-path-faults": {
+      "passed": false,
+      "seconds": 180.00098,
+      "received_mbps": 347.02711560792613,
+      "minimum_complete_one_second_mbps": 0.0,
+      "minimum_window_mbps": 0.0,
+      "complete_one_second_below_target": 13,
+      "failures": [
+        "complete one-second receiver interval below target or absent",
+        "rolling receiver window below target or absent"
+      ]
+    }
+  },
+  "single_path_recovery_passed": true,
+  "all_path_recovery_passed": true,
+  "native_control": {
+    "receiver": {
+      "passed": true,
+      "protocol": "TCP",
+      "scope": "receiver_application_goodput",
+      "seconds": 600.000115,
+      "received_mbps": 350.00062070321434,
+      "minimum_window_mbps": 345.1377349339752,
+      "window_seconds": 1,
+      "maximum_udp_interval_loss_percent": null,
+      "minimum_complete_one_second_mbps": 345.13773493397434,
+      "complete_one_second_intervals": 600,
+      "complete_one_second_below_target": 0,
+      "maximum_udp_interval_jitter_ms": null,
+      "failures": []
+    },
+    "independent_receiver_matches": true,
+    "bypass": {
+      "edge": {
+        "tg_input_bytes_max": 564,
+        "kernel_wg_bulk_bytes": 27986648508,
+        "bypass_confirmed": true
+      },
+      "exit": {
+        "tg_input_bytes_max": 476,
+        "kernel_wg_bulk_bytes": 27981498824,
+        "bypass_confirmed": true
+      }
+    },
+    "latency": {
+      "scope": "500 ICMP probes at 1Hz through the actual native-kernel-WireGuard-without-TG path during bulk TCP; secondary latency observation, not WAN/DPI evidence",
+      "samples": 500,
+      "transmitted": 500,
+      "received": 500,
+      "loss_percent": 0.0,
+      "minimum_ms": 0.18,
+      "mean_ms": 1.929578,
+      "median_ms": 0.776,
+      "maximum_ms": 11.8,
+      "p95_ms": 6.97,
+      "percentile_method": "nearest rank of 500 rounded reply RTT samples",
+      "target_median_ms": 20,
+      "target_p95_ms": 30,
+      "raw_log_sha256": "47315e2737a70be47c4db56729cec877fb799b07e24ea6dc6bb69baa04b63632",
+      "metadata_sha256": "4ee8cf6984ead31841aafc7ca1a2a20b63b65d2f047c6656410779aae612d91f",
+      "start": 1792645732.5017002,
+      "end": 1792646244.942534,
+      "low_latency_target_passed": true,
+      "rtt_stddev_ms": 2.27670988312433,
+      "adjacent_rtt_delta_mean_ms": 2.4856773547094186,
+      "adjacent_rtt_delta_p95_ms": 6.95,
+      "variation_scope": "Population RTT standard deviation and absolute adjacent 1Hz ICMP RTT differences; a round-trip variation proxy, not one-way IP delay variation or RTP/UDP stream jitter.",
+      "within_requested_load": true,
+      "load_case": "direct-probe"
+    },
+    "cleanup_passed": true,
+    "scope": "Matched 600s native kernel-WG control, TG process idle; not a 30-minute TG acceptance or a proof that every TG loss has one cause."
+  }
+}

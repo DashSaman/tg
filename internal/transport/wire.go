@@ -1,0 +1,111 @@
+// Package transport provides encrypted, authenticated carrier channels.
+package transport
+
+import (
+	"context"
+	"encoding/binary"
+	"errors"
+	"github.com/DashSaman/tg/internal/config"
+	"github.com/DashSaman/tg/internal/session"
+	"io"
+	"net"
+)
+
+type Wire interface {
+	// Send consumes b before returning. Receive bytes remain valid until the next Receive.
+	Send([]byte) error
+	Receive(context.Context) ([]byte, error)
+	Close() error
+}
+
+// BatchWire coalesces already available frames without changing their wire format.
+// Implementations consume every input slice before returning, including on failure.
+type BatchWire interface{ SendBatch([][]byte) error }
+
+// BatchReceiver returns one blocking frame followed only by complete frames
+// already buffered. Input storage is borrowed until the next Receive or
+// ReceiveBatch; consumers must copy retained payloads before then. A nonzero
+// count may accompany an error: consume that valid prefix before closing.
+// The sole receive worker supplies 1..MaxReceiveFrames destination slots.
+type BatchReceiver interface {
+	ReceiveBatch(context.Context, [][]byte) (int, error)
+}
+
+const MaxReceiveFrames = 32
+
+// A 32-datagram application vector needs 256 frames for 7200-byte WireGuard
+// ciphertext. Drain only already available frames: no extra batching delay.
+// Framing storage stays bounded to about 261KiB per carrier writer. The
+// DATAGRAM wire bundle remains limited to its original 16-frame format.
+const MaxBatchFrames = 256
+
+type Accept func(context.Context, Wire, uint64) error
+
+func Listen(ctx context.Context, c config.Config, p config.Carrier, epoch uint64, accept Accept) (net.Addr, func(), error) {
+	if c.StreamPackets && (!c.Redundant || !p.Reliable()) {
+		return nil, nil, errors.New("complete packets require acknowledged reliable carriers")
+	}
+	if p.Kind == "https" {
+		return listenHTTP(ctx, c, p, epoch, accept)
+	}
+	if p.Kind == "https-connect" {
+		return listenConnect(ctx, c, p, epoch, accept)
+	}
+	if p.Kind == "quic" || p.Kind == "quic-stream" {
+		return listenQUIC(ctx, c, p, epoch, accept)
+	}
+	return nil, nil, errors.New("unsupported carrier")
+}
+func Dial(ctx context.Context, c config.Config, p config.Carrier, epoch uint64) (Wire, uint64, error) {
+	if c.StreamPackets && (!c.Redundant || !p.Reliable()) {
+		return nil, 0, errors.New("complete packets require acknowledged reliable carriers")
+	}
+	if p.Kind == "https" {
+		return dialHTTP(ctx, c, p, epoch)
+	}
+	if p.Kind == "https-connect" {
+		return dialConnect(ctx, c, p, epoch)
+	}
+	if p.Kind == "quic" || p.Kind == "quic-stream" {
+		return dialQUIC(ctx, c, p, epoch)
+	}
+	return nil, 0, errors.New("unsupported carrier")
+}
+
+func writeAll(w io.Writer, b []byte) error {
+	for len(b) > 0 {
+		n, e := w.Write(b)
+		if e != nil {
+			return e
+		}
+		if n == 0 {
+			return io.ErrShortWrite
+		}
+		b = b[n:]
+	}
+	return nil
+}
+func sendStream(w io.Writer, b []byte) error {
+	if len(b) == 0 || len(b) > session.MaxFrame {
+		return errors.New("invalid carrier frame size")
+	}
+	var n [2]byte
+	binary.BigEndian.PutUint16(n[:], uint16(len(b)))
+	if err := writeAll(w, n[:]); err != nil {
+		return err
+	}
+	return writeAll(w, b)
+}
+func recvStream(r io.Reader) ([]byte, error) {
+	var n [2]byte
+	if _, err := io.ReadFull(r, n[:]); err != nil {
+		return nil, err
+	}
+	size := int(binary.BigEndian.Uint16(n[:]))
+	if size < 1 || size > session.MaxFrame {
+		return nil, errors.New("carrier frame size out of bounds")
+	}
+	b := make([]byte, size)
+	_, err := io.ReadFull(r, b)
+	return b, err
+}

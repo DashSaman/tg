@@ -1,0 +1,180 @@
+{
+  "passed": true,
+  "steady": {
+    "passed": true,
+    "protocol": "TCP",
+    "scope": "receiver_application_goodput",
+    "seconds": 1800.000165,
+    "received_mbps": 350.00065570327325,
+    "minimum_window_mbps": 303.5871188870422,
+    "window_seconds": 10,
+    "maximum_udp_interval_loss_percent": null,
+    "maximum_udp_interval_jitter_ms": null,
+    "failures": [],
+    "start": 1792616535.6392686,
+    "end": 1792618339.6699076,
+    "case": "steady",
+    "reverse": false,
+    "sender_tcp_retransmissions": 12325,
+    "minimum_full_one_second_mbps": 182.51904118780334,
+    "full_one_second_intervals_below_300": 12,
+    "independent_receiver_matches": true,
+    "longest_zero_byte_receiver_run_seconds": 0
+  },
+  "faults": {
+    "passed": false,
+    "protocol": "TCP",
+    "scope": "receiver_application_goodput",
+    "seconds": 180.008068,
+    "received_mbps": 350.0221611844642,
+    "minimum_window_mbps": 138.04758219103422,
+    "window_seconds": 10,
+    "maximum_udp_interval_loss_percent": null,
+    "maximum_udp_interval_jitter_ms": null,
+    "failures": [
+      "rolling receiver window below target or absent"
+    ],
+    "recovered_last_5_intervals": true,
+    "final_healthy": {
+      "edge": 2,
+      "exit": 2
+    },
+    "recovery_duration_covered": true,
+    "recovery_passed": true,
+    "start": 1792618340.8000858,
+    "end": 1792618522.2020586,
+    "case": "faults",
+    "reverse": false,
+    "sender_tcp_retransmissions": 7359,
+    "minimum_full_one_second_mbps": 0.0,
+    "full_one_second_intervals_below_300": 31,
+    "independent_receiver_matches": true,
+    "longest_zero_byte_receiver_run_seconds": 5.000431954860687,
+    "cycle_recovery": [
+      {
+        "cycle": 1,
+        "passed": true,
+        "minimum_mbps": 346.63905396261157,
+        "intervals": 5
+      },
+      {
+        "cycle": 2,
+        "passed": true,
+        "minimum_mbps": 347.34782651301913,
+        "intervals": 5
+      },
+      {
+        "cycle": 3,
+        "passed": true,
+        "minimum_mbps": 347.0257743950304,
+        "intervals": 5
+      }
+    ]
+  },
+  "memory": {
+    "edge": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 358,
+      "rss_early_median_mib": 16.98828125,
+      "rss_late_median_mib": 17.1328125,
+      "pss_early_median_mib": 13.060546875,
+      "pss_late_median_mib": 13.203125,
+      "rss_peak_mib": 18.74609375,
+      "pss_peak_mib": 14.818359375,
+      "rss_growth_mib": 0.14453125,
+      "pss_growth_mib": 0.142578125,
+      "pss_slope_mib_per_minute": 0.0035237773101031706,
+      "rss_slope_mib_per_minute": 0.0035954818732894973,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    },
+    "exit": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 358,
+      "rss_early_median_mib": 18.32421875,
+      "rss_late_median_mib": 18.3984375,
+      "pss_early_median_mib": 14.396484375,
+      "pss_late_median_mib": 14.46875,
+      "rss_peak_mib": 25.33984375,
+      "pss_peak_mib": 21.412109375,
+      "rss_growth_mib": 0.07421875,
+      "pss_growth_mib": 0.072265625,
+      "pss_slope_mib_per_minute": 0.0019304315699808863,
+      "rss_slope_mib_per_minute": 0.0020011480502319873,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    }
+  },
+  "daemon_process_stable_including_faults": {
+    "edge": true,
+    "exit": true
+  },
+  "exit_application_socket_unchanged": true,
+  "sampled_carrier_activity": {
+    "edge": {
+      "": 2,
+      "udp": 367,
+      "web": 30
+    },
+    "exit": {
+      "": 2,
+      "udp": 379,
+      "web": 18
+    }
+  },
+  "steady_last_sample_counters": {
+    "edge": {
+      "dropped_packets": 2,
+      "app_errors": 0,
+      "malformed_frames": 0,
+      "carrier_switches": 0,
+      "udp_receive_buffer_errors": 11852,
+      "sample_time": 1792618331.576257
+    },
+    "exit": {
+      "dropped_packets": 0,
+      "app_errors": 0,
+      "malformed_frames": 0,
+      "carrier_switches": 0,
+      "udp_receive_buffer_errors": 0,
+      "sample_time": 1792618330.9456892
+    }
+  },
+  "runtime_commit": "eef5f85f4aa7ee571fec69092be0659776f36f9e",
+  "binary_sha256": "5a0e613ea3427a6058bc9cfa9dc05b919de046ac561d1ca7ae8f36d63e43657b",
+  "profile": {
+    "gomaxprocs": 4,
+    "vm_logical_cpus": 12,
+    "mtu": 1280,
+    "streams": 8,
+    "auto_upgrade": false,
+    "primary": "quic-stream",
+    "backup": "https"
+  },
+  "scope": "two isolated network namespaces on one Linux Docker VM; kernel WireGuard and TG; no WAN or DPI",
+  "raw_bundle": "tg-wireguard-fixed-30min.zip",
+  "fault_memory": {
+    "edge": {
+      "peak_rss_mib": 17.8828125,
+      "peak_pss_mib": 13.94140625,
+      "final_30s_median_rss_mib": 17.1171875,
+      "final_30s_median_pss_mib": 13.158203125,
+      "growth_from_last_steady_minute_mib": {
+        "rss_mib": 0.06640625,
+        "pss_mib": 0.037109375
+      },
+      "passed": true
+    },
+    "exit": {
+      "peak_rss_mib": 24.15234375,
+      "peak_pss_mib": 20.21875,
+      "final_30s_median_rss_mib": 18.390625,
+      "final_30s_median_pss_mib": 14.4404296875,
+      "growth_from_last_steady_minute_mib": {
+        "rss_mib": -0.3046875,
+        "pss_mib": -0.3251953125
+      },
+      "passed": true
+    }
+  }
+}

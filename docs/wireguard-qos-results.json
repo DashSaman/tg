@@ -1,0 +1,209 @@
+{
+  "passed": true,
+  "runtime_commit": "bba3467e17a1ff29e37ae1214de8073b886fe614",
+  "memory": {
+    "edge": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 358,
+      "rss_early_median_mib": 21.09375,
+      "rss_late_median_mib": 21.484375,
+      "pss_early_median_mib": 17.16015625,
+      "pss_late_median_mib": 17.53125,
+      "rss_peak_mib": 23.42578125,
+      "pss_peak_mib": 19.486328125,
+      "rss_growth_mib": 0.390625,
+      "pss_growth_mib": 0.37109375,
+      "pss_slope_mib_per_minute": 0.013746633359187795,
+      "rss_slope_mib_per_minute": 0.014623946593555271,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    },
+    "exit": {
+      "passed": true,
+      "failures": [],
+      "sample_count": 358,
+      "rss_early_median_mib": 23.54296875,
+      "rss_late_median_mib": 23.62109375,
+      "pss_early_median_mib": 19.607421875,
+      "pss_late_median_mib": 19.66796875,
+      "rss_peak_mib": 28.37109375,
+      "pss_peak_mib": 24.419921875,
+      "rss_growth_mib": 0.078125,
+      "pss_growth_mib": 0.060546875,
+      "pss_slope_mib_per_minute": -0.005955422426150803,
+      "rss_slope_mib_per_minute": -0.005078188011070577,
+      "scope": "Unmodified TG daemon /proc RSS/PSS, excluding iperf, monitor and kernel WireGuard memory; no leak-free guarantee beyond observed duration"
+    }
+  },
+  "continuity": {
+    "edge": {
+      "process_stable": true,
+      "app_socket_stable": true,
+      "observed_wireguard_handshakes": 19
+    },
+    "exit": {
+      "process_stable": true,
+      "app_socket_stable": true,
+      "observed_wireguard_handshakes": 19
+    }
+  },
+  "fault_memory": {
+    "edge": {
+      "growth_mib": {
+        "rss_kib": 0.240234375,
+        "pss_kib": 0.236328125
+      },
+      "passed": true,
+      "peak_rss_mib": 23.74609375
+    },
+    "exit": {
+      "growth_mib": {
+        "rss_kib": -0.396484375,
+        "pss_kib": -0.400390625
+      },
+      "passed": true,
+      "peak_rss_mib": 28.37109375
+    }
+  },
+  "loaded_latency": {
+    "scope": "1500 ICMP probes at 1Hz through the actual kernel WireGuard/TG path during bulk TCP; secondary latency observation, not WAN/DPI evidence",
+    "samples": 1500,
+    "transmitted": 1500,
+    "received": 1500,
+    "loss_percent": 0.0,
+    "minimum_ms": 0.436,
+    "mean_ms": 2.318766,
+    "median_ms": 1.27,
+    "maximum_ms": 36.5,
+    "p95_ms": 6.93,
+    "percentile_method": "nearest rank of 1500 rounded reply RTT samples",
+    "target_median_ms": 20,
+    "target_p95_ms": 30,
+    "raw_log_sha256": "a224048a6f60965a073f7f69351bf869f908c4f60190ec7c5da0e2829d6aca75",
+    "metadata_sha256": "89d1fea4b18e1b823c429e666c71719b1f2f5e4fa98988c1f7e5fb3c11607f1c",
+    "start": 1792650972.2414637,
+    "end": 1792652490.4992285,
+    "low_latency_target_passed": true,
+    "rtt_stddev_ms": 2.726438845437518,
+    "adjacent_rtt_delta_mean_ms": 2.2562294863242163,
+    "adjacent_rtt_delta_p95_ms": 6.380000000000001,
+    "variation_scope": "Population RTT standard deviation and absolute adjacent 1Hz ICMP RTT differences; a round-trip variation proxy, not one-way IP delay variation or RTP/UDP stream jitter.",
+    "within_requested_load": true,
+    "load_case": "steady",
+    "within_steady_load": true,
+    "passed": true,
+    "conservative_steady_coverage": true
+  },
+  "phases": {
+    "steady": {
+      "passed": true,
+      "seconds": 1800.000084,
+      "received_mbps": 350.00067145330195,
+      "minimum_window_mbps": 324.33672271063233,
+      "minimum_complete_one_second_mbps": 324.3346443975722,
+      "complete_one_second_below_target": 0,
+      "failures": []
+    },
+    "faults": {
+      "passed": true,
+      "seconds": 180.00518,
+      "received_mbps": 350.0101662407715,
+      "minimum_window_mbps": 340.3896781548271,
+      "minimum_complete_one_second_mbps": 340.3896781548272,
+      "complete_one_second_below_target": 0,
+      "failures": []
+    },
+    "all-path-faults": {
+      "passed": false,
+      "seconds": 180.001211,
+      "received_mbps": 347.66941686853426,
+      "minimum_window_mbps": 0.0,
+      "minimum_complete_one_second_mbps": 0.0,
+      "complete_one_second_below_target": 11,
+      "failures": [
+        "complete one-second receiver interval below target or absent",
+        "rolling receiver window below target or absent"
+      ]
+    }
+  },
+  "all_path_recovery_passed": true,
+  "binary_sha256": "8c616a6b44e44d2c54b192b853fd38529ee87b57ce028a105ce3456c81fbe130",
+  "harness_sources": {
+    "wgsoak/run.py": "53ceae5a12bef6b13f94a44eace7211eddf9334023dab11fa7529428822e77ba",
+    "wgsoak/node.py": "12128fb72061fe851a4a2dfd34160865326471a97496ab5c0ec218b44296f50a",
+    "qos.py": "77ad52872760879a93f5a91359da7a78857d4798ddce919a3fd929a017b0e7a1"
+  },
+  "profile": {
+    "preferred_carrier": "https",
+    "lab_configuration": {
+      "edge": {
+        "auto_upgrade": false,
+        "redundant": true,
+        "ordered_output": false,
+        "replica_delay_ms": 10,
+        "app_pacing_mbps": 500,
+        "queue_frames": 1024,
+        "max_packet_bytes": 2048,
+        "probe_interval_ms": 1000,
+        "probe_timeout_ms": 4000,
+        "hold_down_ms": 5000,
+        "carriers": [
+          {
+            "name": "web",
+            "kind": "https",
+            "cost_ms": 0
+          },
+          {
+            "name": "udp",
+            "kind": "quic-stream",
+            "cost_ms": 20
+          }
+        ]
+      },
+      "exit": {
+        "auto_upgrade": false,
+        "redundant": true,
+        "ordered_output": false,
+        "replica_delay_ms": 10,
+        "app_pacing_mbps": 500,
+        "queue_frames": 1024,
+        "max_packet_bytes": 2048,
+        "probe_interval_ms": 1000,
+        "probe_timeout_ms": 4000,
+        "hold_down_ms": 5000,
+        "carriers": [
+          {
+            "name": "web",
+            "kind": "https",
+            "cost_ms": 0
+          },
+          {
+            "name": "udp",
+            "kind": "quic-stream",
+            "cost_ms": 20
+          }
+        ]
+      }
+    },
+    "wg_qos_mbps": 400,
+    "application_pacing_mbps": 500,
+    "offered_aggregate_mbps": 350.0,
+    "tcp_pacing": true,
+    "gomaxprocs": 4,
+    "mtu": 1280,
+    "block_size": "128K"
+  },
+  "udp_offload": {
+    "edge": {
+      "accepted_gso_packets": 7978078,
+      "accepted_gso_batches": 2643261,
+      "fallbacks": 0
+    },
+    "exit": {
+      "accepted_gso_packets": 71909579,
+      "accepted_gso_batches": 9924051,
+      "fallbacks": 0
+    }
+  },
+  "scope": "Local Linux amd64, kernel WireGuard, forward eight-stream aggregate receiver goodput; no Iran WAN, DPI, reverse-capacity, 10Gbps or 24h certification."
+}
